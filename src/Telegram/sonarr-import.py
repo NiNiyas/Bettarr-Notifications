@@ -3,6 +3,7 @@ import logging
 import os
 import re
 import sys
+import time
 
 import requests
 
@@ -19,7 +20,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='[%(asctime)s] %(levelname)s - %(message)s'
 )
-log = logging.getLogger('Radarr')
+log = logging.getLogger('Sonarr')
 
 
 def main():
@@ -75,7 +76,7 @@ def main():
         get_tmdb = requests.get(tmdb).json()
         tmdb_id = get_tmdb['tv_results'][0]['id']
 
-    # Season poster ignored in Telegram
+    # Thumbnail poster ignored in Telegram
     # Episode Sample
     try:
         episode_sample = (
@@ -88,13 +89,13 @@ def main():
     except:
         # Series banner when episode sample is not found
         log.error("Could not fetch episode sample. Falling back to series poster.")
-        episode_url = ('https://api.themoviedb.org/3/tv/{}/images?api_key={}&language=en').format(tmdb_id,
-                                                                                                  script_config.moviedb_key)
-        episode_data = requests.get(episode_url).json()
-        sample = episode_data['posters'][0]['file_path']
-        sample = 'https://image.tmdb.org/t/p/original' + sample
+        try:
+            sample = skyhook_data['images'][0]['url']
+        except:
+            log.info("Couldn't fetch poster from skyhook. Falling back to generic.")
+            sample = 'http://gearr.scannain.com/wp-content/uploads/2015/02/noposter.jpg'
 
-    # Adding 0 to Season and Episode
+    # Formatting Season and Episode
     if len(str(season)) == 1:
         season = '0{}'.format(season)
 
@@ -187,6 +188,8 @@ def main():
     log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
 
     # Send notification
+    log.info("Sleeping 30 seconds before sending notifications.")
+    time.sleep(30)
     sender = requests.post(url, json=message)
 
 

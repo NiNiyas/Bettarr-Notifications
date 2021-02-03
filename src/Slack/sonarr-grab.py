@@ -3,9 +3,11 @@ import logging
 import os
 import re
 import sys
+import time
 
 import humanize
 import requests
+
 import script_config
 
 slack_headers = {'content-type': 'application/json'}
@@ -21,7 +23,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='[%(asctime)s] %(levelname)s - %(message)s'
 )
-log = logging.getLogger('Radarr')
+log = logging.getLogger('Sonarr')
 
 # Ratings
 imdb_id = os.environ.get('sonarr_series_imdbid')
@@ -32,19 +34,39 @@ mdblist = requests.get('https://mdblist.com/api/?apikey={}&i={}&m=show'.format(s
 mdblist_data = mdblist.json()
 
 # IMDb
-imdb_rating = mdblist_data['ratings'][0]['value']
+try:
+    imdb_rating = mdblist_data['ratings'][0]['value']
+except:
+    log.info("Error fetching rating from mdblist")
+    imdb_rating = 'None'
 
 # Metacritic
-metacritic = mdblist_data['ratings'][1]['value']
+try:
+    metacritic = mdblist_data['ratings'][1]['value']
+except:
+    log.info("Error fetching rating from mdblist")
+    metacritic = 'None'
 
 # Trakt
-trakt_rating = mdblist_data['ratings'][2]['value']
+try:
+    trakt_rating = mdblist_data['ratings'][2]['value']
+except:
+    log.info("Error fetching rating from mdblist")
+    trakt_rating = 'None'
 
 # TMDb Rating
-tmdb_rating = mdblist_data['ratings'][5]['value']
+try:
+    tmdb_rating = mdblist_data['ratings'][5]['value']
+except:
+    log.info("Error fetching rating from mdblist")
+    tmdb_rating = 'None'
 
 # Rotten Tomatoes
-rottentomatoes = mdblist_data['ratings'][3]['value']
+try:
+    rottentomatoes = mdblist_data['ratings'][3]['value']
+except:
+    log.info("Error fetching rating from mdblist")
+    rottentomatoes = 'None'
 
 
 def main():
@@ -57,7 +79,7 @@ def main():
 
     tvdb_id = os.environ.get('sonarr_series_tvdbid')
     if not tvdb_id:
-        tvdb_id = '121361'
+        tvdb_id = '370998'
 
     size = os.environ.get('sonarr_release_size')
     if not size:
@@ -72,10 +94,6 @@ def main():
     quality = os.environ.get('sonarr_release_quality')
 
     release_indexer = os.environ.get('sonarr_release_indexer')
-
-    if eventtype == 'Test':
-        log.info('Sonarr script test succeeded.')
-        sys.exit(0)
 
     # Get show information from skyhook
     skyhook_url = 'http://skyhook.sonarr.tv/v1/tvdb/shows/en/{}'.format(tvdb_id)
@@ -94,9 +112,8 @@ def main():
                                                                                                               script_config.moviedb_key)
         get_tmdb = requests.get(tmdb).json()
         tmdb_id = get_tmdb['tv_results'][0]['id']
-        print(tmdb_id)
 
-    # # Season poster, if it fails, falls back to series banner
+    # Season poster, if it fails, falls back to series banner
     try:
         banner_url = ('https://api.themoviedb.org/3/tv/{}/season/{}/images?api_key={}&language=en').format(tmdb_id,
                                                                                                            season,
@@ -107,11 +124,10 @@ def main():
     except:
         # Series banner
         log.error("Couldn't fetch season banner. Falling back to series banner")
-        banner_url = ('https://api.themoviedb.org/3/tv/{}/images?api_key={}&language=en').format(tmdb_id,
-                                                                                                 script_config.moviedb_key)
-        banner_data = requests.get(banner_url).json()
-        banner = banner_data['posters'][0]['file_path']
-        banner = 'https://image.tmdb.org/t/p/original' + banner
+        try:
+            banner = skyhook_data['images'][0]['url']
+        except:
+            banner = 'http://gearr.scannain.com/wp-content/uploads/2015/02/noposter.jpg'
 
     # View Details
     tvdb_url = 'https://thetvdb.com/series/' + title_slug
@@ -126,10 +142,13 @@ def main():
 
     tmdb_url = 'https://www.themoviedb.org/tv/' + str(tmdb_id)
 
-    trailer_link = mdblist_data['trailer']
+    try:
+        trailer_link = mdblist_data['trailer']
+    except:
+        log.error("Couldn't find trailer. Using default")
+        trailer_link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab'
 
     # Series Overview
-
     series = ('https://api.themoviedb.org/3/tv/{}?api_key={}&language=en').format(tmdb_id,
                                                                                   script_config.moviedb_key)
     series_data = requests.get(series).json()
@@ -247,7 +266,7 @@ def main():
                         "type": "button",
                         "text": {
                             "type": "plain_text",
-                            "text": "View Series on Sonarr",
+                            "text": "View Series on Sonarr"
 
                         },
                         "style": "primary",
@@ -257,7 +276,7 @@ def main():
                         "type": "button",
                         "text": {
                             "type": "plain_text",
-                            "text": "Open Sonarr",
+                            "text": "Open Sonarr"
                         },
                         "url": script_config.sonarr_url
                     },
@@ -265,7 +284,7 @@ def main():
                         "type": "button",
                         "text": {
                             "type": "plain_text",
-                            "text": "Trailer",
+                            "text": "Trailer"
                         },
                         "url": trailer_link
                     }
@@ -276,6 +295,9 @@ def main():
 
     # Logging
     log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+
+    log.info("Sleeping for 20 seconds before sending notifications")
+    time.sleep(20)
 
     # Send notification
     sender = requests.post(script_config.sonarr_slack_url, headers=slack_headers, json=message)

@@ -3,6 +3,7 @@ import logging
 import os
 import sys
 from datetime import datetime
+import time
 
 import humanize
 import requests
@@ -193,4 +194,6 @@ message = {
 log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
 
 # Send notification
+log.info("Sleeping 30 seconds before sending notification")
+time.sleep(30)
 sender = requests.post(url, json=message)

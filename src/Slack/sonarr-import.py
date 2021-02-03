@@ -3,9 +3,10 @@ import logging
 import os
 import re
 import sys
-from datetime import datetime
+import time
 
 import requests
+
 import script_config
 
 slack_headers = {'content-type': 'application/json'}
@@ -21,7 +22,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='[%(asctime)s] %(levelname)s - %(message)s'
 )
-log = logging.getLogger('Radarr')
+log = logging.getLogger('Sonarr')
 
 
 def main():
@@ -75,22 +76,19 @@ def main():
         get_tmdb = requests.get(tmdb).json()
         tmdb_id = get_tmdb['tv_results'][0]['id']
 
-    # Season poster, if it fails, falls back to series poster
+    # Thumbnail
     try:
-        banner_url = ('https://api.themoviedb.org/3/tv/{}/season/{}/images?api_key={}&language=en').format(tmdb_id,
-                                                                                                           season,
-                                                                                                           script_config.moviedb_key)
-        banner_data = requests.get(banner_url).json()
-        banner = banner_data['posters'][0]['file_path']
-        banner = 'https://image.tmdb.org/t/p/original' + banner
+        thumbnail_url = ('https://api.themoviedb.org/3/tv/{}/images?api_key={}&language=en').format(tmdb_id,
+                                                                                                    script_config.moviedb_key)
+        thumbnail_data = requests.get(thumbnail_url).json()
+        thumbnail = thumbnail_data['posters'][0]['file_path']
+        thumbnail = 'https://image.tmdb.org/t/p/original' + thumbnail
     except:
-        # Series poster
-        log.error("Couldn't fetch season banner. Falling back to series banner")
-        banner_url = ('https://api.themoviedb.org/3/tv/{}/images?api_key={}&language=en').format(tmdb_id,
-                                                                                                 script_config.moviedb_key)
-        banner_data = requests.get(banner_url).json()
-        banner = banner_data['posters'][0]['file_path']
-        banner = 'https://image.tmdb.org/t/p/original' + banner
+        log.info("Series poster not found on tmdb. Fetching from skyhook.")
+        try:
+            thumbnail = skyhook_data['images'][0]['url']
+        except:
+            thumbnail = 'http://gearr.scannain.com/wp-content/uploads/2015/02/noposter.jpg'
 
     # Episode Sample
     try:
@@ -104,11 +102,11 @@ def main():
     except:
         # Series banner when episode sample is not found
         log.error("Could not fetch episode sample. Falling back to series poster.")
-        episode_url = ('https://api.themoviedb.org/3/tv/{}/images?api_key={}&language=en').format(tmdb_id,
-                                                                                                  script_config.moviedb_key)
-        episode_data = requests.get(episode_url).json()
-        sample = episode_data['posters'][0]['file_path']
-        sample = 'https://image.tmdb.org/t/p/original' + sample
+        try:
+            sample = skyhook_data['images'][0]['url']
+        except:
+            log.info("Couldn't fetch poster from skyhook. Falling back to generic.")
+            sample = 'http://gearr.scannain.com/wp-content/uploads/2015/02/noposter.jpg'
 
     # Adding 0 to Season and Episode
     if len(str(season)) == 1:
@@ -193,7 +191,7 @@ def main():
                 },
                 "accessory": {
                     "type": "image",
-                    "image_url": banner,
+                    "image_url": thumbnail,
                     "alt_text": "Banner"
                 }
             },
@@ -271,6 +269,8 @@ def main():
     log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
 
     # Send notification
+    log.info("Sleeping 20 seconds before sending notifications.")
+    time.sleep(20)
     sender = requests.post(script_config.sonarr_slack_url, headers=slack_headers, json=message)
 
 

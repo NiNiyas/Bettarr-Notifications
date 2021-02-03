@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import sys
+import time
 from datetime import datetime
 
 import humanize
@@ -229,4 +230,6 @@ message = {
 log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
 
 # Send notification
+log.info("Sleeping for 10 seconds before sending notifications")
+time.sleep(10)
 sender = requests.post(script_config.radarr_discord_url, headers=discord_headers, json=message)

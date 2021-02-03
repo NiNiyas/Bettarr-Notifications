@@ -2,10 +2,10 @@ import json
 import logging
 import os
 import sys
+import time
 from datetime import datetime
 
 import requests
-
 import script_config
 
 # Set up the log folder and file
@@ -167,4 +167,6 @@ message = {
 log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
 
 # Send notification
+log.info("Sleeping 30 seconds before sending notification")
+time.sleep(30)
 sender = requests.post(url, json=message)

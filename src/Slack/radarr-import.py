@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import sys
+import time
 from datetime import datetime
 
 import requests
@@ -257,4 +258,6 @@ message = {
 log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
 
 # Send notification
+log.info("Sleeping for 20 seconds before sending notifications")
+time.sleep(20)
 sender = requests.post(script_config.radarr_slack_url, headers=slack_headers, json=message)

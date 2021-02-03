@@ -3,6 +3,7 @@ import logging
 import os
 import re
 import sys
+import time
 from datetime import datetime
 
 import humanize
@@ -23,7 +24,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='[%(asctime)s] %(levelname)s - %(message)s'
 )
-log = logging.getLogger('Radarr')
+log = logging.getLogger('Sonarr')
 
 
 # Footer Timestamp
@@ -41,19 +42,39 @@ mdblist = requests.get('https://mdblist.com/api/?apikey={}&i={}&m=show'.format(s
 mdblist_data = mdblist.json()
 
 # IMDb
-imdb_rating = mdblist_data['ratings'][0]['value']
+try:
+    imdb_rating = mdblist_data['ratings'][0]['value']
+except:
+    log.info("Error fetching rating from mdblist")
+    imdb_rating = 'None'
 
 # Metacritic
-metacritic = mdblist_data['ratings'][1]['value']
+try:
+    metacritic = mdblist_data['ratings'][1]['value']
+except:
+    log.info("Error fetching rating from mdblist")
+    metacritic = 'None'
 
 # Trakt
-trakt_rating = mdblist_data['ratings'][2]['value']
+try:
+    trakt_rating = mdblist_data['ratings'][2]['value']
+except:
+    log.info("Error fetching rating from mdblist")
+    trakt_rating = 'None'
 
 # TMDb Rating
-tmdb_rating = mdblist_data['ratings'][5]['value']
+try:
+    tmdb_rating = mdblist_data['ratings'][5]['value']
+except:
+    log.info("Error fetching rating from mdblist")
+    tmdb_rating = 'None'
 
 # Rotten Tomatoes
-rottentomatoes = mdblist_data['ratings'][3]['value']
+try:
+    rottentomatoes = mdblist_data['ratings'][3]['value']
+except:
+    log.info("Error fetching rating from mdblist")
+    rottentomatoes = 'None'
 
 
 def main():
@@ -81,10 +102,6 @@ def main():
     quality = os.environ.get('sonarr_release_quality')
 
     release_indexer = os.environ.get('sonarr_release_indexer')
-
-    if eventtype == 'Test':
-        log.info('Sonarr script test succeeded.')
-        sys.exit(0)
 
     # Get show information from skyhook
     skyhook_url = 'http://skyhook.sonarr.tv/v1/tvdb/shows/en/{}'.format(tvdb_id)
@@ -116,11 +133,10 @@ def main():
     except:
         # Series banner
         log.error("Couldn't fetch season banner. Falling back to series banner")
-        banner_url = ('https://api.themoviedb.org/3/tv/{}/images?api_key={}&language=en').format(tmdb_id,
-                                                                                                 script_config.moviedb_key)
-        banner_data = requests.get(banner_url).json()
-        banner = banner_data['posters'][0]['file_path']
-        banner = 'https://image.tmdb.org/t/p/original' + banner
+        try:
+            banner = skyhook_data['images'][0]['url']
+        except:
+            banner = 'http://gearr.scannain.com/wp-content/uploads/2015/02/noposter.jpg'
 
     # View Details
     tvdb_url = 'https://thetvdb.com/series/' + title_slug
@@ -135,7 +151,11 @@ def main():
 
     tmdb_url = 'https://www.themoviedb.org/tv/' + str(tmdb_id)
 
-    trailer_link = mdblist_data['trailer']
+    try:
+        trailer_link = mdblist_data['trailer']
+    except:
+        log.error("Couldn't find trailer. Using default")
+        trailer_link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab'
 
     # Series Overview
     series = ('https://api.themoviedb.org/3/tv/{}?api_key={}&language=en').format(tmdb_id,
@@ -258,6 +278,9 @@ def main():
 
     # Logging
     log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+
+    log.info("Sleeping for 10 seconds before sending notifications")
+    time.sleep(10)
 
     # Send notification
     sender = requests.post(script_config.sonarr_discord_url, headers=discord_headers, json=message)
