@@ -115,7 +115,7 @@ def main():
         get_tmdb = requests.get(tmdb).json()
         tmdb_id = get_tmdb['tv_results'][0]['id']
     except:
-        log.error("Tvdb id not found. Grabbing from IMDB")
+        log.info("Tvdb id not found. Grabbing from IMDB")
         tmdb = ('https://api.themoviedb.org/3/find/{}?api_key={}&language=en&external_source=imdb_id').format(imdb_id,
                                                                                                               script_config.moviedb_key)
         get_tmdb = requests.get(tmdb).json()
@@ -132,7 +132,7 @@ def main():
         banner = 'https://image.tmdb.org/t/p/original' + banner
     except:
         # Series banner
-        log.error("Couldn't fetch season banner. Falling back to series banner")
+        log.info("Couldn't fetch season banner. Falling back to series banner")
         try:
             banner = skyhook_data['images'][0]['url']
         except:
@@ -151,10 +151,8 @@ def main():
 
     tmdb_url = 'https://www.themoviedb.org/tv/' + str(tmdb_id)
 
-    try:
-        trailer_link = mdblist_data['trailer']
-    except:
-        log.error("Couldn't find trailer. Using default")
+    trailer_link = mdblist_data['trailer']
+    if not trailer_link:
         trailer_link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab'
 
     # Series Overview

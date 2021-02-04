@@ -77,7 +77,7 @@ def main():
         tmdb_id = get_tmdb['tv_results'][0]['id']
     except:
         # Getting TMDb ID from IMDb id when TVDB id is not found
-        log.error("Error when grabbing TMDb ID using TVDB ID. Using IMDb ID")
+        log.info("Error when grabbing TMDb ID using TVDB ID. Using IMDb ID")
         tmdb = ('https://api.themoviedb.org/3/find/{}?api_key={}&language=en&external_source=imdb_id').format(imdb_id,
                                                                                                               script_config.moviedb_key)
         get_tmdb = requests.get(tmdb).json()
@@ -108,7 +108,7 @@ def main():
         sample = 'https://image.tmdb.org/t/p/original' + sample
     except:
         # Series banner when episode sample is not found
-        log.error("Could not fetch episode sample. Falling back to series poster.")
+        log.info("Could not fetch episode sample. Falling back to series poster.")
         try:
             sample = skyhook_data['images'][0]['url']
         except:
@@ -167,7 +167,7 @@ def main():
 
     except:
         # Series Overview when Episode overview is not found
-        log.error("Couldn't fetch episode overview. Falling back to series overview.")
+        log.info("Couldn't fetch episode overview. Falling back to series overview.")
         series = ('https://api.themoviedb.org/3/tv/{}?api_key={}&language=en').format(tmdb_id,
                                                                                       script_config.moviedb_key)
         series_data = requests.get(series).json()
