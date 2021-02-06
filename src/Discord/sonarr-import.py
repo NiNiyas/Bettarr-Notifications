@@ -221,13 +221,13 @@ def main():
                         "inline": True
                     },
                     {
-                        "name": "Genre",
-                        "value": genres,
+                        "name": "Network",
+                        "value": network,
                         "inline": True
                     },
                     {
-                        "name": "Network",
-                        "value": network,
+                        "name": "Genre",
+                        "value": genres,
                         "inline": True
                     }
                 ],

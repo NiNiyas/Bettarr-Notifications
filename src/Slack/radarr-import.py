@@ -48,7 +48,7 @@ if not movie_id:
 
 media_title = os.environ.get('radarr_movie_title')
 
-quality = os.environ.get('radarr_release_quality')
+quality = os.environ.get('radarr_moviefile_quality')
 
 scene_name = os.environ.get('radarr_moviefile_scenename')
 

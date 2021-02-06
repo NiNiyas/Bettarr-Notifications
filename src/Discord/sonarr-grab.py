@@ -238,13 +238,13 @@ def main():
                         "inline": True
                     },
                     {
-                        "name": "Genre",
-                        "value": genres,
+                        "name": "Release Group",
+                        "value": release_group,
                         "inline": True
                     },
                     {
-                        "name": "Release Group",
-                        "value": release_group,
+                        "name": "Genre",
+                        "value": genres,
                         "inline": True
                     },
                     {
