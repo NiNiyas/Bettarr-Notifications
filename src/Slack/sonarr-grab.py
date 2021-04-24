@@ -3,7 +3,6 @@ import logging
 import os
 import re
 import sys
-import time
 
 import humanize
 import requests
@@ -132,7 +131,11 @@ def main():
     # View Details
     tvdb_url = 'https://thetvdb.com/series/' + title_slug
 
-    tvmaze_id = skyhook_data['tvMazeId']
+    try:
+        tvmaze_id = skyhook_data['tvMazeId']
+    except Exception as e:
+        log.info("TVMaze id not found. Using GOT. Error: {}".format(e))
+        tvmaze_id = '82'
 
     tvmaze_url = 'https://www.tvmaze.com/shows/' + str(tvmaze_id)
 
@@ -142,8 +145,14 @@ def main():
 
     tmdb_url = 'https://www.themoviedb.org/tv/' + str(tmdb_id)
 
-    trailer_link = mdblist_data['trailer']
-    if not trailer_link:
+    # Trailer
+    try:
+        trailer_link = mdblist_data['trailer']
+        if trailer_link is None:
+            log.info("Trailer not Found. Using 'Never Gonna Give You Up'.")
+            trailer_link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab'
+    except KeyError:
+        print("Trailer not Found. Using 'Never Gonna Give You Up'.")
         trailer_link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab'
 
     # Series Overview
@@ -294,11 +303,12 @@ def main():
     # Logging
     log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
 
-    log.info("Sleeping for 20 seconds before sending notifications")
-    time.sleep(20)
-
     # Send notification
     sender = requests.post(script_config.sonarr_slack_url, headers=slack_headers, json=message)
+    if eventtype == "Test":
+        print("Successfully sent test notification.")
+    else:
+        print("Successfully sent notification to Slack.")
 
 
 # Call main
