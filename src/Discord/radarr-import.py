@@ -2,7 +2,6 @@ import json
 import logging
 import os
 import sys
-import time
 from datetime import datetime
 
 import requests
@@ -87,9 +86,7 @@ except:
 moviedb_api_url = 'https://api.themoviedb.org/3/find/{}?api_key={}&external_source=imdb_id'.format(imdb_id,
                                                                                                    script_config.moviedb_key)
 moviedb_api = requests.get(moviedb_api_url)
-
 moviedb_api_data = moviedb_api.json()
-
 radarr_id = moviedb_api_data['movie_results'][0]['id']
 
 try:
@@ -222,6 +219,8 @@ message = {
 log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
 
 # Send notification
-log.info("Sleeping for 10 seconds before sending notifications")
-time.sleep(10)
 sender = requests.post(script_config.radarr_discord_url, headers=discord_headers, json=message)
+if eventtype == "Test":
+    print("Successfully sent test notification.")
+else:
+    print("Successfully sent notification to Discord.")
