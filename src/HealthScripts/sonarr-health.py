@@ -1,7 +1,5 @@
 import datetime
-import logging
 import os
-import sys
 
 import requests
 
@@ -27,7 +25,6 @@ wiki_link = os.environ.get('sonarr_health_issue_wiki')
 
 discordmessage = {
     'username': script_config.sonarr_discord_user,
-    'description': "An error has occured on Sonarr",
     'embeds': [
         {
             'author': {
@@ -35,6 +32,11 @@ discordmessage = {
                 'url': script_config.sonarr_url,
                 'icon_url': script_config.sonarr_icon
             },
+            "footer": {
+                "icon_url": script_config.sonarr_icon,
+                "text": "Sonarr"
+            },
+            'description': "**An error has occured on Sonarr.**",
             'timestamp': utc_now_iso(),
             'color': 15158332,
             'fields': [
