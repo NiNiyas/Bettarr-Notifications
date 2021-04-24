@@ -34,24 +34,44 @@ def utc_now_iso():
 # Ratings
 imdb_id = os.environ.get('radarr_movie_imdbid')
 if not imdb_id:
-    imdb_id = 'tt0076759'
+    imdb_id = 'tt0120915'
 mdblist = requests.get('https://mdblist.com/api/?apikey={}&i={}'.format(script_config.mdbapi, imdb_id))
 mdblist_data = mdblist.json()
 
 # IMDb
-imdb_rating = mdblist_data['ratings'][0]['value']
+try:
+    imdb_rating = mdblist_data['ratings'][0]['value']
+except:
+    log.info("Error fetching rating from mdblist")
+    imdb_rating = 'None'
 
 # Metacritic
-metacritic = mdblist_data['ratings'][1]['value']
+try:
+    metacritic = mdblist_data['ratings'][1]['value']
+except:
+    log.info("Error fetching rating from mdblist")
+    metacritic = 'None'
 
 # Trakt
-trakt_rating = mdblist_data['ratings'][2]['value']
+try:
+    trakt_rating = mdblist_data['ratings'][2]['value']
+except:
+    log.info("Error fetching rating from mdblist")
+    trakt_rating = 'None'
 
 # TMDb Rating
-tmdb_rating = mdblist_data['ratings'][5]['value']
+try:
+    tmdb_rating = mdblist_data['ratings'][5]['value']
+except:
+    log.info("Error fetching rating from mdblist")
+    tmdb_rating = 'None'
 
 # Rotten Tomatoes
-rottentomatoes = mdblist_data['ratings'][3]['value']
+try:
+    rottentomatoes = mdblist_data['ratings'][3]['value']
+except:
+    log.info("Error fetching rating from mdblist")
+    rottentomatoes = 'None'
 
 # TMDb ID
 tmdb_id = os.environ.get('radarr_movie_tmdbid')
