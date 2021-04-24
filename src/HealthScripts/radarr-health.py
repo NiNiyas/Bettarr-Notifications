@@ -1,7 +1,5 @@
 import datetime
-import logging
 import os
-import sys
 
 import requests
 
@@ -27,7 +25,6 @@ wiki_link = os.environ.get('radarr_health_issue_wiki')
 
 discordmessage = {
     'username': script_config.radarr_discord_user,
-    'description': "An error has occured on Radarr",
     'embeds': [
         {
             'author': {
@@ -35,6 +32,11 @@ discordmessage = {
                 'url': script_config.radarr_url,
                 'icon_url': script_config.radarr_icon
             },
+            "footer": {
+                "icon_url": script_config.radarr_icon,
+                "text": "Radarr"
+            },
+            'description': "**An error has occured on Radarr.**",
             'timestamp': utc_now_iso(),
             'color': 15158332,
             'fields': [
