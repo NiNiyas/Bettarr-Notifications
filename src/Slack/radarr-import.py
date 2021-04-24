@@ -2,10 +2,10 @@ import json
 import logging
 import os
 import sys
-import time
 from datetime import datetime
 
 import requests
+
 import script_config
 
 slack_headers = {'content-type': 'application/json'}
@@ -63,9 +63,7 @@ imdb_url = 'https://www.imdb.com/title/' + imdb_id
 
 # Get Radarr data
 radarr_api_url = '{}api/v3/movie/{}?apikey={}'.format(script_config.radarr_url, movie_id, script_config.radarr_key)
-
 radarr = requests.get(radarr_api_url)
-
 radarr_data = radarr.json()
 
 if not TEST_MODE:
@@ -84,11 +82,8 @@ except:
 # Get data from TMDB
 moviedb_api_url = 'https://api.themoviedb.org/3/find/{}?api_key={}&external_source=imdb_id'.format(imdb_id,
                                                                                                    script_config.moviedb_key)
-
 moviedb_api = requests.get(moviedb_api_url)
-
 moviedb_api_data = moviedb_api.json()
-
 radarr_id = moviedb_api_data['movie_results'][0]['id']
 
 try:
@@ -129,7 +124,6 @@ except:
 
 # Get Poster from TMDB
 poster_path = moviedb_api_data['movie_results'][0]['poster_path']
-
 try:
     poster_path = 'https://image.tmdb.org/t/p/original' + poster_path
 except TypeError:
@@ -258,6 +252,8 @@ message = {
 log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
 
 # Send notification
-log.info("Sleeping for 20 seconds before sending notifications")
-time.sleep(20)
 sender = requests.post(script_config.radarr_slack_url, headers=slack_headers, json=message)
+if eventtype == "Test":
+    print("Successfully sent test notification.")
+else:
+    print("Successfully sent notification to Slack.")
