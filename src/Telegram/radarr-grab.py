@@ -3,7 +3,6 @@ import logging
 import os
 import sys
 from datetime import datetime
-import time
 
 import humanize
 import requests
@@ -31,19 +30,39 @@ mdblist = requests.get('https://mdblist.com/api/?apikey={}&i={}'.format(script_c
 mdblist_data = mdblist.json()
 
 # IMDb
-imdb_rating = mdblist_data['ratings'][0]['value']
+try:
+    imdb_rating = mdblist_data['ratings'][0]['value']
+except:
+    log.info("Error fetching rating from mdblist")
+    imdb_rating = 'None'
 
 # Metacritic
-metacritic = mdblist_data['ratings'][1]['value']
+try:
+    metacritic = mdblist_data['ratings'][1]['value']
+except:
+    log.info("Error fetching rating from mdblist")
+    metacritic = 'None'
 
 # Trakt
-trakt_rating = mdblist_data['ratings'][2]['value']
+try:
+    trakt_rating = mdblist_data['ratings'][2]['value']
+except:
+    log.info("Error fetching rating from mdblist")
+    trakt_rating = 'None'
 
 # TMDb Rating
-tmdb_rating = mdblist_data['ratings'][5]['value']
+try:
+    tmdb_rating = mdblist_data['ratings'][5]['value']
+except:
+    log.info("Error fetching rating from mdblist")
+    tmdb_rating = 'None'
 
 # Rotten Tomatoes
-rottentomatoes = mdblist_data['ratings'][3]['value']
+try:
+    rottentomatoes = mdblist_data['ratings'][3]['value']
+except:
+    log.info("Error fetching rating from mdblist")
+    rottentomatoes = 'None'
 
 # TMDb ID
 tmdb_id = os.environ.get('radarr_movie_tmdbid')
@@ -88,9 +107,7 @@ trakt_url = 'https://trakt.tv/search/tmdb/' + tmdb_id + '?id_type=movie'
 
 # Get Radarr data
 radarr_api_url = '{}api/v3/movie/{}?apikey={}'.format(script_config.radarr_url, movie_id, script_config.radarr_key)
-
 radarr = requests.get(radarr_api_url)
-
 radarr_data = radarr.json()
 
 if not TEST_MODE:
@@ -109,11 +126,8 @@ except:
 # Get data from TMDB
 moviedb_api_url = 'https://api.themoviedb.org/3/find/{}?api_key={}&external_source=imdb_id'.format(imdb_id,
                                                                                                    script_config.moviedb_key)
-
 moviedb_api = requests.get(moviedb_api_url)
-
 moviedb_api_data = moviedb_api.json()
-
 radarr_id = moviedb_api_data['movie_results'][0]['id']
 
 try:
@@ -136,7 +150,6 @@ except:
 
 # Get Poster from TMDB
 poster_path = moviedb_api_data['movie_results'][0]['poster_path']
-
 try:
     poster_path = 'https://image.tmdb.org/t/p/original' + poster_path
 except TypeError:
@@ -194,6 +207,8 @@ message = {
 log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
 
 # Send notification
-log.info("Sleeping 30 seconds before sending notification")
-time.sleep(30)
 sender = requests.post(url, json=message)
+if eventtype == "Test":
+    print("Successfully sent test notification.")
+else:
+    print("Successfully sent notification to Telegram.")
