@@ -3,7 +3,6 @@ import logging
 import os
 import re
 import sys
-import time
 
 import humanize
 import requests
@@ -112,7 +111,6 @@ def main():
                                                                                                               script_config.moviedb_key)
         get_tmdb = requests.get(tmdb).json()
         tmdb_id = get_tmdb['tv_results'][0]['id']
-        print(tmdb_id)
 
     # Season poster, if it fails, falls back to series banner
     try:
@@ -133,7 +131,11 @@ def main():
     # View Details
     tvdb_url = 'https://thetvdb.com/series/' + title_slug
 
-    tvmaze_id = skyhook_data['tvMazeId']
+    try:
+        tvmaze_id = skyhook_data['tvMazeId']
+    except Exception as e:
+        log.info("TVMaze id not found. Using GOT. Error: {}".format(e))
+        tvmaze_id = '82'
 
     tvmaze_url = 'https://www.tvmaze.com/shows/' + str(tvmaze_id)
 
@@ -143,12 +145,17 @@ def main():
 
     tmdb_url = 'https://www.themoviedb.org/tv/' + str(tmdb_id)
 
-    trailer_link = mdblist_data['trailer']
-    if not trailer_link:
+    # Trailer
+    try:
+        trailer_link = mdblist_data['trailer']
+        if trailer_link is None:
+            log.info("Trailer not Found. Using 'Never Gonna Give You Up'.")
+            trailer_link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab'
+    except KeyError:
+        print("Trailer not Found. Using 'Never Gonna Give You Up'.")
         trailer_link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab'
 
     # Series Overview
-
     series = ('https://api.themoviedb.org/3/tv/{}?api_key={}&language=en').format(tmdb_id,
                                                                                   script_config.moviedb_key)
     series_data = requests.get(series).json()
@@ -237,9 +244,11 @@ def main():
     log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
 
     # Send notification
-    log.info("Sleeping for 30 seconds before sending notifications")
-    time.sleep(30)
     sender = requests.post(url, json=message)
+    if eventtype == "Test":
+        print("Successfully sent test notification.")
+    else:
+        print("Successfully sent notification to Telegram.")
 
 
 # Call main
