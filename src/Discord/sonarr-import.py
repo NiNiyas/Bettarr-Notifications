@@ -3,7 +3,6 @@ import logging
 import os
 import re
 import sys
-import time
 from datetime import datetime
 
 import requests
@@ -238,9 +237,11 @@ def main():
     log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
 
     # Send notification
-    log.info("Sleeping 10 seconds before sending notification")
-    time.sleep(10)
     sender = requests.post(script_config.sonarr_discord_url, headers=discord_headers, json=message)
+    if eventtype == "Test":
+        print("Successfully sent test notification.")
+    else:
+        print("Successfully sent notification to Discord.")
 
 
 # Call main
