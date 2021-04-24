@@ -3,7 +3,6 @@ import logging
 import os
 import re
 import sys
-import time
 
 import requests
 
@@ -269,9 +268,11 @@ def main():
     log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
 
     # Send notification
-    log.info("Sleeping 20 seconds before sending notifications.")
-    time.sleep(20)
     sender = requests.post(script_config.sonarr_slack_url, headers=slack_headers, json=message)
+    if eventtype == "Test":
+        print("Successfully sent test notification.")
+    else:
+        print("Successfully sent notification to Slack.")
 
 
 # Call main
