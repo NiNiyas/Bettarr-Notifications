@@ -15,7 +15,7 @@ dir = os.path.join(os.path.dirname(sys.argv[0]))
 os.chdir(dir)
 if not os.path.exists('Logs'):
     os.mkdir('Logs')
-log_filename = os.path.join(os.path.dirname(sys.argv[0]), 'Logs/radarr-grab-telegram.log')
+log_filename = os.path.join(os.path.dirname(sys.argv[0]), 'Logs/radarr-grab-tor-telegram.log')
 logging.basicConfig(
     filename=log_filename,
     level=logging.INFO,
