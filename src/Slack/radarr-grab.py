@@ -2,11 +2,11 @@ import json
 import logging
 import os
 import sys
-import time
 from datetime import datetime
 
 import humanize
 import requests
+
 import script_config
 
 slack_headers = {'content-type': 'application/json'}
@@ -87,9 +87,7 @@ trakt_url = 'https://trakt.tv/search/tmdb/' + tmdb_id + '?id_type=movie'
 
 # Get Radarr data
 radarr_api_url = '{}api/v3/movie/{}?apikey={}'.format(script_config.radarr_url, movie_id, script_config.radarr_key)
-
 radarr = requests.get(radarr_api_url)
-
 radarr_data = radarr.json()
 
 if not TEST_MODE:
@@ -100,19 +98,16 @@ if TEST_MODE:
     year = "TEST"
 
 # Get Trailer Link from Radarr
-try:
-    trailer_link = 'https://www.youtube.com/watch?v={}'.format(radarr_data['youTubeTrailerId'])
-except:
-    trailer_link = 'None'
+trailer_link = 'https://www.youtube.com/watch?v={}'.format(radarr_data['youTubeTrailerId'])
+if not trailer_link:
+    log.info("Trailer not found. Using 'Never Gonna Give You Up'")
+    trailer_link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab'
 
 # Get data from TMDB
 moviedb_api_url = 'https://api.themoviedb.org/3/find/{}?api_key={}&external_source=imdb_id'.format(imdb_id,
                                                                                                    script_config.moviedb_key)
-
 moviedb_api = requests.get(moviedb_api_url)
-
 moviedb_api_data = moviedb_api.json()
-
 radarr_id = moviedb_api_data['movie_results'][0]['id']
 
 try:
@@ -135,7 +130,6 @@ except:
 
 # Get Poster from TMDB
 poster_path = moviedb_api_data['movie_results'][0]['poster_path']
-
 try:
     poster_path = 'https://image.tmdb.org/t/p/original' + poster_path
 except TypeError:
@@ -150,7 +144,8 @@ message = {
             "text": {
                 "type": "mrkdwn",
                 "text": "Grabbed New Movie - *{}* ({}) from *{}*\n*IMDb*: {} | *Metascore*: {} | *Rotten Tomatoes*: {} | *TMDb*: {} | *Trakt*: {}".format(
-                    media_title, year, release_indexer, imdb_rating, metacritic, rottentomatoes, tmdb_rating, trakt_rating)
+                    media_title, year, release_indexer, imdb_rating, metacritic, rottentomatoes, tmdb_rating,
+                    trakt_rating)
             }
         },
         {
@@ -205,9 +200,9 @@ message = {
                 {
                     "type": "mrkdwn",
                     "text": "*View Details*\n<{}|IMDb> | <{}|TMDb> | <{}|Trakt> | <{}|MovieChat>".format(imdb_url,
-                                                                                                          tmdb_url,
-                                                                                                          trakt_url,
-                                                                                                          moviechat)
+                                                                                                         tmdb_url,
+                                                                                                         trakt_url,
+                                                                                                         moviechat)
                 }
             ]
         },
@@ -244,6 +239,8 @@ message = {
 log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
 
 # Send notification
-log.info("Sleeping for 20 seconds before sending notifications")
-time.sleep(20)
 sender = requests.post(script_config.radarr_slack_url, headers=slack_headers, json=message)
+if eventtype == "Test":
+    print("Successfully sent test notification.")
+else:
+    print("Successfully sent notification to Slack.")
