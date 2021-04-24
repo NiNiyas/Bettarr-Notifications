@@ -3,7 +3,6 @@ import logging
 import os
 import re
 import sys
-import time
 from datetime import datetime
 
 import humanize
@@ -115,12 +114,11 @@ def main():
         get_tmdb = requests.get(tmdb).json()
         tmdb_id = get_tmdb['tv_results'][0]['id']
     except:
-        log.info("Tvdb id not found. Grabbing from IMDB")
+        log.info("TVDb id not found. Grabbing from IMDB")
         tmdb = ('https://api.themoviedb.org/3/find/{}?api_key={}&language=en&external_source=imdb_id').format(imdb_id,
                                                                                                               script_config.moviedb_key)
         get_tmdb = requests.get(tmdb).json()
         tmdb_id = get_tmdb['tv_results'][0]['id']
-        print(tmdb_id)
 
     # Season poster, if it fails, falls back to series banner
     try:
@@ -141,7 +139,11 @@ def main():
     # View Details
     tvdb_url = 'https://thetvdb.com/series/' + title_slug
 
-    tvmaze_id = skyhook_data['tvMazeId']
+    try:
+        tvmaze_id = skyhook_data['tvMazeId']
+    except Exception as e:
+        log.info("TVMaze id not found. Using GOT. Error: {}".format(e))
+        tvmaze_id = '82'
 
     tvmaze_url = 'https://www.tvmaze.com/shows/' + str(tvmaze_id)
 
@@ -151,8 +153,14 @@ def main():
 
     tmdb_url = 'https://www.themoviedb.org/tv/' + str(tmdb_id)
 
-    trailer_link = mdblist_data['trailer']
-    if not trailer_link:
+    # Trailer
+    try:
+        trailer_link = mdblist_data['trailer']
+        if trailer_link is None:
+            log.info("Trailer not Found. Using 'Never Gonna Give You Up'.")
+            trailer_link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab'
+    except KeyError:
+        print("Trailer not Found. Using 'Never Gonna Give You Up'.")
         trailer_link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab'
 
     # Series Overview
@@ -277,11 +285,13 @@ def main():
     # Logging
     log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
 
-    log.info("Sleeping for 10 seconds before sending notifications")
-    time.sleep(10)
-
     # Send notification
     sender = requests.post(script_config.sonarr_discord_url, headers=discord_headers, json=message)
+    print("Successfully sent notification.")
+    if eventtype == "Test":
+        print("Successfully sent test notification.")
+    else:
+        print("Successfully sent notification to Discord.")
 
 
 # Call main
