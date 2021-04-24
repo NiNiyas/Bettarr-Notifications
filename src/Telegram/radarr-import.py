@@ -2,10 +2,10 @@ import json
 import logging
 import os
 import sys
-import time
 from datetime import datetime
 
 import requests
+
 import script_config
 
 # Set up the log folder and file
@@ -56,9 +56,7 @@ is_upgrade = os.environ.get('radarr_isupgrade')
 
 # Get Radarr data
 radarr_api_url = '{}api/v3/movie/{}?apikey={}'.format(script_config.radarr_url, movie_id, script_config.radarr_key)
-
 radarr = requests.get(radarr_api_url)
-
 radarr_data = radarr.json()
 
 if not TEST_MODE:
@@ -78,9 +76,7 @@ except:
 moviedb_api_url = 'https://api.themoviedb.org/3/find/{}?api_key={}&external_source=imdb_id'.format(imdb_id,
                                                                                                    script_config.moviedb_key)
 moviedb_api = requests.get(moviedb_api_url)
-
 moviedb_api_data = moviedb_api.json()
-
 radarr_id = moviedb_api_data['movie_results'][0]['id']
 
 try:
@@ -167,6 +163,8 @@ message = {
 log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
 
 # Send notification
-log.info("Sleeping 30 seconds before sending notification")
-time.sleep(30)
 sender = requests.post(url, json=message)
+if eventtype == "Test":
+    print("Successfully sent test notification.")
+else:
+    print("Successfully sent notification to Telegram.")
