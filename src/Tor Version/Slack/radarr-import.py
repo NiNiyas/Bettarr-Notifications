@@ -10,6 +10,12 @@ from torpy.http.requests import TorRequests
 import script_config
 
 slack_headers = {'content-type': 'application/json'}
+headers = {
+    "Accept-Encoding": "gzip, deflate",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Upgrade-Insecure-Requests": "1",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36 Edg/90.0.818.49"
+}
 
 # Set up the log folder and file
 dir = os.path.join(os.path.dirname(sys.argv[0]))
@@ -34,18 +40,10 @@ tmdb_id = os.environ.get('radarr_movie_tmdbid')
 if not tmdb_id:
     tmdb_id = '11'
 
-# Get Event Type
+# Get ENV variables.
 eventtype = os.environ.get('radarr_eventtype')
 
-if eventtype == 'Test':
-    TEST_MODE = True
-else:
-    TEST_MODE = False
-
-# Get ENV variables
 movie_id = os.environ.get('radarr_movie_id')
-if not movie_id:
-    movie_id = '10'
 
 media_title = os.environ.get('radarr_movie_title')
 
@@ -55,39 +53,41 @@ scene_name = os.environ.get('radarr_moviefile_scenename')
 
 is_upgrade = os.environ.get('radarr_isupgrade')
 
-release_size = os.environ.get('radarr_release_size')
-if not release_size:
-    release_size = '5146516114'
-
-# Service URLs
-imdb_url = 'https://www.imdb.com/title/' + imdb_id
-
 # Get Radarr data
 radarr_api_url = '{}api/v3/movie/{}?apikey={}'.format(script_config.radarr_url, movie_id, script_config.radarr_key)
 radarr = requests.get(radarr_api_url)
 radarr_data = radarr.json()
 
-if not TEST_MODE:
-    year = os.environ.get('radarr_movie_year')
+if eventtype == 'Test':
+    TEST_MODE = True
+else:
+    TEST_MODE = False
 
-if TEST_MODE:
-    media_title = 'Unknown'
-    year = 'Unknown'
+if not TEST_MODE:
+    try:
+        year = os.environ.get('radarr_movie_year')
+    except:
+        year = "Unknown"
 
 # Get Trailer Link from Radarr
-trailer_link = 'https://www.youtube.com/watch?v={}'.format(radarr_data['youTubeTrailerId'])
-if not trailer_link:
-    log.info("Trailer not found. Using 'Never Gonna Give You Up'")
+try:
+    trailer_link = 'https://www.youtube.com/watch?v={}'.format(radarr_data['youTubeTrailerId'])
+    if trailer_link is None:
+        log.info("Trailer not Found. Using 'Never Gonna Give You Up'.")
+        trailer_link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab'
+except KeyError:
+    log.info("Trailer not Found. Using 'Never Gonna Give You Up'.")
     trailer_link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab'
 
 # Get data from TMDB
 with TorRequests() as tor_requests:
-    with tor_requests.get_session() as sess:
+    with tor_requests.get_session(retries=10) as sess:
         moviedb_api_url = 'https://api.themoviedb.org/3/find/{}?api_key={}&external_source=imdb_id'.format(imdb_id,
                                                                                                            script_config.moviedb_key)
-        moviedb_api = sess.get(moviedb_api_url)
+        moviedb_api = sess.get(moviedb_api_url, headers=headers, timeout=60)
         moviedb_api_data = moviedb_api.json()
 
+# Overview
 try:
     overview = radarr_data['overview']
 except:
@@ -107,15 +107,6 @@ try:
 except:
     release = 'Unknown'
 
-# Upgrade or not
-if is_upgrade == 'True':
-    content = 'Upgraded Movie - *{}*'.format(media_title)
-    is_upgrade = 'Yes'
-
-else:
-    content = 'New movie downloaded - *{}*'.format(media_title)
-    is_upgrade = 'No'
-
 # Genre
 try:
     genres_data = radarr_data['genres']
@@ -123,6 +114,14 @@ try:
     genres = genres.replace("'", "")
 except:
     genres = 'Unknown'
+
+# Upgrade
+if is_upgrade == 'True':
+    content = 'Upgraded Movie - *{}*'.format(media_title)
+    is_upgrade = 'Yes'
+else:
+    content = 'New movie downloaded - *{}*'.format(media_title)
+    is_upgrade = 'No'
 
 # Get Poster from TMDB
 poster_path = moviedb_api_data['movie_results'][0]['poster_path']
@@ -134,12 +133,12 @@ except TypeError:
 
 # Backdrop
 with TorRequests() as tor_requests:
-    with tor_requests.get_session() as sess:
+    with tor_requests.get_session(retries=10) as sess:
         try:
             banner_url = ('https://api.themoviedb.org/3/movie/{}/images?api_key={}&language=en').format(tmdb_id,
                                                                                                         script_config.moviedb_key)
 
-            banner_data = sess.get(banner_url).json()
+            banner_data = sess.get(banner_url, headers=headers, timeout=60).json()
             banner = banner_data['backdrops'][0]['file_path']
             banner = 'https://image.tmdb.org/t/p/original' + banner
         except:
@@ -215,10 +214,6 @@ message = {
                 {
                     "type": "mrkdwn",
                     "text": "*Release Name*\n{}".format(scene_name)
-                },
-                {
-                    "type": "mrkdwn",
-                    "text": "*Trailer:*\n<{}|Youtube>".format(trailer_link)
                 }
             ]
         },
@@ -245,17 +240,26 @@ message = {
                         "text": "Go to Radarr"
                     },
                     "url": script_config.radarr_url
+                },
+                {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "Trailer"
+                    },
+                    "url": trailer_link
                 }
             ]
         }
     ]
 }
 
-# Log json
-log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
-
 # Send notification
 sender = requests.post(script_config.radarr_slack_url, headers=slack_headers, json=message)
+
+# Logging
+log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+
 if eventtype == 'Test':
     print("Successfully sent test notification")
 else:

@@ -9,6 +9,15 @@ from torpy.http.requests import TorRequests
 
 import script_config
 
+headers = {
+    "Accept-Encoding": "gzip, deflate",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Upgrade-Insecure-Requests": "1",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36 Edg/90.0.818.49"
+}
+
+tgurl = 'https://api.telegram.org/bot{}/sendMessage'.format(script_config.bot_id)
+
 # Set up the log folder and file
 dir = os.path.join(os.path.dirname(sys.argv[0]))
 os.chdir(dir)
@@ -30,22 +39,12 @@ if not imdb_id:
 # TMDB ID
 tmdb_id = os.environ.get('radarr_movie_tmdbid')
 if not tmdb_id:
-    tmdb_id = '1893'
-
-# Get Radarr event type
-eventtype = os.environ.get('radarr_eventtype')
-
-url = 'https://api.telegram.org/bot{}/sendMessage'.format(script_config.bot_id)
-
-if eventtype == 'Test':
-    TEST_MODE = True
-else:
-    TEST_MODE = False
+    tmdb_id = '11'
 
 # Get Radarr variables
+eventtype = os.environ.get('radarr_eventtype')
+
 movie_id = os.environ.get('radarr_movie_id')
-if not movie_id:
-    movie_id = '10'
 
 media_title = os.environ.get('radarr_movie_title')
 
@@ -60,25 +59,37 @@ radarr_api_url = '{}api/v3/movie/{}?apikey={}'.format(script_config.radarr_url, 
 radarr = requests.get(radarr_api_url)
 radarr_data = radarr.json()
 
+if eventtype == 'Test':
+    TEST_MODE = True
+else:
+    TEST_MODE = False
+
 if not TEST_MODE:
-    year = radarr_data['year']
+    try:
+        year = os.environ.get('radarr_movie_year')
+    except:
+        year = "Unknown"
 
 if TEST_MODE:
-    scene_name = 'Unknown'
+    media_title = 'Unknown'
     year = 'Unknown'
 
 # Get Trailer Link from Radarr
-trailer_link = 'https://www.youtube.com/watch?v={}'.format(radarr_data['youTubeTrailerId'])
-if not trailer_link:
-    log.info("Trailer not found. Using 'Never Gonna Give You Up'")
+try:
+    trailer_link = 'https://www.youtube.com/watch?v={}'.format(radarr_data['youTubeTrailerId'])
+    if trailer_link is None:
+        log.info("Trailer not Found. Using 'Never Gonna Give You Up'.")
+        trailer_link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab'
+except KeyError:
+    log.info("Trailer not Found. Using 'Never Gonna Give You Up'.")
     trailer_link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab'
 
 # Get data from TMDB
 with TorRequests() as tor_requests:
-    with tor_requests.get_session() as sess:
+    with tor_requests.get_session(retries=10) as sess:
         moviedb_api_url = 'https://api.themoviedb.org/3/find/{}?api_key={}&external_source=imdb_id'.format(imdb_id,
                                                                                                            script_config.moviedb_key)
-        moviedb_api = sess.get(moviedb_api_url)
+        moviedb_api = sess.get(moviedb_api_url, headers=headers, timeout=60)
         moviedb_api_data = moviedb_api.json()
 
 # Overview
@@ -87,7 +98,7 @@ try:
 except:
     overview = 'Unknown'
 
-# Physical Release
+# Physical Release Date
 try:
     physical_release = radarr_data['physicalRelease']
     physical_release = datetime.strptime(physical_release, "%Y-%m-%dT%H:%M:%SZ").strftime("%B %d, %Y")
@@ -101,23 +112,30 @@ try:
 except:
     release = 'Unknown'
 
+# Genres
+try:
+    genres_data = radarr_data['genres']
+    genres = str(genres_data)[1:-1]
+    genres = genres.replace("'", "")
+except:
+    genres = 'Unknown'
+
 # Upgrade
 if is_upgrade == 'True':
     content = 'Upgraded Movie - <b>{}</b>'.format(media_title)
     is_upgrade = 'Yes'
-
 else:
     content = 'New movie downloaded - <b>{}</b>'.format(media_title)
     is_upgrade = 'No'
 
 # Backdrop
 with TorRequests() as tor_requests:
-    with tor_requests.get_session() as sess:
+    with tor_requests.get_session(retries=10) as sess:
         try:
             banner_url = ('https://api.themoviedb.org/3/movie/{}/images?api_key={}&language=en').format(tmdb_id,
                                                                                                         script_config.moviedb_key)
 
-            banner_data = sess.get(banner_url).json()
+            banner_data = sess.get(banner_url, headers=headers, timeout=60).json()
             banner = banner_data['backdrops'][0]['file_path']
             banner = 'https://image.tmdb.org/t/p/original' + banner
         except:
@@ -129,14 +147,6 @@ with TorRequests() as tor_requests:
             except:
                 log.info("Banner not found. Falling back to generic banner.")
                 banner = 'https://stratnor.com/wp-content/themes/stratnor/images/no-image.png'
-
-# Genres
-try:
-    genres_data = radarr_data['genres']
-    genres = str(genres_data)[1:-1]
-    genres = genres.replace("'", "")
-except:
-    genres = 'Unknown'
 
 # Telegram Message Format
 message = {
@@ -167,11 +177,12 @@ message = {
 
 }
 
-# Log json
+# Send notification
+sender = requests.post(tgurl, json=message)
+
+# Logging
 log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
 
-# Send notification
-sender = requests.post(url, json=message)
 if eventtype == 'Test':
     print("Successfully sent test notification")
 else:

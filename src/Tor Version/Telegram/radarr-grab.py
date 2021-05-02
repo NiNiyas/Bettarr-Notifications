@@ -6,9 +6,20 @@ import sys
 
 import humanize
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 from torpy.http.requests import TorRequests
 
 import script_config
+
+headers = {
+    "Accept-Encoding": "gzip, deflate",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Upgrade-Insecure-Requests": "1",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36 Edg/90.0.818.49"
+}
+
+tgurl = 'https://api.telegram.org/bot{}/sendMessage'.format(script_config.bot_id)
 
 # Set up the log folder and file
 dir = os.path.join(os.path.dirname(sys.argv[0]))
@@ -23,16 +34,34 @@ logging.basicConfig(
 )
 log = logging.getLogger('Radarr')
 
-# Was getting error : https://github.com/psf/requests/issues/3391#issuecomment-231990544
-sess = requests.Session()
-adapter = requests.adapters.HTTPAdapter(max_retries=20)
-sess.mount('http://', adapter)
+
+# From https://www.peterbe.com/plog/best-practice-with-retries-with-requests
+def requests_retry_session(
+        retries=5,
+        backoff_factor=0.3,
+        status_forcelist=(500, 502, 504),
+        session=None,
+):
+    session = session or requests.Session()
+    retry = Retry(
+        total=retries,
+        read=retries,
+        connect=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=status_forcelist,
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    return session
+
 
 # Ratings
 imdb_id = os.environ.get('radarr_movie_imdbid')
 if not imdb_id:
     imdb_id = 'tt0120915'
-mdblist = sess.get('https://mdblist.com/api/?apikey={}&i={}'.format(script_config.mdbapi, imdb_id))
+mdblist = requests_retry_session().get('https://mdblist.com/api/?apikey={}&i={}&m=movie'.format(script_config.mdbapi, imdb_id),
+                                       headers=headers)
 mdblist_data = mdblist.json()
 
 # IMDb
@@ -75,17 +104,9 @@ tmdb_id = os.environ.get('radarr_movie_tmdbid')
 if not tmdb_id:
     tmdb_id = '1893'
 
-# Get Event Type
+# Get variables from Radarr
 eventtype = os.environ.get('radarr_eventtype')
 
-url = 'https://api.telegram.org/bot{}/sendMessage'.format(script_config.bot_id)
-
-if eventtype == 'Test':
-    TEST_MODE = True
-else:
-    TEST_MODE = False
-
-# Get variables from Radarr
 movie_id = os.environ.get('radarr_movie_id')
 
 media_title = os.environ.get('radarr_movie_title')
@@ -116,38 +137,39 @@ radarr_api_url = '{}api/v3/movie/{}?apikey={}'.format(script_config.radarr_url, 
 radarr = requests.get(radarr_api_url)
 radarr_data = radarr.json()
 
-if not TEST_MODE:
-    year = os.environ.get('radarr_movie_year')
-
-if TEST_MODE:
-    media_title = 'Unknown'
-    year = 'Unknown'
-
 # Get Trailer Link from Radarr
-trailer_link = 'https://www.youtube.com/watch?v={}'.format(radarr_data['youTubeTrailerId'])
-if not trailer_link:
-    log.info("Trailer not found. Using 'Never Gonna Give You Up'")
+try:
+    trailer_link = 'https://www.youtube.com/watch?v={}'.format(radarr_data['youTubeTrailerId'])
+    if trailer_link is None:
+        log.info("Trailer not Found. Using 'Never Gonna Give You Up'.")
+        trailer_link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab'
+except KeyError:
+    log.info("Trailer not Found. Using 'Never Gonna Give You Up'.")
     trailer_link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab'
 
 # Get data from TMDB
 with TorRequests() as tor_requests:
-    with tor_requests.get_session() as sess:
+    with tor_requests.get_session(retries=10) as sess:
         moviedb_api_url = 'https://api.themoviedb.org/3/find/{}?api_key={}&external_source=imdb_id'.format(imdb_id,
                                                                                                            script_config.moviedb_key)
-        moviedb_api = sess.get(moviedb_api_url)
+        moviedb_api = sess.get(moviedb_api_url, headers=headers, timeout=60)
         moviedb_api_data = moviedb_api.json()
 
+
+# Overview
 try:
     overview = radarr_data['overview']
 except:
     overview = 'Unknown'
 
+# Release Date
 try:
     release = moviedb_api_data['movie_results'][0]['release_date']
     release = datetime.datetime.strptime(release, "%Y-%m-%d").strftime("%B %d, %Y")
 except:
     release = 'Unknown'
 
+# Genres
 try:
     genres_data = radarr_data['genres']
     genres = str(genres_data)[1:-1]
@@ -162,6 +184,18 @@ try:
 except TypeError:
     # Send a generic poster if there is not one for this movie
     poster_path = 'https://i.imgur.com/GoqfZJe.jpg'
+
+if eventtype == 'Test':
+    TEST_MODE = True
+else:
+    TEST_MODE = False
+
+if not TEST_MODE:
+    year = os.environ.get('radarr_movie_year')
+
+if TEST_MODE:
+    media_title = 'Unknown'
+    year = 'Unknown'
 
 # Telegram Message Format
 message = {
@@ -210,11 +244,12 @@ message = {
 
 }
 
-# Log json
+# Send notification
+sender = requests.post(tgurl, json=message)
+
+# Logging
 log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
 
-# Send notification
-sender = requests.post(url, json=message)
 if eventtype == 'Test':
     print("Successfully sent test notification")
 else:

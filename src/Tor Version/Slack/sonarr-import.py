@@ -10,6 +10,12 @@ from torpy.http.requests import TorRequests
 import script_config
 
 slack_headers = {'content-type': 'application/json'}
+headers = {
+    "Accept-Encoding": "gzip, deflate",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Upgrade-Insecure-Requests": "1",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36 Edg/90.0.818.49"
+}
 
 # Set up the log folder and file
 dir = os.path.join(os.path.dirname(sys.argv[0]))
@@ -47,15 +53,9 @@ def main():
 
     is_upgrade = os.environ.get('sonarr_isupgrade')
 
-    if eventtype == 'Test':
-        log.info('Sonarr script test succeeded.')
-        sys.exit(0)
-
     # Get show information from skyhook
     get_skyhook = requests.get(script_config.skyhook_url + str(tvdb_id))
-
     skyhook_data = get_skyhook.json()
-
     title_slug = skyhook_data['slug']
 
     imdb_id = os.environ.get('sonarr_series_imdbid')
@@ -64,15 +64,15 @@ def main():
 
     # TMDb ID
     with TorRequests() as tor_requests:
-        with tor_requests.get_session() as sess:
+        with tor_requests.get_session(retries=10) as sess:
             try:
                 tmdb = ('https://api.themoviedb.org/3/find/{}?api_key={}&language=en&external_source=tvdb_id').format(
                     tvdb_id,
                     script_config.moviedb_key)
-                get_tmdb = sess.get(tmdb).json()
+                get_tmdb = sess.get(tmdb, headers=headers, timeout=60).json()
                 tmdb_id = get_tmdb['tv_results'][0]['id']
             except:
-                with tor_requests.get_session() as sess:
+                with tor_requests.get_session(retries=10) as sess:
                     tmdb = (
                         'https://api.themoviedb.org/3/find/{}?api_key={}&language=en&external_source=imdb_id').format(
                         imdb_id,
@@ -82,11 +82,11 @@ def main():
 
     # Thumbnail
     with TorRequests() as tor_requests:
-        with tor_requests.get_session() as sess:
+        with tor_requests.get_session(retries=10) as sess:
             try:
                 thumbnail_url = ('https://api.themoviedb.org/3/tv/{}/images?api_key={}&language=en').format(tmdb_id,
                                                                                                             script_config.moviedb_key)
-                thumbnail_data = sess.get(thumbnail_url).json()
+                thumbnail_data = sess.get(thumbnail_url, headers=headers, timeout=60).json()
                 thumbnail = thumbnail_data['posters'][0]['file_path']
                 thumbnail = 'https://image.tmdb.org/t/p/original' + thumbnail
             except:
@@ -98,56 +98,53 @@ def main():
 
     # Episode Sample
     with TorRequests() as tor_requests:
-        with tor_requests.get_session() as sess:
+        with tor_requests.get_session(retries=10) as sess:
             try:
                 episode_sample = (
                     'https://api.themoviedb.org/3/tv/{}/season/{}/episode/{}/images?api_key={}').format(tmdb_id, season,
                                                                                                         episode,
                                                                                                         script_config.moviedb_key)
-                episode_data = sess.get(episode_sample).json()
+                episode_data = sess.get(episode_sample, headers=headers, timeout=60).json()
                 sample = episode_data['stills'][0]['file_path']
                 sample = 'https://image.tmdb.org/t/p/original' + sample
             except:
                 # Season poster when episode sample is not found
                 log.info("Could not fetch episode sample. Falling back to series poster.")
-                with TorRequests() as tor_requests:
-                    with tor_requests.get_session() as sess:
-                        try:
-                            season_poster = 'https://api.themoviedb.org/3/tv/{}/season/{}/images?api_key={}'.format(
-                                tmdb_id, season, script_config.moviedb_key)
-                            sp = sess.get(season_poster).json()
-                            poster = sp['poster'][0]['file_path']
-                            sample = 'https://image.tmdb.org/t/p/original' + poster
-                        except:
-                            sample = skyhook_data['images'][0]['url']
+                with tor_requests.get_session(retries=10) as sess:
+                    try:
+                        season_poster = 'https://api.themoviedb.org/3/tv/{}/season/{}/images?api_key={}'.format(
+                            tmdb_id, season, script_config.moviedb_key)
+                        sp = sess.get(season_poster, headers=headers, timeout=60).json()
+                        poster = sp['poster'][0]['file_path']
+                        sample = 'https://image.tmdb.org/t/p/original' + poster
+                    except:
+                        sample = skyhook_data['images'][0]['url']
 
     # Episode Overview
     with TorRequests() as tor_requests:
-        with tor_requests.get_session() as sess:
+        with tor_requests.get_session(retries=10) as sess:
             try:
                 episode_url = ('https://api.themoviedb.org/3/tv/{}/season/{}/episode/{}?api_key={}&language=en').format(
                     tmdb_id,
                     season,
                     episode,
                     script_config.moviedb_key)
-                episode_data = sess.get(episode_url).json()
+                episode_data = sess.get(episode_url, headers=headers, timeout=60).json()
                 overview = episode_data['overview']
-                if overview == (""):
-                    with TorRequests() as tor_requests:
-                        with tor_requests.get_session() as sess:
-                            series = ('https://api.themoviedb.org/3/tv/{}?api_key={}&language=en').format(tmdb_id,
-                                                                                                          script_config.moviedb_key)
-                            series_data = sess.get(series).json()
-                            overview = series_data['overview']
+                if overview == "":
+                    with tor_requests.get_session(retries=10) as sess:
+                        series = ('https://api.themoviedb.org/3/tv/{}?api_key={}&language=en').format(tmdb_id,
+                                                                                                      script_config.moviedb_key)
+                        series_data = sess.get(series, headers=headers, timeout=60).json()
+                        overview = series_data['overview']
             except:
                 # Series Overview when Episode overview is not found
                 log.info("Couldn't fetch episode overview. Falling back to series overview.")
-                with TorRequests() as tor_requests:
-                    with tor_requests.get_session() as sess:
-                        series = ('https://api.themoviedb.org/3/tv/{}?api_key={}&language=en').format(tmdb_id,
-                                                                                                      script_config.moviedb_key)
-                        series_data = sess.get(series).json()
-                        overview = series_data['overview']
+                with tor_requests.get_session(retries=10) as sess:
+                    series = ('https://api.themoviedb.org/3/tv/{}?api_key={}&language=en').format(tmdb_id,
+                                                                                                  script_config.moviedb_key)
+                    series_data = sess.get(series, headers=headers, timeout=60).json()
+                    overview = series_data['overview']
 
     # Adding 0 to Season and Episode
     if len(str(season)) == 1:
@@ -285,10 +282,12 @@ def main():
         ]
     }
 
-    log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
-
     # Send notification
     sender = requests.post(script_config.sonarr_slack_url, headers=slack_headers, json=message)
+
+    # Logging
+    log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+
     if eventtype == "Test":
         print("Successfully sent test notification.")
     else:

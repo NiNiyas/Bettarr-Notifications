@@ -6,11 +6,19 @@ import sys
 
 import humanize
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 from torpy.http.requests import TorRequests
 
 import script_config
 
 slack_headers = {'content-type': 'application/json'}
+headers = {
+    "Accept-Encoding": "gzip, deflate",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Upgrade-Insecure-Requests": "1",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.85 Safari/537.36 Edg/90.0.818.49"
+}
 
 # Set up the log folder and file
 dir = os.path.join(os.path.dirname(sys.argv[0]))
@@ -25,17 +33,35 @@ logging.basicConfig(
 )
 log = logging.getLogger('Sonarr')
 
-# Was getting error : https://github.com/psf/requests/issues/3391#issuecomment-231990544
-sess = requests.Session()
-adapter = requests.adapters.HTTPAdapter(max_retries=20)
-sess.mount('http://', adapter)
+
+# From https://www.peterbe.com/plog/best-practice-with-retries-with-requests
+def requests_retry_session(
+        retries=5,
+        backoff_factor=0.3,
+        status_forcelist=(500, 502, 504),
+        session=None,
+):
+    session = session or requests.Session()
+    retry = Retry(
+        total=retries,
+        read=retries,
+        connect=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=status_forcelist,
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    return session
+
 
 # Ratings
 imdb_id = os.environ.get('sonarr_series_imdbid')
 if not imdb_id:
     imdb_id = 'tt0944947'
-
-mdblist = sess.get('https://mdblist.com/api/?apikey={}&i={}&m=show'.format(script_config.mdbapi, imdb_id))
+mdblist = requests_retry_session().get(
+    'https://mdblist.com/api/?apikey={}&i={}&m=show'.format(script_config.mdbapi, imdb_id),
+    headers=headers)
 mdblist_data = mdblist.json()
 
 # IMDb
@@ -107,31 +133,31 @@ def main():
 
     # TMDb ID
     with TorRequests() as tor_requests:
-        with tor_requests.get_session() as sess:
+        with tor_requests.get_session(retries=10) as sess:
             try:
                 tmdb = ('https://api.themoviedb.org/3/find/{}?api_key={}&language=en&external_source=tvdb_id').format(
                     tvdb_id,
                     script_config.moviedb_key)
-                get_tmdb = sess.get(tmdb).json()
+                get_tmdb = sess.get(tmdb, headers=headers, timeout=60).json()
                 tmdb_id = get_tmdb['tv_results'][0]['id']
             except:
-                with tor_requests.get_session() as sess:
+                with tor_requests.get_session(retries=10) as sess:
                     tmdb = (
                         'https://api.themoviedb.org/3/find/{}?api_key={}&language=en&external_source=imdb_id').format(
                         imdb_id,
                         script_config.moviedb_key)
-                    get_tmdb = sess.get(tmdb).json()
+                    get_tmdb = sess.get(tmdb, headers=headers, timeout=60).json()
                     tmdb_id = get_tmdb['tv_results'][0]['id']
 
     # Season poster, if it fails, falls back to series banner
     with TorRequests() as tor_requests:
-        with tor_requests.get_session() as sess:
+        with tor_requests.get_session(retries=10) as sess:
             try:
                 banner_url = ('https://api.themoviedb.org/3/tv/{}/season/{}/images?api_key={}&language=en').format(
                     tmdb_id,
                     season,
                     script_config.moviedb_key)
-                banner_data = sess.get(banner_url).json()
+                banner_data = sess.get(banner_url, headers=headers, timeout=60).json()
                 banner = banner_data['posters'][0]['file_path']
                 banner = 'https://image.tmdb.org/t/p/original' + banner
             except:
@@ -141,14 +167,6 @@ def main():
                     banner = skyhook_data['images'][0]['url']
                 except:
                     banner = 'http://gearr.scannain.com/wp-content/uploads/2015/02/noposter.jpg'
-
-    # Series Overview
-    with TorRequests() as tor_requests:
-        with tor_requests.get_session() as sess:
-            series = ('https://api.themoviedb.org/3/tv/{}?api_key={}&language=en').format(tmdb_id,
-                                                                                          script_config.moviedb_key)
-            series_data = sess.get(series).json()
-            overview = series_data['overview']
 
     # View Details
     tvdb_url = 'https://thetvdb.com/series/' + title_slug
@@ -167,12 +185,6 @@ def main():
 
     tmdb_url = 'https://www.themoviedb.org/tv/' + str(tmdb_id)
 
-    # Trailer Test
-    # trailer_link = mdblist_data['trailer']
-    # if not trailer_link:
-    #    log.info("Trailer not found. Using 'Never Gonna Give You Up by Rick Astley'")
-    #   trailer_link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab'
-
     # Trailer
     try:
         trailer_link = mdblist_data['trailer']
@@ -180,17 +192,20 @@ def main():
             log.info("Trailer not Found. Using 'Never Gonna Give You Up'.")
             trailer_link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab'
     except KeyError:
-        print("Trailer not Found. Using 'Never Gonna Give You Up'.")
+        log.info("Trailer not Found. Using 'Never Gonna Give You Up'.")
         trailer_link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab'
 
-    # API Used
-    api_used = mdblist_data['apiused']
-    log.info("API Used:" + str(api_used))
+    # Series Overview
+    with TorRequests() as tor_requests:
+        with tor_requests.get_session(retries=10) as sess:
+            series = ('https://api.themoviedb.org/3/tv/{}?api_key={}&language=en').format(tmdb_id,
+                                                                                          script_config.moviedb_key)
+            series_data = sess.get(series, headers=headers, timeout=60).json()
+            overview = series_data['overview']
 
     # Formatting Season and Episode
     if len(str(season)) == 1:
         season = '0{}'.format(season)
-
     if len(str(episode)) == 1:
         episode = '0{}'.format(episode)
 
@@ -280,7 +295,7 @@ def main():
                     },
                     {
                         "type": "mrkdwn",
-                        "text": "*View Details:*\n<{}|IMDb> | <{}|The TVDB> | <{}|TMDb> | <{}|Trakt> | <{}|TVmaze>".format(
+                        "text": "*View Details:*\n<{}|IMDb> | <{}|TVDb> | <{}|TMDb> | <{}|Trakt> | <{}|TVmaze>".format(
                             imdb_url,
                             tvdb_url,
                             tmdb_url,
@@ -326,11 +341,12 @@ def main():
         ]
     }
 
+    # Send notification
+    sender = requests.post(script_config.sonarr_slack_url, headers=slack_headers, json=message)
+
     # Logging
     log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
 
-    # Send notification
-    sender = requests.post(script_config.sonarr_slack_url, headers=slack_headers, json=message)
     if eventtype == "Test":
         print("Successfully sent test notification.")
     else:
