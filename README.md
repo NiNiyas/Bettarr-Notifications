@@ -25,7 +25,7 @@ I have tested it with v3.0.7.1477 of Sonarr and v4.0.5.5981 of Radarr. Might wor
 ### mdblist
 In order to get ratings, you should set your api key in `config.py` file in `addons` directory. This is optional.
 - Create your mdblist API key from [here](https://mdblist.com/). 
-- You will need a [Trakt](https://trakt.tv) account for this. This has a 100 calls per day limit unless you are a Patreon subscriber. Fill in `mdbapi`.
+- You will need a [Trakt](https://trakt.tv) account for this. This has a 1000 calls per day limit unless you are a Patreon subscriber. Fill in `mdbapi`.
 
 ### TMDB
 - To create TMDB API, check [here](https://www.themoviedb.org/settings/api). This has no known limit.
