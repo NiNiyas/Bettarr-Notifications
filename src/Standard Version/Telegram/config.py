@@ -10,12 +10,11 @@ error_channel = ""  # Optional
 silent = False  # True | False. Not in quotes.
 
 # Radarr
-radarr_url = "http://192.168.1.2:7878/"  # Make sure you include the trailing '/'. Required. Use actual IP instead of 'localhost'. See issue #1
+radarr_url = "http://192.168.1.2:7878/"  # Make sure you include the trailing '/'. Required. Use actual IP instead of 'localhost'.
 radarr_key = ""  # Required
 
 # Sonarr
-skyhook_url = "http://skyhook.sonarr.tv/v1/tvdb/shows/en/"  # No need to change this
-sonarr_url = "http://192.168.1.2:8989/"  # Make sure you include the trailing '/'. Required. Use actual IP instead of 'localhost'. See issue #1
+sonarr_url = "http://192.168.1.2:8989/"  # Make sure you include the trailing '/'. Required. Use actual IP instead of 'localhost'.
 
 # TMDb API
 moviedb_key = ""  # Required

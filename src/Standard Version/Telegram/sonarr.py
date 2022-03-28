@@ -5,13 +5,13 @@ import os
 import re
 import sys
 
-from helpers.size import convert_size
-from helpers import logging
 import requests
 
 import config
-from helpers import retry
 from addons import ratings_sonarr
+from helpers import log
+from helpers import retry
+from helpers.size import convert_size
 
 tg_url = 'https://api.telegram.org/bot{}/sendMessage'.format(config.sonarr_botid)
 tg_health = 'https://api.telegram.org/bot{}/sendMessage'.format(config.sonarr_error_botid)
@@ -26,7 +26,7 @@ def initialize():
     for variable in required_variables:
         if variable == "":
             print("Required variables not set.. Exiting!")
-            logging.log.error("Please set required variables in script_config.py")
+            log.log.error("Please set required variables in script_config.py")
             sys.exit(1)
         else:
             continue
@@ -41,17 +41,15 @@ def test_message():
     }
     sender = requests.post(tg_url, json=testmessage)
     if sender.status_code == 200:
-        print("Successfully sent test notification to Telegram.")
-        logging.log.info(json.dumps(testmessage, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.info("Successfully sent test notification to Telegram.")
         sys.exit(0)
     else:
-        print(
+        log.log.error(
             "Error occured when trying to send test notification to Telegram. Please open an issue with the below contents.")
-        print("-------------------------------------------------------")
-        print(sender.content)
-        logging.log.error(json.dumps(testmessage, sort_keys=True, indent=4, separators=(',', ': ')))
-        print("-------------------------------------------------------")
-        logging.log.info(json.dumps(testmessage, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
+        log.log.error(sender.content)
+        log.log.error(json.dumps(testmessage, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
         sys.exit(1)
 
 
@@ -187,7 +185,7 @@ def grab():
         for p in tmdbProviders["results"][country_code]['flatrate']:
             providers.append(p['provider_name'])
     except (KeyError, TypeError, IndexError):
-        logging.log.info("Couldn't fetch providers from TMDb. Defaulting to US")
+        log.log.info("Couldn't fetch providers from TMDb. Defaulting to US")
         try:
             for x in ratings_sonarr.mdblist_data['streams']:
                 stream = (x['name'])
@@ -205,7 +203,7 @@ def grab():
     try:
         trailer_link = ratings_sonarr.trailer
     except (KeyError, TypeError, IndexError):
-        logging.log.info("Trailer not Found. Using 'Never Gonna Give You Up'.")
+        log.log.info("Trailer not Found. Using 'Never Gonna Give You Up'.")
         trailer_link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab'
 
     # Series Overview
@@ -287,16 +285,14 @@ def grab():
     # Send notification
     sender = requests.post(tg_url, json=message)
     if sender.status_code == 200:
-        print("Successfully sent grab notification to Telegram.")
-        logging.log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.info("Successfully sent grab notification to Telegram.")
         sys.exit(0)
     else:
-        print(
+        log.log.error(
             "Error occured when trying to send grab notification to Telegram. Please open an issue with the below contents.")
-        print("-------------------------------------------------------")
-        print(sender.content)
-        print("-------------------------------------------------------")
-        logging.log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
+        log.log.error(sender.content)
+        log.log.error("-------------------------------------------------------")
         sys.exit(1)
 
 
@@ -375,7 +371,7 @@ def import_():
             overview = series_data['overview']
     except (KeyError, TypeError, IndexError):
         # Series Overview when Episode overview is not found
-        logging.log.info("Couldn't fetch episode overview. Falling back to series overview.")
+        log.log.info("Couldn't fetch episode overview. Falling back to series overview.")
         series = 'https://api.themoviedb.org/3/tv/{}?api_key={}&language=en'.format(tmdb_id,
                                                                                  config.moviedb_key)
         series_data = retry.requests_retry_session().get(series, timeout=20).json()
@@ -451,20 +447,17 @@ def import_():
         }
     }
 
-    # Send notification
     sender = requests.post(tg_url, json=message)
     if sender.status_code == 200:
-        print("Successfully sent import notification to Telegram.")
-        logging.log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.info("Successfully sent import notification to Telegram.")
         sys.exit(0)
     else:
-        print(
+        log.log.error(
             "Error occured when trying to send import notification to Telegram. Please open an issue with the below contents.")
-        print("-------------------------------------------------------")
-        print(sender.content)
-        logging.log.error(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
-        print("-------------------------------------------------------")
-        logging.log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
+        log.log.error(sender.content)
+        log.log.error(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
         sys.exit(1)
 
 
@@ -480,10 +473,11 @@ def health():
     message = {
         "chat_id": config.error_channel,
         "parse_mode": "HTML",
+        "disable_notification": config.silent,
         "text": "An error has occured on Sonarr"
-                "\n\n<b>Error Level</b> - {}"
-                "\n\n<b>Error Type</b> - {}"
-                "\n<b>Error Message</b> - {}".format(issue_level, issue_type, issue_message),
+                "\n\n<b>Error Level</b>: {}"
+                "\n<b>Error Type</b>: {}"
+                "\n<b>Error Message</b>: {}".format(issue_level, issue_type, issue_message),
         "reply_markup": {
             "inline_keyboard": [[
                 {
@@ -496,22 +490,249 @@ def health():
                 }]
             ]
         }
-
     }
 
     sender = requests.post(tg_health, json=message)
     if sender.status_code == 200:
-        print("Successfully sent health notification to Telegram.")
-        logging.log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.info("Successfully sent health notification to Telegram.")
         sys.exit(0)
     else:
-        print(
+        log.log.error(
             "Error occured when trying to send health notification to Telegram. Please open an issue with the below contents.")
-        print("-------------------------------------------------------")
-        print(sender.content)
-        logging.log.error(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
-        print("-------------------------------------------------------")
-        logging.log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
+        log.log.error(sender.content)
+        log.log.error(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
+        sys.exit(1)
+
+
+def delete_episode():
+    series_title = os.environ.get('sonarr_series_title')
+
+    tvdb_id = os.environ.get('sonarr_series_tvdbid')
+
+    imdb_id = os.environ.get('sonarr_series_imdbid')
+
+    episode_path = os.environ.get('sonarr_episodefile_path')
+
+    season = os.environ.get('sonarr_episodefile_seasonnumber')
+
+    air_date = os.environ.get('sonarr_episodefile_episodeairdatesutc')
+
+    quality = os.environ.get('sonarr_episodefile_quality')
+
+    episode_title = os.environ.get('sonarr_episodefile_episodetitles')
+
+    episode = os.environ.get('sonarr_episodefile_episodenumbers')
+
+    release_group = os.environ.get('sonarr_episodefile_releasegroup')
+    if release_group is None:
+        release_group = "Unknown"
+
+    scene_name = os.environ.get('sonarr_episodefile_scenename')
+    if scene_name is None:
+        scene_name = "Unknown"
+
+    # Formatting Season and Episode
+    if len(str(season)) == 1:
+        season = '0{}'.format(season)
+
+    if len(str(episode)) == 1:
+        episode = '0{}'.format(episode)
+
+    # TMDb ID
+    try:
+        tmdb = retry.requests_retry_session().get(
+            'https://api.themoviedb.org/3/find/{}?api_key={}&language=en&external_source=tvdb_id'.format(
+                tvdb_id,
+                config.moviedb_key), timeout=20).json()
+        tmdb_id = tmdb['tv_results'][0]['id']
+    except (KeyError, TypeError, IndexError):
+        tmdb = retry.requests_retry_session().get(
+            'https://api.themoviedb.org/3/find/{}?api_key={}&language=en&external_source=imdb_id'.format(
+                imdb_id,
+                config.moviedb_key)).json()
+        tmdb_id = tmdb['tv_results'][0]['id']
+
+    skyhook = retry.requests_retry_session().get('http://skyhook.sonarr.tv/v1/tvdb/shows/en/{}'.format(tvdb_id)).json()
+    title_slug = skyhook['slug']
+
+    tvdb_url = 'https://thetvdb.com/series/' + title_slug
+
+    try:
+        tvmaze_id = os.environ.get('sonarr_series_tvmazeid')
+    except (KeyError, TypeError, IndexError):
+        tvmaze_id = '82'
+
+    tvmaze_url = 'https://www.tvmaze.com/shows/' + str(tvmaze_id)
+
+    trakt_url = 'https://trakt.tv/search/tvdb/' + tvdb_id + '?id_type=show'
+
+    imdb_url = 'https://www.imdb.com/title/' + str(imdb_id)
+
+    tmdb_url = 'https://www.themoviedb.org/tv/' + str(tmdb_id)
+
+    message = {
+        "chat_id": config.chat_id,
+        "parse_mode": "HTML",
+        "disable_notification": config.silent,
+        "text": f"Deleted <b>{series_title}</b> - <b>S{season}E{episode}</b> - <b>{episode_title}</b>"
+                f"\n\n<b>Series name</b>: {series_title}"
+                f"\n<b>Episode name</b>: {episode_title}"
+                f"\n<b>Season no.</b>: {season}"
+                f"\n<b>Episode no.</b>: {episode}"
+                f"\n<b>Quality</b>: {quality}"
+                f"\n<b>Release Group</b>: {release_group}"
+                f"\n<b>File name</b>: {scene_name}"
+                f"\n<b>File location</b>: {episode_path}"
+                f"\n<b>Aired on</b>: {air_date} UTC"
+                f"\n<b>View Details</b>: <a href={imdb_url}>IMDb</a> | <a href={tvdb_url}>TheTVDB</a> | <a href={tmdb_url}>TMDB</a> | <a href={trakt_url}>Trakt</a>| <a href={tvmaze_url}>TVmaze</a>",
+        "reply_markup": {
+            "inline_keyboard": [[
+                {
+                    "text": "Visit Sonarr",
+                    "url": config.sonarr_url
+                }]
+            ]
+        }
+    }
+
+    sender = requests.post(tg_url, json=message)
+    if sender.status_code == 200:
+        log.log.info("Successfully sent episode deleted notification to Telegram.")
+        sys.exit(0)
+    else:
+        log.log.error(
+            "Error occured when trying to send episode deleted notification to Telegram. Please open an issue with the below contents.")
+        log.log.error("-------------------------------------------------------")
+        log.log.error(sender.content)
+        log.log.error(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
+        sys.exit(1)
+
+
+def series_delete():
+    series_title = os.environ.get('sonarr_series_title')
+
+    tvdb_id = os.environ.get('sonarr_series_tvdbid')
+
+    imdb_id = os.environ.get('sonarr_series_imdbid')
+
+    deleted_files = os.environ.get('Sonarr_Series_DeletedFiles')
+    if deleted_files == "False":
+        deleted_files = "None"
+
+    if len(deleted_files) >= 150:
+        deleted_files = deleted_files[:100]
+        deleted_files += '...'
+
+    path = os.environ.get('Sonarr_Series_Path')
+
+    # TMDb ID
+    try:
+        tmdb = retry.requests_retry_session().get(
+            'https://api.themoviedb.org/3/find/{}?api_key={}&language=en&external_source=tvdb_id'.format(
+                tvdb_id,
+                config.moviedb_key), timeout=20).json()
+        tmdb_id = tmdb['tv_results'][0]['id']
+    except (KeyError, TypeError, IndexError):
+        tmdb = retry.requests_retry_session().get(
+            'https://api.themoviedb.org/3/find/{}?api_key={}&language=en&external_source=imdb_id'.format(
+                imdb_id,
+                config.moviedb_key)).json()
+        tmdb_id = tmdb['tv_results'][0]['id']
+
+    skyhook = retry.requests_retry_session().get('http://skyhook.sonarr.tv/v1/tvdb/shows/en/{}'.format(tvdb_id)).json()
+    title_slug = skyhook['slug']
+
+    tvdb_url = 'https://thetvdb.com/series/' + title_slug
+
+    try:
+        tvmaze_id = os.environ.get('sonarr_series_tvmazeid')
+    except (KeyError, TypeError, IndexError):
+        tvmaze_id = '82'
+
+    tvmaze_url = 'https://www.tvmaze.com/shows/' + str(tvmaze_id)
+
+    trakt_url = 'https://trakt.tv/search/tvdb/' + tvdb_id + '?id_type=show'
+
+    imdb_url = 'https://www.imdb.com/title/' + str(imdb_id)
+
+    tmdb_url = 'https://www.themoviedb.org/tv/' + str(tmdb_id)
+
+    message = {
+        "chat_id": config.chat_id,
+        "parse_mode": "HTML",
+        "disable_notification": config.silent,
+        "text": f"Deleted <b>{series_title}</b> from Sonarr."
+                f"\n\n<b>Series name</b>: {series_title}"
+                f"\n<b>Files</b>: {deleted_files}"
+                f"\n<b>Path</b>: {path}"
+                f"\n<b>View Details</b>: <a href={imdb_url}>IMDb</a> | <a href={tvdb_url}>TheTVDB</a> | <a href={tmdb_url}>TMDB</a> | <a href={trakt_url}>Trakt</a>| <a href={tvmaze_url}>TVmaze</a>",
+        "reply_markup": {
+            "inline_keyboard": [[
+                {
+                    "text": "Visit Sonarr",
+                    "url": config.sonarr_url
+                }]
+            ]
+        }
+    }
+
+    sender = requests.post(tg_url, json=message)
+    if sender.status_code == 200:
+        log.log.info("Successfully sent series deleted notification to Telegram.")
+        sys.exit(0)
+    else:
+        log.log.error(
+            "Error occured when trying to send series deleted notification to Telegram. Please open an issue with the below contents.")
+        log.log.error("-------------------------------------------------------")
+        log.log.error(sender.content)
+        log.log.error(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
+        sys.exit(1)
+
+
+def app_update():
+    update_message = os.environ.get('Sonarr_Update_Message')
+
+    if len(update_message) >= 250:
+        update_message = update_message[:200]
+        update_message += '...'
+
+    new_version = os.environ.get('Sonarr_Update_NewVersion')
+
+    old_version = os.environ.get('Sonarr_Update_PreviousVersion')
+
+    message = {
+        "chat_id": config.chat_id,
+        "parse_mode": "HTML",
+        "disable_notification": config.silent,
+        "text": f"A new update `({new_version})` is available for Sonarr."
+                f"\n\n<b>Notes</b>: {update_message}"
+                f"\n\n<b>New version</b>: {new_version}"
+                f"\n<b>Old version</b>: {old_version}",
+        "reply_markup": {
+            "inline_keyboard": [[
+                {
+                    "text": "Visit Sonarr",
+                    "url": config.sonarr_url
+                }]
+            ]
+        }
+    }
+
+    sender = requests.post(tg_url, json=message)
+    if sender.status_code == 200:
+        log.log.info("Successfully sent application update notification to Telegram.")
+        sys.exit(0)
+    else:
+        log.log.error(
+            "Error occured when trying to send application update notification to Telegram. Please open an issue with the below contents.")
+        log.log.error("-------------------------------------------------------")
+        log.log.error(sender.content)
+        log.log.error(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
         sys.exit(1)
 
 
@@ -530,3 +751,15 @@ if eventtype == "Download":
 if eventtype == "HealthIssue":
     initialize()
     health()
+
+if eventtype == "EpisodeFileDelete":
+    initialize()
+    delete_episode()
+
+if eventtype == "ApplicationUpdate":
+    initialize()
+    app_update()
+
+if eventtype == "SeriesDelete":
+    initialize()
+    series_delete()

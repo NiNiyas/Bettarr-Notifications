@@ -3,18 +3,18 @@
 import datetime
 import json
 import os
+import random
 import re
 import sys
-import random
 
-from helpers.size import convert_size
-from helpers import logging
 import requests
 
 import config
-from helpers import retry
 from addons import ratings_sonarr
 from helpers import colors
+from helpers import log
+from helpers import retry
+from helpers.size import convert_size
 
 discord_headers = {'content-type': 'application/json'}
 
@@ -27,7 +27,7 @@ def initialize():
     for variable in required_variables:
         if variable == "":
             print("Required variables not set.. Exiting!")
-            logging.log.error("Please set required variables in script_config.py")
+            log.log.error("Please set required variables in script_config.py")
             sys.exit(1)
         else:
             continue
@@ -43,18 +43,17 @@ def test_message():
         'content': '**Bettarr Notification for Discord Sonarr AIO test message.\nThank you for using the script!**'}
     sender = requests.post(config.sonarr_discord_url, headers=discord_headers, json=testmessage)
     if sender.status_code == 204:
-        print("Successfully sent test notification to Discord.")
-        logging.log.error(json.dumps(testmessage, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.info("Successfully sent test notification to Discord.")
         sys.exit(0)
     else:
-        print(
+        log.log.error(
             "Error occured when trying to send test notification to Discord. Please open an issue with the below contents.")
-        print("-------------------------------------------------------")
-        print(sender.content)
-        logging.log.error(json.dumps(testmessage, sort_keys=True, indent=4, separators=(',', ': ')))
-        print("-------------------------------------------------------")
-        logging.log.info(json.dumps(testmessage, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
+        log.log.error(sender.content)
+        log.log.error(json.dumps(testmessage, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
         sys.exit(1)
+
 
 def grab():
     imdb_id = os.environ.get('sonarr_series_imdbid')
@@ -183,12 +182,12 @@ def grab():
     try:
         justwatch = retry.requests_retry_session().get(
             'https://api.themoviedb.org/3/tv/{}/watch/providers?api_key={}'.format(tmdb_id,
-                                                                                   config.moviedb_key))
+                                                                                config.moviedb_key))
         tmdbProviders = justwatch.json()
         for p in tmdbProviders["results"][country_code]['flatrate']:
             providers.append(p['provider_name'])
     except (KeyError, TypeError, IndexError):
-        logging.log.info("Couldn't fetch providers from TMDb. Defaulting to US")
+        log.log.info("Couldn't fetch providers from TMDb. Defaulting to US")
         try:
             for x in ratings_sonarr.mdblist_data['streams']:
                 stream = (x['name'])
@@ -206,13 +205,13 @@ def grab():
     try:
         trailer_link = ratings_sonarr.trailer
     except (KeyError, TypeError, IndexError):
-        logging.log.info("Trailer not Found. Using 'Never Gonna Give You Up'.")
+        log.log.info("Trailer not Found. Using 'Never Gonna Give You Up'.")
         trailer_link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab'
 
     # Series Overview
     series = retry.requests_retry_session().get(
         'https://api.themoviedb.org/3/tv/{}?api_key={}&language=en'.format(tmdb_id,
-                                                                           config.moviedb_key),
+                                                                        config.moviedb_key),
         timeout=20).json()
     overview = series['overview']
 
@@ -298,7 +297,7 @@ def grab():
                         "inline": False
                     },
                     {
-                        "name": "Direcor(s)",
+                        "name": "Director(s)",
                         "value": directors,
                         "inline": False
                     },
@@ -330,17 +329,15 @@ def grab():
     # Send notification
     sender = requests.post(config.sonarr_discord_url, headers=discord_headers, json=message)
     if sender.status_code == 204:
-        print("Successfully sent grab notification to Discord.")
-        logging.log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.info("Successfully sent grab notification to Discord.")
         sys.exit(0)
     else:
-        print(
+        log.log.error(
             "Error occured when trying to send grab notification to Discord. Please open an issue with the below contents.")
-        print("-------------------------------------------------------")
-        print(sender.content)
-        logging.log.error(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
-        print("-------------------------------------------------------")
-        logging.log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
+        log.log.error(sender.content)
+        log.log.error(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
         sys.exit(1)
 
 
@@ -386,7 +383,7 @@ def import_():
     # Thumbnail
     try:
         thumbnail_url = 'https://api.themoviedb.org/3/tv/{}/images?api_key={}&language=en'.format(tmdb_id,
-                                                                                                  config.moviedb_key)
+                                                                                               config.moviedb_key)
         thumbnail_data = retry.requests_retry_session().get(thumbnail_url, timeout=20).json()
         thumbnail = thumbnail_data['posters'][0]['file_path']
         thumbnail = 'https://image.tmdb.org/t/p/original' + thumbnail
@@ -400,8 +397,8 @@ def import_():
     try:
         episode_data = retry.requests_retry_session().get(
             'https://api.themoviedb.org/3/tv/{}/season/{}/episode/{}/images?api_key={}'.format(tmdb_id, season,
-                                                                                               episode,
-                                                                                               config.moviedb_key),
+                                                                                            episode,
+                                                                                            config.moviedb_key),
             timeout=20).json()
         sample = episode_data['stills'][0]['file_path']
         sample = 'https://image.tmdb.org/t/p/original' + sample
@@ -409,7 +406,7 @@ def import_():
         try:
             sp = retry.requests_retry_session().get(
                 'https://api.themoviedb.org/3/tv/{}/images?api_key={}&language=en'.format(tmdb_id,
-                                                                                          config.moviedb_key),
+                                                                                       config.moviedb_key),
                 timeout=20).json()
             poster = sp['posters'][0]['file_path']
             sample = 'https://image.tmdb.org/t/p/original' + poster
@@ -427,14 +424,14 @@ def import_():
         overview = episode_data['overview']
         if overview == "":
             series = 'https://api.themoviedb.org/3/tv/{}?api_key={}&language=en'.format(tmdb_id,
-                                                                                        config.moviedb_key)
+                                                                                     config.moviedb_key)
             series_data = retry.requests_retry_session().get(series, timeout=20).json()
             overview = series_data['overview']
     except (KeyError, TypeError, IndexError):
         # Series Overview when Episode overview is not found
-        logging.log.info("Couldn't fetch episode overview. Falling back to series overview.")
+        log.log.info("Couldn't fetch episode overview. Falling back to series overview.")
         series = 'https://api.themoviedb.org/3/tv/{}?api_key={}&language=en'.format(tmdb_id,
-                                                                                    config.moviedb_key)
+                                                                                 config.moviedb_key)
         series_data = retry.requests_retry_session().get(series, timeout=20).json()
         overview = series_data['overview']
 
@@ -537,17 +534,15 @@ def import_():
     # Send notification
     sender = requests.post(config.sonarr_discord_url, headers=discord_headers, json=message)
     if sender.status_code == 204:
-        print("Successfully sent import notification to Discord.")
-        logging.log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.info("Successfully sent import notification to Discord.")
         sys.exit(0)
     else:
-        print(
+        log.log.error(
             "Error occured when trying to send import notification to Discord. Please open an issue with the below contents.")
-        print("-------------------------------------------------------")
-        print(sender.content)
-        logging.log.error(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
-        print("-------------------------------------------------------")
-        logging.log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
+        log.log.error(sender.content)
+        log.log.error(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
         sys.exit(1)
 
 
@@ -609,18 +604,343 @@ def health():
 
     sender = requests.post(config.sonarr_health_url, headers=discord_headers, json=message)
     if sender.status_code == 204:
-        print("Successfully sent health notification to Discord.")
-        logging.log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.info("Successfully sent health notification to Discord.")
         sys.exit(0)
     else:
-        print(
+        log.log.error(
             "Error occured when trying to send health notification to Discord. Please open an issue with the below contents.")
-        print("-------------------------------------------------------")
-        print(sender.content)
-        logging.log.error(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
-        print("-------------------------------------------------------")
-        logging.log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
+        log.log.error(sender.content)
+        log.log.error(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
         sys.exit(1)
+
+
+def delete_episode():
+    series_title = os.environ.get('sonarr_series_title')
+
+    tvdb_id = os.environ.get('sonarr_series_tvdbid')
+
+    imdb_id = os.environ.get('sonarr_series_imdbid')
+
+    episode_path = os.environ.get('sonarr_episodefile_path')
+
+    season = os.environ.get('sonarr_episodefile_seasonnumber')
+
+    air_date = os.environ.get('sonarr_episodefile_episodeairdatesutc')
+
+    quality = os.environ.get('sonarr_episodefile_quality')
+
+    episode_title = os.environ.get('sonarr_episodefile_episodetitles')
+
+    episode = os.environ.get('sonarr_episodefile_episodenumbers')
+
+    release_group = os.environ.get('sonarr_episodefile_releasegroup')
+    if release_group is None:
+        release_group = "Unknown"
+
+    scene_name = os.environ.get('sonarr_episodefile_scenename')
+    if scene_name is None:
+        scene_name = "Unknown"
+
+    # Formatting Season and Episode
+    if len(str(season)) == 1:
+        season = '0{}'.format(season)
+
+    if len(str(episode)) == 1:
+        episode = '0{}'.format(episode)
+
+    # TMDb ID
+    try:
+        tmdb = retry.requests_retry_session().get(
+            'https://api.themoviedb.org/3/find/{}?api_key={}&language=en&external_source=tvdb_id'.format(
+                tvdb_id,
+                config.moviedb_key), timeout=20).json()
+        tmdb_id = tmdb['tv_results'][0]['id']
+    except (KeyError, TypeError, IndexError):
+        tmdb = retry.requests_retry_session().get(
+            'https://api.themoviedb.org/3/find/{}?api_key={}&language=en&external_source=imdb_id'.format(
+                imdb_id,
+                config.moviedb_key)).json()
+        tmdb_id = tmdb['tv_results'][0]['id']
+
+    skyhook = retry.requests_retry_session().get('http://skyhook.sonarr.tv/v1/tvdb/shows/en/{}'.format(tvdb_id)).json()
+    title_slug = skyhook['slug']
+
+    tvdb_url = 'https://thetvdb.com/series/' + title_slug
+
+    try:
+        tvmaze_id = os.environ.get('sonarr_series_tvmazeid')
+    except (KeyError, TypeError, IndexError):
+        tvmaze_id = '82'
+
+    tvmaze_url = 'https://www.tvmaze.com/shows/' + str(tvmaze_id)
+
+    trakt_url = 'https://trakt.tv/search/tvdb/' + tvdb_id + '?id_type=show'
+
+    imdb_url = 'https://www.imdb.com/title/' + str(imdb_id)
+
+    tmdb_url = 'https://www.themoviedb.org/tv/' + str(tmdb_id)
+
+    message = {
+        'username': config.sonarr_discord_user,
+        'content': f"Deleted **{series_title}** - **S{season}E{episode}** - **{episode_title}**",
+        'embeds': [
+            {
+                'author': {
+                    'name': config.sonarr_discord_user,
+                    'url': config.sonarr_url,
+                    'icon_url': config.sonarr_icon
+                },
+                "footer": {
+                    "icon_url": config.sonarr_icon,
+                    "text": "Sonarr"
+                },
+                'timestamp': utc_now_iso(),
+                'title': f"Deleted **{series_title}** - **S{season}E{episode}** - **{episode_title}**",
+                'description': f"**File location**\n```{episode_path}```",
+                'color': random.choice(colors.colors),
+                'fields': [
+                    {
+                        "name": 'Series name',
+                        "value": series_title,
+                        "inline": False
+                    },
+                    {
+                        "name": 'Episode name',
+                        "value": episode_title,
+                        "inline": False
+                    },
+                    {
+                        "name": 'Season no.',
+                        "value": season,
+                        "inline": True
+                    },
+                    {
+                        "name": 'Episode no.',
+                        "value": episode,
+                        "inline": True
+                    },
+                    {
+                        "name": 'Quality',
+                        "value": quality,
+                        "inline": True
+                    },
+                    {
+                        "name": 'Release Group',
+                        "value": release_group,
+                        "inline": False
+                    },
+                    {
+                        "name": 'File name',
+                        "value": scene_name,
+                        "inline": False
+                    },
+                    {
+                        "name": 'Aired on',
+                        "value": f'{air_date} UTC',
+                        "inline": False
+                    },
+                    {
+                        "name": "View Details",
+                        "value": "[IMDb]({}) | [TheTVDB]({}) | [TMDB]({}) | [Trakt]({}) | [TVmaze]({})".format(
+                            imdb_url,
+                            tvdb_url,
+                            tmdb_url,
+                            trakt_url,
+                            tvmaze_url),
+                        "inline": False
+                    },
+                    {
+                        "name": 'Visit Sonarr',
+                        "value": '[{}]({})'.format("Sonarr", config.sonarr_url),
+                        "inline": False
+                    },
+                ],
+            },
+        ]
+    }
+
+    sender = requests.post(config.sonarr_discord_url, headers=discord_headers, json=message)
+    if sender.status_code == 204:
+        log.log.info("Successfully sent episode deleted notification to Discord.")
+        sys.exit(0)
+    else:
+        log.log.error(
+            "Error occured when trying to send episode deleted notification to Discord. Please open an issue with the below contents.")
+        log.log.error("-------------------------------------------------------")
+        log.log.error(sender.content)
+        log.log.error(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
+        sys.exit(1)
+
+
+def series_delete():
+    series_title = os.environ.get('sonarr_series_title')
+
+    tvdb_id = os.environ.get('sonarr_series_tvdbid')
+
+    imdb_id = os.environ.get('sonarr_series_imdbid')
+
+    deleted_files = os.environ.get('Sonarr_Series_DeletedFiles')
+    if deleted_files == "False":
+        deleted_files = "None"
+
+    path = os.environ.get('Sonarr_Series_Path')
+
+    # TMDb ID
+    try:
+        tmdb = retry.requests_retry_session().get(
+            'https://api.themoviedb.org/3/find/{}?api_key={}&language=en&external_source=tvdb_id'.format(
+                tvdb_id,
+                config.moviedb_key), timeout=20).json()
+        tmdb_id = tmdb['tv_results'][0]['id']
+    except (KeyError, TypeError, IndexError):
+        tmdb = retry.requests_retry_session().get(
+            'https://api.themoviedb.org/3/find/{}?api_key={}&language=en&external_source=imdb_id'.format(
+                imdb_id,
+                config.moviedb_key)).json()
+        tmdb_id = tmdb['tv_results'][0]['id']
+
+    skyhook = retry.requests_retry_session().get('http://skyhook.sonarr.tv/v1/tvdb/shows/en/{}'.format(tvdb_id)).json()
+    title_slug = skyhook['slug']
+
+    tvdb_url = 'https://thetvdb.com/series/' + title_slug
+
+    try:
+        tvmaze_id = os.environ.get('sonarr_series_tvmazeid')
+    except (KeyError, TypeError, IndexError):
+        tvmaze_id = '82'
+
+    tvmaze_url = 'https://www.tvmaze.com/shows/' + str(tvmaze_id)
+
+    trakt_url = 'https://trakt.tv/search/tvdb/' + tvdb_id + '?id_type=show'
+
+    imdb_url = 'https://www.imdb.com/title/' + str(imdb_id)
+
+    tmdb_url = 'https://www.themoviedb.org/tv/' + str(tmdb_id)
+
+    message = {
+        'username': config.sonarr_discord_user,
+        'content': f"Deleted **{series_title}** from Sonarr.",
+        'embeds': [
+            {
+                'author': {
+                    'name': config.sonarr_discord_user,
+                    'url': config.sonarr_url,
+                    'icon_url': config.sonarr_icon
+                },
+                "footer": {
+                    "icon_url": config.sonarr_icon,
+                    "text": "Sonarr"
+                },
+                'timestamp': utc_now_iso(),
+                'title': f"Deleted `{series_title} from Sonarr.`",
+                'description': f"**Files**\n```{deleted_files}```",
+                'color': random.choice(colors.colors),
+                'fields': [
+                    {
+                        "name": 'Series name',
+                        "value": series_title,
+                        "inline": False
+                    },
+                    {
+                        "name": 'Path',
+                        "value": path,
+                        "inline": False
+                    },
+                    {
+                        "name": "View Details",
+                        "value": "[IMDb]({}) | [TheTVDB]({}) | [TMDB]({}) | [Trakt]({}) | [TVmaze]({})".format(
+                            imdb_url,
+                            tvdb_url,
+                            tmdb_url,
+                            trakt_url,
+                            tvmaze_url),
+                        "inline": False
+                    },
+                    {
+                        "name": 'Visit Sonarr',
+                        "value": '[{}]({})'.format("Sonarr", config.sonarr_url),
+                        "inline": False
+                    },
+                ],
+            },
+        ]
+    }
+
+    sender = requests.post(config.sonarr_discord_url, headers=discord_headers, json=message)
+    if sender.status_code == 204:
+        log.log.info("Successfully sent series deleted notification to Discord.")
+        sys.exit(0)
+    else:
+        log.log.error(
+            "Error occured when trying to send series deleted notification to Discord. Please open an issue with the below contents.")
+        log.log.error("-------------------------------------------------------")
+        log.log.error(sender.content)
+        log.log.error(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
+        sys.exit(1)
+
+
+def app_update():
+    update_message = os.environ.get('Sonarr_Update_Message')
+
+    if len(update_message) >= 250:
+        update_message = update_message[:200]
+        update_message += '...'
+
+    new_version = os.environ.get('Sonarr_Update_NewVersion')
+
+    old_version = os.environ.get('Sonarr_Update_PreviousVersion')
+
+    message = {
+        'username': config.sonarr_discord_user,
+        'content': f"A new update `({new_version})` is available for Sonarr.",
+        'embeds': [
+            {
+                'author': {
+                    'name': config.sonarr_discord_user,
+                    'url': config.sonarr_url,
+                    'icon_url': config.sonarr_icon
+                },
+                "footer": {
+                    "icon_url": config.sonarr_icon,
+                    "text": "Sonarr"
+                },
+                'timestamp': utc_now_iso(),
+                'title': f"A new update `({new_version})` is available for Sonarr.",
+                'description': f"**Notes**\n```{update_message}```",
+                'color': random.choice(colors.colors),
+                'fields': [
+                    {
+                        "name": 'New version',
+                        "value": new_version,
+                        "inline": False
+                    },
+                    {
+                        "name": 'Old version',
+                        "value": old_version,
+                        "inline": False
+                    },
+                ],
+            },
+        ]
+    }
+
+    sender = requests.post(config.sonarr_discord_url, headers=discord_headers, json=message)
+    if sender.status_code == 204:
+        log.log.info("Successfully sent application update notification to Discord.")
+        sys.exit(0)
+    else:
+        log.log.error(
+            "Error occured when trying to send application update notification to Discord. Please open an issue with the below contents.")
+        log.log.error("-------------------------------------------------------")
+        log.log.error(sender.content)
+        log.log.error(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
+        sys.exit(1)
+
 
 if eventtype == "Test":
     initialize()
@@ -637,3 +957,15 @@ if eventtype == "Download":
 if eventtype == "HealthIssue":
     initialize()
     health()
+
+if eventtype == "EpisodeFileDelete":
+    initialize()
+    delete_episode()
+
+if eventtype == "ApplicationUpdate":
+    initialize()
+    app_update()
+
+if eventtype == "SeriesDelete":
+    initialize()
+    series_delete()

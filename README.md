@@ -9,7 +9,8 @@ I have tested it with v3.0.7.1477 of Sonarr and v4.0.5.5981 of Radarr. Might wor
 - Clone the repo.
 - Extract and cd to the folder. Install requirements using `pip install -r requirements.txt`.
 - On Sonarr and/or Radarr, add a custom script in `Settings -> Connect`.
-- Notification triggers: `On Grab`, `On Import`, `On Upgrade`, `On Health Issue`, `Include Health Warnings`.
+- Sonarr notification triggers: `On Grab`, `On Import`, `On Upgrade`, `On Health Issue`, `Include Health Warnings`, `On Series Delete`, `On Episode File Delete`, `On Episode File Delete For Upgrade`, `On Application Update`.
+- Radarr notification triggers: `On Grab`, `On Import`, `On Upgrade`, `On Health Issue`, `Include Health Warnings`.
 - `On Health Issue`, `Include Health Warnings` is optional.
 
 ## Docker Installation
@@ -22,15 +23,15 @@ I have tested it with v3.0.7.1477 of Sonarr and v4.0.5.5981 of Radarr. Might wor
 
 # APIs
 
-### mdblist
-In order to get ratings, you should set your api key in `config.py` file in `addons` directory. This is optional.
-- Create your mdblist API key from [here](https://mdblist.com/). 
-- You will need a [Trakt](https://trakt.tv) account for this. This has a 1000 calls per day limit unless you are a Patreon subscriber. Fill in `mdbapi`.
-
-### TMDB
+### TMDB (Required)
 - To create TMDB API, check [here](https://www.themoviedb.org/settings/api). This has no known limit.
 - Fill in the `moviedb_key` in `config.py` in all notifier folders you use.
 - If you need the JustWatch providers for you country, fill in the `tmdb_country`. For country codes, see [here](https://www.justwatch.com/), scroll down to the very bottom of the page.
+
+### mdblist (Optional)
+In order to get ratings, you should set your api key in `config.py` file in `addons` directory. This is optional.
+- Create your mdblist API key from [here](https://mdblist.com/). 
+- You will need a [Trakt](https://trakt.tv) account for this. This has a 100 calls per day limit unless you are a Patreon subscriber. Fill in `mdbapi`.
 
 # Notifiers
 
@@ -60,7 +61,8 @@ In order to get ratings, you should set your api key in `config.py` file in `add
 - Emergency priority (2) has default 30 second timeout between retries and will expire after 1 hour.
 
 ## Samples
-Some samples are outdated. I will update them when I have free time.
+Discord, Slack and Telegram samples are outdated.
+
 ##### Discord
 [Radarr Grab](https://user-images.githubusercontent.com/54862871/105728794-8ea3f980-5f52-11eb-86d1-fbd2b02da663.jpg "Radarr Grab - Discord")\
 [Radarr Import](https://user-images.githubusercontent.com/54862871/105728796-8f3c9000-5f52-11eb-90b0-ffe0e23d24ee.jpg "Radarr Import - Discord")\

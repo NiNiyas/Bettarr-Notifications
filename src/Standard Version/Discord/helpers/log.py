@@ -10,7 +10,7 @@ log_filename = os.path.join(os.path.dirname(sys.argv[0]), 'Logs/aio.log')
 log = logging.getLogger('AIO - Discord')
 logging.basicConfig(
     filename=log_filename,
-    level=logging.ERROR,
+    level=logging.DEBUG,
     format='[%(asctime)s]-[%(name)s] - %(levelname)s - %(message)s',
     datefmt='%d-%b-%y %H:%M:%S'
 )

@@ -16,3 +16,6 @@ radarr_key = ""  # Required
 # TMDb API
 moviedb_key = ""  # Required
 tmdb_country = "US"  # Optional
+
+# Sonarr
+sonarr_url = "http://192.168.1.2:8989/"  # Make sure you include the trailing '/'. Required

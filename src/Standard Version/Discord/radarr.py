@@ -3,17 +3,17 @@
 import datetime
 import json
 import os
-import sys
 import random
+import sys
 
-from helpers.size import convert_size
-from helpers import logging
 import requests
 
 import config
-from helpers import retry
 from addons import ratings_radarr
 from helpers import colors
+from helpers import log
+from helpers import retry
+from helpers.size import convert_size
 
 discord_headers = {'content-type': 'application/json'}
 
@@ -26,7 +26,7 @@ def initialize():
     for variable in required_variables:
         if variable == "":
             print("Required variables not set.. Exiting!")
-            logging.log.error("Please set required variables in script_config.py")
+            log.log.error("Please set required variables in script_config.py")
             sys.exit(1)
         else:
             continue
@@ -42,17 +42,16 @@ def test_message():
         'content': '**Bettarr Notification for Discord Radarr AIO test message.\nThank you for using the script!**'}
     sender = requests.post(config.radarr_discord_url, headers=discord_headers, json=testmessage)
     if sender.status_code == 204:
-        print("Successfully sent test notification to Discord.")
-        logging.log.info(json.dumps(testmessage, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.info("Successfully sent test notification to Discord.")
         sys.exit(0)
     else:
-        print(
+        log.log.error(
             "Error occured when trying to send test notification to Discord. Please open an issue with the below contents.")
-        print("-------------------------------------------------------")
-        print(sender.content)
-        logging.log.error(json.dumps(testmessage, sort_keys=True, indent=4, separators=(',', ': ')))
-        print("-------------------------------------------------------")
-        logging.log.info(json.dumps(testmessage, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
+        log.log.error(sender.content)
+        log.log.error(json.dumps(testmessage, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
+        log.log.info(json.dumps(testmessage, sort_keys=True, indent=4, separators=(',', ': ')))
         sys.exit(1)
 
 
@@ -96,7 +95,7 @@ def grab():
     try:
         trailer_link = 'https://www.youtube.com/watch?v={}'.format(radarr['youTubeTrailerId'])
     except (KeyError, TypeError, IndexError):
-        logging.log.info("Trailer not Found. Using 'Never Gonna Give You Up'.")
+        log.log.info("Trailer not Found. Using 'Never Gonna Give You Up'.")
         trailer_link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab'
 
     # Overview
@@ -160,13 +159,13 @@ def grab():
             providers.append(p['provider_name'])
     except (KeyError, TypeError, IndexError):
         country_code = "US"
-        logging.log.info("Couldn't fetch providers from TMDb. Defaulting to US. Fetching from mdblist.")
+        log.log.info("Couldn't fetch providers from TMDb. Defaulting to US. Fetching from mdblist.")
         try:
             for x in ratings_radarr.mdblist_data['streams']:
                 stream = (x['name'])
                 providers.append(stream)
         except (KeyError, TypeError, IndexError):
-            logging.log.info("Error fetching stream data from mdblist.")
+            log.log.info("Error fetching stream data from mdblist.")
             stream = "None"
             providers.append(stream)
 
@@ -285,17 +284,15 @@ def grab():
     # Send notification
     sender = requests.post(config.radarr_discord_url, headers=discord_headers, json=message, timeout=60)
     if sender.status_code == 204:
-        print("Successfully sent grab notification to Discord.")
-        logging.log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.info("Successfully sent grab notification to Discord.")
         sys.exit(0)
     else:
-        print(
+        log.log.error(
             "Error occured when trying to send grab notification to Discord. Please open an issue with the below contents.")
-        print("-------------------------------------------------------")
-        print(sender.content)
-        logging.log.error(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
-        print("-------------------------------------------------------")
-        logging.log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
+        log.log.error(sender.content)
+        log.log.error(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
         sys.exit(1)
 
 
@@ -322,7 +319,7 @@ def import_():
     try:
         trailer_link = 'https://www.youtube.com/watch?v={}'.format(radarr['youTubeTrailerId'])
     except (KeyError, TypeError, IndexError):
-        logging.log.info("Trailer not Found. Using 'Never Gonna Give You Up'.")
+        log.log.info("Trailer not Found. Using 'Never Gonna Give You Up'.")
         trailer_link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab'
 
     # Overview
@@ -379,7 +376,7 @@ def import_():
         try:
             banner = 'https://image.tmdb.org/t/p/original' + banner_url
         except (KeyError, TypeError, IndexError):
-            logging.log.info("Error retrieving backdrop. Defaulting to generic banner.")
+            log.log.info("Error retrieving backdrop. Defaulting to generic banner.")
             banner = 'https://i.imgur.com/IMQb6ia.png'
 
     # Upgrade
@@ -449,17 +446,15 @@ def import_():
     # Send notification
     sender = requests.post(config.radarr_discord_url, headers=discord_headers, json=message)
     if sender.status_code == 204:
-        print("Successfully sent import notification to Discord.")
-        logging.log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.info("Successfully sent import notification to Discord.")
         sys.exit(0)
     else:
-        print(
+        log.log.error(
             "Error occured when trying to send import notification to Discord. Please open an issue with the below contents.")
-        print("-------------------------------------------------------")
-        print(sender.content)
-        logging.log.error(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
-        print("-------------------------------------------------------")
-        logging.log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
+        log.log.error(sender.content)
+        log.log.error(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
         sys.exit(1)
 
 
@@ -521,17 +516,15 @@ def health():
 
     sender = requests.post(config.radarr_health_url, headers=discord_headers, json=message)
     if sender.status_code == 204:
-        print("Successfully sent health notification to Discord.")
-        logging.log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.info("Successfully sent health notification to Discord.")
         sys.exit(0)
     else:
-        print(
+        log.log.error(
             "Error occured when trying to send health notification to Discord. Please open an issue with the below contents.")
-        print("-------------------------------------------------------")
-        print(sender.content)
-        logging.log.error(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
-        print("-------------------------------------------------------")
-        logging.log.info(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
+        log.log.error(sender.content)
+        log.log.error(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+        log.log.error("-------------------------------------------------------")
         sys.exit(1)
 
 
