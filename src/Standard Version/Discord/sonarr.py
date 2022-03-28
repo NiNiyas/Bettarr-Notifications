@@ -787,6 +787,8 @@ def series_delete():
         deleted_files = "None"
 
     path = os.environ.get('Sonarr_Series_Path')
+    if path is None:
+        path = "None"
 
     # TMDb ID
     try:
@@ -835,7 +837,7 @@ def series_delete():
                     "text": "Sonarr"
                 },
                 'timestamp': utc_now_iso(),
-                'title': f"Deleted `{series_title} from Sonarr.`",
+                'title': f"Deleted `{series_title}` from Sonarr.",
                 'description': f"**Files**\n```{deleted_files}```",
                 'color': random.choice(colors.colors),
                 'fields': [

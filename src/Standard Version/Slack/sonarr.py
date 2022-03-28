@@ -880,6 +880,8 @@ def series_delete():
         deleted_files = "None"
 
     path = os.environ.get('Sonarr_Series_Path')
+    if path is None:
+        path = "None"
 
     # TMDb ID
     try:

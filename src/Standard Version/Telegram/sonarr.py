@@ -586,7 +586,7 @@ def delete_episode():
                 f"\n<b>File name</b>: {scene_name}"
                 f"\n<b>File location</b>: {episode_path}"
                 f"\n<b>Aired on</b>: {air_date} UTC"
-                f"\n<b>View Details</b>: <a href={imdb_url}>IMDb</a> | <a href={tvdb_url}>TheTVDB</a> | <a href={tmdb_url}>TMDB</a> | <a href={trakt_url}>Trakt</a>| <a href={tvmaze_url}>TVmaze</a>",
+                f"\n<b>View Details</b>: <a href='{imdb_url}'>IMDb</a> | <a href='{tvdb_url}'>TheTVDB</a> | <a href='{tmdb_url}'>TMDB</a> | <a href='{trakt_url}'>Trakt</a> | <a href='{tvmaze_url}'>TVmaze</a>",
         "reply_markup": {
             "inline_keyboard": [[
                 {
@@ -622,11 +622,16 @@ def series_delete():
     if deleted_files == "False":
         deleted_files = "None"
 
-    if len(deleted_files) >= 150:
-        deleted_files = deleted_files[:100]
-        deleted_files += '...'
+    try:
+        if len(deleted_files) >= 150:
+            deleted_files = deleted_files[:100]
+            deleted_files += '...'
+    except (KeyError, TypeError, IndexError):
+        deleted_files = "None"
 
     path = os.environ.get('Sonarr_Series_Path')
+    if path is None:
+        path = "None"
 
     # TMDb ID
     try:
@@ -668,7 +673,7 @@ def series_delete():
                 f"\n\n<b>Series name</b>: {series_title}"
                 f"\n<b>Files</b>: {deleted_files}"
                 f"\n<b>Path</b>: {path}"
-                f"\n<b>View Details</b>: <a href={imdb_url}>IMDb</a> | <a href={tvdb_url}>TheTVDB</a> | <a href={tmdb_url}>TMDB</a> | <a href={trakt_url}>Trakt</a>| <a href={tvmaze_url}>TVmaze</a>",
+                f"\n<b>View Details</b>: <a href='{imdb_url}'>IMDb</a> | <a href='{tvdb_url}'>TheTVDB</a> | <a href='{tmdb_url}'>TMDB</a> | <a href='{trakt_url}'>Trakt</a> | <a href='{tvmaze_url}'>TVmaze</a>",
         "reply_markup": {
             "inline_keyboard": [[
                 {

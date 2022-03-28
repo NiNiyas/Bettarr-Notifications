@@ -563,7 +563,7 @@ def delete_episode():
 
     message = {
         "html": 1,
-        "token": config.push_error,
+        "token": config.push_sonarr,
         "user": config.push_user,
         "sound": config.push_sound,
         "priority": config.push_priority,
@@ -571,21 +571,21 @@ def delete_episode():
         "retry": 60,
         "expire": 3600,
         "message": f"Deleted <b>{series_title}</b> - <b>S{season}E{episode}</b> - <b>{episode_title}</b>"
-        f"\n\n<b>Series name</b>: {series_title}"
-        f"\n<b>Episode name</b>: {episode_title}"
-        f"\n<b>Season no.</b>: {season}"
-        f"\n<b>Episode no.</b>: {episode}"
-        f"\n<b>Quality</b>: {quality}"
-        f"\n<b>Release Group</b>: {release_group}"
-        f"\n<b>File name</b>: {scene_name}"
-        f"\n<b>File location</b>: {episode_path}"
-        f"\n<b>Aired on</b>: {air_date} UTC"
-        f"\n<b>View Details</b>: <a href={imdb_url}>IMDb</a> | <a href={tvdb_url}>TheTVDB</a> | <a href={tmdb_url}>TMDB</a> | <a href={trakt_url}>Trakt</a>| <a href={tvmaze_url}>TVmaze</a>"
-        f"\n<b>Visit Sonarr</b>: <a href={config.sonarr_url}>IMDb</a>"
+                   f"\n\n<b>Series name</b>: {series_title}"
+                   f"\n<b>Episode name</b>: {episode_title}"
+                   f"\n<b>Season no.</b>: {season}"
+                   f"\n<b>Episode no.</b>: {episode}"
+                   f"\n<b>Quality</b>: {quality}"
+                   f"\n<b>Release Group</b>: {release_group}"
+                   f"\n<b>File name</b>: {scene_name}"
+                   f"\n<b>File location</b>: {episode_path}"
+                   f"\n<b>Aired on</b>: {air_date} UTC"
+                   f"\n<b>View Details</b>: <a href='{imdb_url}'>IMDb</a> | <a href='{tvdb_url}'>TheTVDB</a> | <a href='{tmdb_url}'>TMDB</a> | <a href='{trakt_url}'>Trakt</a>| <a href='{tvmaze_url}'>TVmaze</a>"
+                   f"\n<b>Visit Sonarr</b>: <a href='{config.sonarr_url}'>Sonarr</a>"
     }
 
     sender = requests.post(push_url, json=message)
-    if sender.status_code == 204:
+    if sender.status_code == 200:
         log.log.info("Successfully sent episode deleted notification to Pushover.")
         sys.exit(0)
     else:
@@ -609,11 +609,16 @@ def series_delete():
     if deleted_files == "False":
         deleted_files = "None"
 
-    if len(deleted_files) >= 150:
-        deleted_files = deleted_files[:100]
-        deleted_files += '...'
+    try:
+        if len(deleted_files) >= 150:
+            deleted_files = deleted_files[:100]
+            deleted_files += '...'
+    except (KeyError, TypeError, IndexError):
+        deleted_files = "None"
 
     path = os.environ.get('Sonarr_Series_Path')
+    if path is None:
+        path = "None"
 
     # TMDb ID
     try:
@@ -649,7 +654,7 @@ def series_delete():
 
     message = {
         "html": 1,
-        "token": config.push_error,
+        "token": config.push_sonarr,
         "user": config.push_user,
         "sound": config.push_sound,
         "priority": config.push_priority,
@@ -660,12 +665,12 @@ def series_delete():
                    f"\n\n<b>Series name</b>: {series_title}"
                    f"\n<b>Files</b>: {deleted_files}"
                    f"\n<b>Path</b>: {path}"
-                   f"\n<b>View Details</b>: <a href={imdb_url}>IMDb</a> | <a href={tvdb_url}>TheTVDB</a> | <a href={tmdb_url}>TMDB</a> | <a href={trakt_url}>Trakt</a>| <a href={tvmaze_url}>TVmaze</a>"
-                   f"\n<b>Visit Sonarr</b>: <a href={config.sonarr_url}>IMDb</a>"
+                   f"\n<b>View Details</b>: <a href='{imdb_url}'>IMDb</a> | <a href='{tvdb_url}'>TheTVDB</a> | <a href='{tmdb_url}'>TMDB</a> | <a href='{trakt_url}'>Trakt</a> | <a href='{tvmaze_url}'>TVmaze</a>"
+                   f"\n<b>Visit Sonarr</b>: <a href='{config.sonarr_url}'>Sonarr</a>"
     }
 
     sender = requests.post(push_url, json=message)
-    if sender.status_code == 204:
+    if sender.status_code == 200:
         log.log.info("Successfully sent series deleted notification to Pushover.")
         sys.exit(0)
     else:
@@ -691,7 +696,7 @@ def app_update():
 
     message = {
         "html": 1,
-        "token": config.push_error,
+        "token": config.push_sonarr,
         "user": config.push_user,
         "sound": config.push_sound,
         "priority": config.push_priority,
@@ -702,11 +707,11 @@ def app_update():
                    f"\n\n<b>Notes</b>: {update_message}"
                    f"\n\n<b>New version</b>: {new_version}"
                    f"\n<b>Old version</b>: {old_version}"
-                   f"\n<b>Visit Sonarr</b>: <a href={config.sonarr_url}>IMDb</a>"
+                   f"\n<b>Visit Sonarr</b>: <a href={config.sonarr_url}>Sonarr</a>"
     }
 
     sender = requests.post(push_url, json=message)
-    if sender.status_code == 204:
+    if sender.status_code == 200:
         log.log.info("Successfully sent application update notification to Pushover.")
         sys.exit(0)
     else:
