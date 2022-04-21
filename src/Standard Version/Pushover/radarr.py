@@ -140,24 +140,22 @@ def grab():
         directors = "None"
 
     # Powered by JustWatch and/or mdblist
+    country_code = config.tmdb_country
     providers = []
     try:
-        country_code = config.tmdb_country
         justwatch = retry.requests_retry_session().get(
             'https://api.themoviedb.org/3/movie/{}/watch/providers?api_key={}'.format(tmdb_id,
-                                                                                   config.moviedb_key))
+                                                                                config.moviedb_key))
         tmdbProviders = justwatch.json()
         for p in tmdbProviders["results"][country_code]['flatrate']:
             providers.append(p['provider_name'])
     except (KeyError, TypeError, IndexError):
-        country_code = "US"
-        log.log.info("Couldn't fetch providers from TMDb. Defaulting to US. Fetching from mdblist.")
+        log.log.info("Couldn't fetch providers from TMDb. Defaulting to US")
         try:
             for x in ratings_radarr.mdblist_data['streams']:
                 stream = (x['name'])
                 providers.append(stream)
         except (KeyError, TypeError, IndexError):
-            log.log.info("Error fetching stream data from mdblist.")
             stream = "None"
             providers.append(stream)
 
