@@ -1,6 +1,7 @@
 import os
 
 import requests
+
 from . import config
 
 imdb_id = os.environ.get('radarr_movie_imdbid')
@@ -62,7 +63,7 @@ if config.mdbapi != "":
         except (KeyError, TypeError, IndexError):
             certification = 'None'
 
-        ratings = "<b>IMDb</b>: {}\n<b>Metacritic</b>: {}\n<b>Rotten Tomatoes</b>: {}\n<b>TMDb</b>: {}\n<b>Trakt</b>: {}\n<b>LetterBoxd</b>: {}".format(
+        ratings = "IMDb: {}\nMetacritic: {}\nRotten Tomatoes: {}\nTMDb: {}\nTrakt: {}\nLetterBoxd: {}".format(
             imdb_rating,
             metacritic, rottentomatoes, tmdb_rating, trakt_rating, letterboxd)
 
@@ -70,3 +71,7 @@ if config.mdbapi != "":
         ratings = "None"
         certification = 'None'
         print("Failed to fetch ratings and trailer. API limit reached.")
+else:
+    ratings = "None"
+    certification = 'None'
+    print("Skipped fetching ratings.")
