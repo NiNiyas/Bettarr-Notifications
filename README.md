@@ -29,15 +29,15 @@ Tested with v3.0.8.1507 of Sonarr and v4.1.0.6175 of Radarr.
 
 - To create TMDB API, check [here](https://www.themoviedb.org/settings/api). This has no known limit.
 - Fill in the `TMDB_APIKEY` in `config.py` file.
-- If you need the JustWatch providers for you country, fill in the `TMDB_COUNTRY_CODE`.
+- If you need the JustWatch providers for your country, fill in the `TMDB_COUNTRY_CODE`.
 - For country codes, see [here](https://www.justwatch.com/), scroll down to the very bottom of the page.
 
 If your ISP block access to TMDB API like mine does, host a [tmdb-proxy](https://github.com/chervontsev/tmdb-proxy) on
-Heroku ot Railway and fill in `TMDB_URL`. I personally host mine in Railway.
+Heroku or Railway and fill in `TMDB_URL`. I personally host mine in Railway.
 
 ### mdblist (Optional)
 
-In order to get ratings, you should set `MDBLIST_APIKEY` in `config.py` file.
+To get ratings, you should set `MDBLIST_APIKEY` in `config.py` file.
 
 - Create your mdblist API key from [here](https://mdblist.com/).
 - You will need a [Trakt](https://trakt.tv) account for this. This has a 1000 calls per day limit which is more than

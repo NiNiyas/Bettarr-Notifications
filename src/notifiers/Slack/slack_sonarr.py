@@ -126,7 +126,7 @@ def sonarr_grab():
                 "fields": [
                     {
                         "type": "mrkdwn",
-                        "text": f"*Cast*\n<{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}|{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}>, <{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][1]}|{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][1]}>,<{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][2]}|{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][2]}>"
+                        "text": f"*Cast*\n<{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}|{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}>, <{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][1]}|{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][1]}>, <{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][2]}|{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][2]}>"
                     },
                     {
                         "type": "mrkdwn",
@@ -310,7 +310,7 @@ def sonarr_import():
         ]
     }
 
-    if sonarr_envs.scene_name == "Unknown":
+    if sonarr_envs.scene_name == "":
         del message['blocks'][5]['fields'][5]
 
     if funcs.get_sonarr_contentrating(skyhook) == "Unknown":
@@ -429,6 +429,13 @@ def sonarr_delete_episode():
         "text": f"Deleted *{sonarr_envs.media_title}* - *S{season}E{episode}* - *{sonarr_envs.delete_episode_name}*",
         "blocks": [
             {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"Deleted *{sonarr_envs.media_title}* - *S{season}E{episode}* - *{sonarr_envs.delete_episode_name}*",
+                }
+            },
+            {
                 "type": "header",
                 "text": {
                     "type": "plain_text",
@@ -444,13 +451,6 @@ def sonarr_delete_episode():
             },
             {
                 "type": "divider"
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"Deleted *{sonarr_envs.media_title}* - *S{season}E{episode}* - *{sonarr_envs.delete_episode_name}*",
-                }
             },
             {
                 "type": "section",
@@ -522,10 +522,10 @@ def sonarr_delete_episode():
         ]
     }
 
-    if sonarr_envs.scene_name == "Unknown":
+    if sonarr_envs.scene_name == "":
         del message['blocks'][4]['fields'][6]
 
-    if sonarr_envs.delete_release_group == "Unknown":
+    if sonarr_envs.delete_release_group == "":
         del message['blocks'][4]['fields'][5]
 
     try:

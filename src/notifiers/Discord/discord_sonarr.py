@@ -141,7 +141,7 @@ def sonarr_grab():
         ]
     }
 
-    if sonarr_envs.release_group == "Unknown":
+    if sonarr_envs.release_group == "":
         del message['embeds'][0]['fields'][4]
 
     if funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1] == "Unknown":
@@ -241,7 +241,7 @@ def sonarr_import():
         ]
     }
 
-    if sonarr_envs.scene_name == "Unknown":
+    if sonarr_envs.scene_name == "":
         del message['embeds'][0]['fields'][5]
 
     if funcs.get_sonarr_contentrating(skyhook) == "Unknown":
@@ -409,10 +409,10 @@ def sonarr_delete_episode():
         ]
     }
 
-    if sonarr_envs.scene_name == "Unknown":
+    if sonarr_envs.scene_name == "":
         del message['embeds'][0]['fields'][6]
 
-    if sonarr_envs.delete_release_group == "Unknown":
+    if sonarr_envs.delete_release_group == "":
         del message['embeds'][0]['fields'][5]
 
     try:

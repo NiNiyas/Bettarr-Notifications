@@ -16,13 +16,13 @@ release_indexer = os.environ.get("radarr_release_indexer")
 
 release_size = os.environ.get("radarr_release_size")
 
-release_group = os.environ.get("radarr_release_releasegroup", "Unknown")
+release_group = os.environ.get("radarr_release_releasegroup")
 
 tmdb_id = os.environ.get("radarr_movie_tmdbid")
 
 year = os.environ.get("radarr_movie_year")
 
-scene_name = os.environ.get("radarr_moviefile_scenename", "Unknown")
+scene_name = os.environ.get("radarr_moviefile_scenename")
 
 is_upgrade = os.environ.get("radarr_isupgrade")
 
@@ -46,10 +46,10 @@ deleted_files = os.environ.get('radarr_movie_deletedfiles')
 
 deleted_size = os.environ.get('radarr_movie_folder_size', 0)
 
-deleted_moviefilereason = os.environ.get('radarr_moviefile_deletereason', "Unknown")
+deleted_moviefilereason = os.environ.get('radarr_moviefile_deletereason')
 
 deleted_moviefilepath = os.environ.get('radarr_moviefile_path')
 
 deleted_moviefilesize = os.environ.get('radarr_moviefile_size', 0)
 
-deleted_moviereleasegroup = os.environ.get('radarr_moviefile_releasegroup', "Unknown")
+deleted_moviereleasegroup = os.environ.get('radarr_moviefile_releasegroup')

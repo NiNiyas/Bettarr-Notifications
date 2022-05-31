@@ -79,7 +79,7 @@ def sonarr_grab():
         message["text"] = mod_string
         log.warning("Director field is unknown, removing it..")
 
-    if sonarr_envs.release_group == "Unknown":
+    if sonarr_envs.release_group == "":
         import re
         pattern = r'<b>Release Group<\/b>: Unknown'
         mod_string = re.sub(pattern, '', message["text"])
@@ -136,7 +136,7 @@ def sonarr_import():
         mod_string = re.sub(pattern, '', message["text"])
         message["text"] = mod_string
 
-    if sonarr_envs.scene_name == "Unknown":
+    if sonarr_envs.scene_name == "":
         import re
         pattern = r'<b>Release Name<\/b>: Unknown'
         mod_string = re.sub(pattern, '', message["text"])
@@ -212,14 +212,14 @@ def sonarr_delete_episode():
                 f"\n\n<b>View Details</b>: <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[3]}'>IMDb</a> | <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[0]}'>TheTVDB</a> | <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[4]}'>TheMovieDb</a> | <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[2]}'>Trakt</a> | <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[1]}'>TVmaze</a>"
     }
 
-    if sonarr_envs.delete_release_group == "Unknown":
+    if sonarr_envs.delete_release_group == "":
         import re
         pattern = r'<b>Release Group<\/b>: Unknown'
         mod_string = re.sub(pattern, '', message["text"])
         message["text"] = mod_string
         log.warning("Release Group field is unknown, removing it..")
 
-    if sonarr_envs.scene_name == "Unknown":
+    if sonarr_envs.scene_name == "":
         import re
         pattern = r'<b>Release Name<\/b>: Unknown'
         mod_string = re.sub(pattern, '', message["text"])

@@ -154,7 +154,7 @@ def radarr_grab():
         ]
     }
 
-    if radarr_envs.release_group == "Unknown":
+    if radarr_envs.release_group == "":
         del message["blocks"][5]["fields"][3]
 
     if ratings.mdblist_movie()[1] == "Unknown":
@@ -287,7 +287,7 @@ def radarr_import():
         ]
     }
 
-    if radarr_envs.scene_name == "Unknown":
+    if radarr_envs.scene_name == "":
         del message["blocks"][5]["fields"][4]
 
     try:
@@ -617,14 +617,14 @@ def radarr_moviefile_delete():
         ]
     }
 
-    if radarr_envs.deleted_moviefilereason == "Unknown":
+    if radarr_envs.deleted_moviefilereason == "":
         del message['blocks'][1]
         del message['blocks'][2]
 
     if radarr_envs.deleted_moviefilesize == 0:
         del message['blocks'][4]['fields'][1]
 
-    if radarr_envs.deleted_moviereleasegroup == "Unknown":
+    if radarr_envs.deleted_moviereleasegroup == "":
         del message['blocks'][4]['fields'][3]
 
     try:

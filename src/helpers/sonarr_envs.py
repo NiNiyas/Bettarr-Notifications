@@ -10,7 +10,7 @@ tvdb_id = os.environ.get('sonarr_series_tvdbid')
 
 size = os.environ.get('sonarr_release_size')
 
-release_group = os.environ.get('sonarr_release_releasegroup', "Unknown")
+release_group = os.environ.get('sonarr_release_releasegroup')
 
 media_title = os.environ.get('sonarr_series_title')
 try:
@@ -40,7 +40,7 @@ is_upgrade = os.environ.get('sonarr_isupgrade')
 
 air_date = os.environ.get('sonarr_release_episodeairdatesutc')
 
-scene_name = os.environ.get('sonarr_episodefile_scenename', "Unknown")
+scene_name = os.environ.get('sonarr_episodefile_scenename')
 
 issue_level = os.environ.get('sonarr_health_issue_level')
 
@@ -58,7 +58,7 @@ delete_episode = os.environ.get('sonarr_episodefile_episodenumbers')
 
 delete_season = os.environ.get('sonarr_episodefile_seasonnumber')
 
-delete_release_group = os.environ.get('sonarr_episodefile_releasegroup', "Unknown")
+delete_release_group = os.environ.get('sonarr_episodefile_releasegroup')
 
 delete_quality = os.environ.get('sonarr_episodefile_quality')
 
