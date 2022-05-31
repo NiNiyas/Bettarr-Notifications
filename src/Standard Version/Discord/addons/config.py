@@ -1,2 +1,0 @@
-# Ratings
-mdbapi = ""  # Optional
