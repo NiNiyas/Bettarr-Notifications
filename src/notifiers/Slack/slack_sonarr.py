@@ -42,6 +42,14 @@ def sonarr_grab():
         title = title[:150]
         title += '...'
 
+    try:
+        cast = f"<{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}|{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}>, <{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][1]}|{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][1]}>, <{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][2]}|{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][2]}>"
+    except (KeyError, TypeError, IndexError, Exception):
+        try:
+            cast = f"<{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}|{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}>"
+        except (KeyError, TypeError, IndexError, Exception):
+            cast = "Unknown"
+
     message = {
         "channel": config.SLACK_CHANNEL,
         "text": f"Grabbed *{sonarr_envs.media_title}* - *S{season}E{episode}* - *{sonarr_envs.episode_title}* from *{sonarr_envs.release_indexer}*.",
@@ -126,7 +134,7 @@ def sonarr_grab():
                 "fields": [
                     {
                         "type": "mrkdwn",
-                        "text": f"*Cast*\n<{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}|{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}>, <{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][1]}|{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][1]}>, <{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][2]}|{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][2]}>"
+                        "text": f"*Cast*\n{cast}"
                     },
                     {
                         "type": "mrkdwn",
@@ -173,6 +181,9 @@ def sonarr_grab():
             }
         ]
     }
+
+    if cast == "Unknown":
+        del message['blocks'][6]['fields'][0]
 
     if funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1] == "Unknown":
         del message['blocks'][6]['fields'][1]

@@ -44,6 +44,14 @@ def radarr_grab():
     radarr = requests.get(f"{config.RADARR_URL}api/v3/movie/{radarr_envs.movie_id}?apikey={config.RADARR_APIKEY}")
     radarr = radarr.json()
 
+    try:
+        cast = f"<a href={funcs.get_movie_cast(radarr_envs.tmdb_id)[0][0]}>{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][0]}</a>, <a href={funcs.get_movie_cast(radarr_envs.tmdb_id)[0][1]}>{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][1]}</a>, <a href={funcs.get_movie_cast(radarr_envs.tmdb_id)[0][2]}>{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][2]}</a>"
+    except (KeyError, TypeError, IndexError, Exception):
+        try:
+            cast = f"<a href={funcs.get_movie_cast(radarr_envs.tmdb_id)[0][0]}>{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][0]}</a>"
+        except (KeyError, TypeError, IndexError, Exception):
+            cast = "Unknown"
+
     message = {
         "html": 1,
         "user": config.PUSHOVER_USER,
@@ -64,11 +72,18 @@ def radarr_grab():
                    f"\n<b>Release Date</b>: {funcs.get_radarr_releasedate(radarr_envs.tmdb_id)}"
                    f"\n<b>Content Rating</b>: {ratings.mdblist_movie()[1]}"
                    f"\n<b>Genre(s)</b>: {funcs.get_radarr_genres(radarr)}"
-                   f"\n<b>Cast</b>: <a href={funcs.get_movie_cast(radarr_envs.tmdb_id)[0][0]}>{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][0]}</a>, <a href={funcs.get_movie_cast(radarr_envs.tmdb_id)[0][1]}>{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][1]}</a>, <a href={funcs.get_movie_cast(radarr_envs.tmdb_id)[0][2]}>{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][2]}</a>"
+                   f"\n<b>Cast</b>: {cast}"
                    f"\n<b>Director</b>: <a href={funcs.get_movie_crew(radarr_envs.tmdb_id)[0][0]}>{funcs.get_movie_crew(radarr_envs.tmdb_id)[1][0]}</a>"
                    f"\n<b>Available On</b>: ({funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[1]}): {funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0]}"
                    f"\n<b>Trailer</b>: <a href={funcs.get_radarr_trailer(radarr)}>Youtube</a>"
     }
+
+    if cast == "Unknown":
+        import re
+        pattern = r'<b>Cast<\/b>: Unknown'
+        log.warning("Cast field is unknown, removing it..")
+        mod_string = re.sub(pattern, '', message["message"])
+        message["message"] = mod_string
 
     if funcs.get_movie_crew(radarr_envs.tmdb_id)[1][0] == "Unknown":
         import re

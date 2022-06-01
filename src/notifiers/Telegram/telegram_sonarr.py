@@ -41,6 +41,14 @@ def sonarr_grab():
 
     title = f"Grabbed <b>{sonarr_envs.media_title}</b> - <b>S{season}E{episode}</b> - <b>{sonarr_envs.episode_title}</b> from <b>{sonarr_envs.release_indexer}</b>."
 
+    try:
+        cast = f"<a href='{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}'>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}</a>, <a href='{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][2]}'>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][1]}</a>, <a href='{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][1]}'>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][2]}</a>"
+    except (KeyError, TypeError, IndexError, Exception):
+        try:
+            cast = f"<a href='{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}'>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}</a>"
+        except (KeyError, TypeError, IndexError, Exception):
+            cast = "Unknown"
+
     message = {
         "chat_id": config.TELEGRAM_CHAT_ID,
         "parse_mode": "HTML",
@@ -57,13 +65,20 @@ def sonarr_grab():
                 f"\n<b>Genre(s)</b>: {funcs.get_sonarrgenres(skyhook)}"
                 f"\n<b>Air Date</b>: {sonarr_envs.air_date} UTC"
                 f"\n<a href='{funcs.get_posterseries(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)}'>&#8204;</a>"
-                f"\n<b>Cast</b>: <a href='{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}'>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}</a>, <a href='{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][2]}'>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][1]}</a>, <a href='{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][1]}'>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][2]}</a>"
+                f"\n<b>Cast</b>: {cast}"
                 f"\n<b>Director</b>: <a href='{funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0]}'>{funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1]}</a>"
                 f"\n<b>Available On</b> ({funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1]}):  {funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0]}"
                 f"\n<b>Trailer</b>: <a href='{funcs.get_sonarr_trailer()}'>YouTube</a>"
                 f"\n<b>View Details</b>: <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[3]}'>IMDb</a>, <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[0]}'>TheTVDB</a>, <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[4]}'>TheMovieDb</a>, <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[2]}'>Trakt</a>, <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[1]}'>TVmaze</a>"
 
     }
+
+    if cast == "Unknown":
+        import re
+        pattern = r'<b>Cast<\/b>: Unknown'
+        log.warning("Cast field is unknown, removing it..")
+        mod_string = re.sub(pattern, '', message["text"])
+        message["text"] = mod_string
 
     if funcs.get_sonarr_contentrating(skyhook) == "Unknown":
         import re

@@ -50,6 +50,14 @@ def sonarr_grab():
         title = title[:100]
         title += '...'
 
+    try:
+        cast = f"<a href={funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}</a>, <a href={funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][2]}>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][1]}</a>, <a href={funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][1]}>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][2]}</a>"
+    except (KeyError, TypeError, IndexError, Exception):
+        try:
+            cast = f"<a href={funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}</a>"
+        except (KeyError, TypeError, IndexError, Exception):
+            cast = "Unknown"
+
     message = {
         "html": 1,
         "user": config.PUSHOVER_USER,
@@ -71,11 +79,18 @@ def sonarr_grab():
                    f"\n<b>Content Rating</b>: {funcs.get_sonarr_contentrating(skyhook)}"
                    f"\n<b>Genre(s)</b>: {funcs.get_sonarrgenres(skyhook)}"
                    f"\n<b>Air Date</b>: {sonarr_envs.air_date} UTC"
-                   f"\n<b>Cast</b>: <a href={funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}</a>, <a href={funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][2]}>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][1]}</a>, <a href={funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][1]}>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][2]}</a>"
+                   f"\n<b>Cast</b>: {cast}"
                    f"\n<b>Director</b>: <a href={funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0]}>{funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1]}</a>"
                    f"\n<b>Available On</b>: ({funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1]}): {funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0]}"
                    f"\n<a href={funcs.get_sonarr_trailer()}>Trailer</a>"
     }
+
+    if cast == "Unknown":
+        import re
+        pattern = r'<b>Cast<\/b>: Unknown'
+        log.warning("Cast field is unknown, removing it..")
+        mod_string = re.sub(pattern, '', message["message"])
+        message["message"] = mod_string
 
     if funcs.get_sonarr_contentrating(skyhook) == "Unknown":
         import re

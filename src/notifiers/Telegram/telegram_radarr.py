@@ -37,6 +37,14 @@ def radarr_grab():
     radarr = requests.get(f"{config.RADARR_URL}api/v3/movie/{radarr_envs.movie_id}?apikey={config.RADARR_APIKEY}")
     radarr = radarr.json()
 
+    try:
+        cast = f"<a href='{funcs.get_movie_cast(radarr_envs.tmdb_id)[0][0]}'>{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][0]}</a>, <a href='{funcs.get_movie_cast(radarr_envs.tmdb_id)[0][1]}'>{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][1]}</a>, <a href='{funcs.get_movie_cast(radarr_envs.tmdb_id)[0][2]}'>{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][2]}</a>"
+    except (KeyError, TypeError, IndexError, Exception):
+        try:
+            cast = f"<a href='{funcs.get_movie_cast(radarr_envs.tmdb_id)[0][0]}'>{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][0]}</a>"
+        except (KeyError, TypeError, IndexError, Exception):
+            cast = "Unknown"
+
     message = {
         "chat_id": config.TELEGRAM_CHAT_ID,
         "parse_mode": "HTML",
@@ -52,11 +60,18 @@ def radarr_grab():
                 f"\n<b>Content Rating</b>: {ratings.mdblist_movie()[1]}"
                 f"\n<b>Genre(s)</b>: {funcs.get_radarr_genres(radarr)}"
                 f"\n<a href='{funcs.get_radarrposter(radarr_envs.tmdb_id)}'>&#8204;</a>"
-                f"\n<b>Cast</b>: <a href='{funcs.get_movie_cast(radarr_envs.tmdb_id)[0][0]}'>{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][0]}</a>, <a href='{funcs.get_movie_cast(radarr_envs.tmdb_id)[0][1]}'>{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][1]}</a>, <a href='{funcs.get_movie_cast(radarr_envs.tmdb_id)[0][2]}'>{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][2]}</a>"
+                f"\n<b>Cast</b>: {cast}"
                 f"\n<b>Director</b>: <a href='{funcs.get_movie_crew(radarr_envs.tmdb_id)[0][0]}'>{funcs.get_movie_crew(radarr_envs.tmdb_id)[1][0]}</a>"
                 f"\n<b>Available On</b>: ({funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[1]}): {funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0]}"
                 f"\n<b>View Details</b>: <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[0]}'>IMDb</a>, <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[1]}'>TheMovieDb</a>, <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[2]}'>Trakt</a>, <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[3]}'>MovieChat</a>"
     }
+
+    if cast == "Unknown":
+        import re
+        pattern = r'<b>Cast<\/b>: Unknown'
+        log.warning("Cast field is unknown, removing it..")
+        mod_string = re.sub(pattern, '', message["text"])
+        message["text"] = mod_string
 
     if funcs.get_movie_crew(radarr_envs.tmdb_id)[1][0] == "Unknown":
         import re
@@ -251,7 +266,7 @@ def radarr_moviefile_delete():
         pattern = r'<b>Size<\/b>: 0B'
         log.warning("Size field is 0B, removing it..")
         mod_string = re.sub(pattern, '', string)
-        message["message"] = mod_string
+        message["text"] = mod_string
 
     if radarr_envs.scene_name == "":
         import re
@@ -259,7 +274,7 @@ def radarr_moviefile_delete():
         pattern = r'<b>Release Name<\/b>: Unknown'
         log.warning("Release Name field is Unknown, removing it..")
         mod_string = re.sub(pattern, '', string)
-        message["message"] = mod_string
+        message["text"] = mod_string
 
     if radarr_envs.deleted_moviereleasegroup == "":
         import re
@@ -267,7 +282,7 @@ def radarr_moviefile_delete():
         pattern = r'<b>Release Group<\/b>: Unknown'
         log.warning("Release Group field is Unknown, removing it..")
         mod_string = re.sub(pattern, '', string)
-        message["message"] = mod_string
+        message["text"] = mod_string
 
     try:
         sender = requests.post(config.TELEGRAM_RADARR_MISC_URL, headers=HEADERS, json=message)

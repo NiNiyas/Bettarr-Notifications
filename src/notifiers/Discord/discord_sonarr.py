@@ -43,6 +43,14 @@ def sonarr_grab():
         title = title[:150]
         title += '...'
 
+    try:
+        cast = f"[{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}]({funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}), [{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][1]}]({funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][1]}), [{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][2]}]({funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][2]})"
+    except (KeyError, TypeError, IndexError, Exception):
+        try:
+            cast = f"[{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}]({funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]})"
+        except (KeyError, TypeError, IndexError, Exception):
+            cast = "Unknown"
+
     message = {
         "username": config.SONARR_DISCORD_USERNAME,
         'content': f"Grabbed **{sonarr_envs.media_title}** - **S{season}E{episode}** - **{sonarr_envs.episode_title}** from **{sonarr_envs.release_indexer}**.",
@@ -113,7 +121,7 @@ def sonarr_grab():
                     },
                     {
                         "name": "Cast",
-                        "value": f"[{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}]({funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}), [{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][1]}]({funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][1]}), [{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][2]}]({funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][2]})",
+                        "value": cast,
                         "inline": False
                     },
                     {
@@ -140,6 +148,11 @@ def sonarr_grab():
             }
         ]
     }
+
+    log.debug(funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1])
+
+    if cast == "Unknown":
+        del message['embeds'][0]['fields'][9]
 
     if sonarr_envs.release_group == "":
         del message['embeds'][0]['fields'][4]

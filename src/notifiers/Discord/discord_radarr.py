@@ -35,6 +35,15 @@ def radarr_test():
 def radarr_grab():
     radarr = requests.get(f"{config.RADARR_URL}api/v3/movie/{radarr_envs.movie_id}?apikey={config.RADARR_APIKEY}")
     radarr = radarr.json()
+
+    try:
+        cast = f"[{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][0]}]({funcs.get_movie_cast(radarr_envs.tmdb_id)[0][0]}), [{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][1]}]({funcs.get_movie_cast(radarr_envs.tmdb_id)[0][1]}), [{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][2]}]({funcs.get_movie_cast(radarr_envs.tmdb_id)[0][2]})"
+    except (KeyError, TypeError, IndexError, Exception):
+        try:
+            cast = f"[{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][0]}]({funcs.get_movie_cast(radarr_envs.tmdb_id)[0][0]})"
+        except (KeyError, TypeError, IndexError, Exception):
+            cast = "Unknown"
+
     message = {
         "username": config.RADARR_DISCORD_USERNAME,
         "content": f"Grabbed **{radarr_envs.media_title} ({radarr_envs.year})** from **{radarr_envs.release_indexer}**",
@@ -95,7 +104,7 @@ def radarr_grab():
                     },
                     {
                         "name": "Cast",
-                        "value": f"[{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][0]}]({funcs.get_movie_cast(radarr_envs.tmdb_id)[0][0]}), [{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][1]}]({funcs.get_movie_cast(radarr_envs.tmdb_id)[0][1]}), [{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][2]}]({funcs.get_movie_cast(radarr_envs.tmdb_id)[0][2]})",
+                        "value": cast,
                         "inline": False
                     },
                     {
@@ -122,6 +131,9 @@ def radarr_grab():
             }
         ]
     }
+
+    if cast == "Unknown":
+        del message['embeds'][0]['fields'][7]
 
     if radarr_envs.release_group == "":
         del message["embeds"][0]["fields"][3]

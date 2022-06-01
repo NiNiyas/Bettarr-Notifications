@@ -334,21 +334,8 @@ def get_seriescast(tvdb_id, imdb_id):
             actors_url = actors_url.replace(" ", "+")
             cast_url.append(actors_url)
     except (KeyError, TypeError, IndexError, Exception):
-        crew = requests.get(
-            f"https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}/credits?api_key={config.TMDB_APIKEY}",
-            timeout=60)
-        crew = crew.json()
         cast = []
         cast_url = []
-
-        for x in crew['cast']:
-            cast.append(x['original_name'])
-            cast = cast[:3]
-
-        for actors in cast:
-            actors_url = f"https://www.themoviedb.org/search?query={actors}"
-            actors_url = actors_url.replace(" ", "+")
-            cast_url.append(actors_url)
 
     return cast_url, cast
 
@@ -370,20 +357,8 @@ def get_seriescrew(tvdb_id, imdb_id):
             actors_url = actors_url.replace(" ", "+")
             director_url.append(actors_url)
     except (KeyError, TypeError, IndexError, Exception):
-        crew = requests.get(
-            f"https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}/credits?api_key={config.TMDB_APIKEY}",
-            timeout=60)
-        crew = crew.json()
         directors = []
         director_url = []
-        for x in crew['crew']:
-            if x['job'] == "Director":
-                directors.append(x['original_name'])
-
-        for director in directors:
-            actors_url = f"https://www.themoviedb.org/search?query={director}"
-            actors_url = actors_url.replace(" ", "+")
-            director_url.append(actors_url)
 
     if not directors:
         directors = "Unknown"
@@ -393,23 +368,13 @@ def get_seriescrew(tvdb_id, imdb_id):
 
 def get_posterseries(tvdb_id, imdb_id):
     try:
-        try:
-            poster_path = requests.get(
-                f"https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}?api_key={config.TMDB_APIKEY}&language=en-US",
-                timeout=60).json()
-            poster = poster_path['poster_path']
-            poster = "https://image.tmdb.org/t/p/original/" + poster
-        except (KeyError, TypeError, IndexError, Exception):
-            poster = 'http://gearr.scannain.com/wp-content/uploads/2015/02/noposter.jpg'
+        poster_path = requests.get(
+            f"https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}?api_key={config.TMDB_APIKEY}&language=en-US",
+            timeout=60).json()
+        poster = poster_path['poster_path']
+        poster = "https://image.tmdb.org/t/p/original/" + poster
     except (KeyError, TypeError, IndexError, Exception):
-        try:
-            poster_path = requests.get(
-                f"https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}?api_key={config.TMDB_APIKEY}&language=en-US",
-                timeout=60).json()
-            poster = poster_path['poster_path']
-            poster = "https://image.tmdb.org/t/p/original/" + poster
-        except (KeyError, TypeError, IndexError, Exception):
-            poster = 'http://gearr.scannain.com/wp-content/uploads/2015/02/noposter.jpg'
+        poster = 'http://gearr.scannain.com/wp-content/uploads/2015/02/noposter.jpg'
 
     return poster
 
@@ -581,10 +546,6 @@ def get_sonarr_episodeoverview(season, episode, tvdb_id, imdb_id):
             f'https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}/season/{season}/episode/{episode}?api_key={config.TMDB_APIKEY}&language=en',
             timeout=60).json()
         overview = episode_data['overview']
-        if overview == "":
-            series = f'https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}?api_key={config.TMDB_APIKEY}&language=en'
-            series_data = requests_retry_session().get(series, timeout=20).json()
-            overview = series_data['overview']
     except (KeyError, TypeError, IndexError, Exception):
         log.warning("Couldn't fetch episode overview. Falling back to series overview.")
         series = f'https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}?api_key={config.TMDB_APIKEY}&language=en'
