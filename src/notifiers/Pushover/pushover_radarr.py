@@ -74,9 +74,16 @@ def radarr_grab():
                    f"\n<b>Genre(s)</b>: {funcs.get_radarr_genres(radarr)}"
                    f"\n<b>Cast</b>: {cast}"
                    f"\n<b>Director</b>: <a href={funcs.get_movie_crew(radarr_envs.tmdb_id)[0][0]}>{funcs.get_movie_crew(radarr_envs.tmdb_id)[1][0]}</a>"
-                   f"\n<b>Available On</b>: ({funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[1]}): {funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0]}"
+                   f"\n<b>Available On</b> ({funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[1]}): {funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0]}"
                    f"\n<b>Trailer</b>: <a href={funcs.get_radarr_trailer(radarr)}>Youtube</a>"
     }
+
+    if funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0] == "None":
+        import re
+        pattern = r'<b>Available On \([^()]*\)<\/b>: None'
+        log.warning("Available On field is unknown, removing it..")
+        mod_string = re.sub(pattern, '', message["message"])
+        message["message"] = mod_string
 
     if cast == "Unknown":
         import re

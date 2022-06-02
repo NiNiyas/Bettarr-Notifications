@@ -132,6 +132,9 @@ def radarr_grab():
         ]
     }
 
+    if funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0] == "None":
+        del message['embeds'][0]['fields'][9]
+
     if cast == "Unknown":
         del message['embeds'][0]['fields'][7]
 

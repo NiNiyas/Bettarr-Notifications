@@ -81,9 +81,16 @@ def sonarr_grab():
                    f"\n<b>Air Date</b>: {sonarr_envs.air_date} UTC"
                    f"\n<b>Cast</b>: {cast}"
                    f"\n<b>Director</b>: <a href={funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0]}>{funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1]}</a>"
-                   f"\n<b>Available On</b>: ({funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1]}): {funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0]}"
+                   f"\n<b>Available On</b> ({funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1]}): {funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0]}"
                    f"\n<a href={funcs.get_sonarr_trailer()}>Trailer</a>"
     }
+
+    if funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0] == "None":
+        import re
+        pattern = r'<b>Available On \([^()]*\)<\/b>: None'
+        log.warning("Available On field is unknown, removing it..")
+        mod_string = re.sub(pattern, '', message["message"])
+        message["message"] = mod_string
 
     if cast == "Unknown":
         import re

@@ -149,7 +149,8 @@ def sonarr_grab():
         ]
     }
 
-    log.debug(funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1])
+    if funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0] == "None":
+        del message['embeds'][0]['fields'][11]
 
     if cast == "Unknown":
         del message['embeds'][0]['fields'][9]

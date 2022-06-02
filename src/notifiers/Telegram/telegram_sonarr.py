@@ -73,6 +73,13 @@ def sonarr_grab():
 
     }
 
+    if funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0] == "None":
+        import re
+        pattern = r'<b>Available On \([^()]*\)<\/b>: None'
+        log.warning("Available On field is unknown, removing it..")
+        mod_string = re.sub(pattern, '', message["text"])
+        message["text"] = mod_string
+
     if cast == "Unknown":
         import re
         pattern = r'<b>Cast<\/b>: Unknown'

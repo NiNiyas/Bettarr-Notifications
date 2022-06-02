@@ -62,9 +62,16 @@ def radarr_grab():
                 f"\n<a href='{funcs.get_radarrposter(radarr_envs.tmdb_id)}'>&#8204;</a>"
                 f"\n<b>Cast</b>: {cast}"
                 f"\n<b>Director</b>: <a href='{funcs.get_movie_crew(radarr_envs.tmdb_id)[0][0]}'>{funcs.get_movie_crew(radarr_envs.tmdb_id)[1][0]}</a>"
-                f"\n<b>Available On</b>: ({funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[1]}): {funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0]}"
+                f"\n<b>Available On</b> ({funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[1]}): {funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0]}"
                 f"\n<b>View Details</b>: <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[0]}'>IMDb</a>, <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[1]}'>TheMovieDb</a>, <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[2]}'>Trakt</a>, <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[3]}'>MovieChat</a>"
     }
+
+    if funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0] == "None":
+        import re
+        pattern = r'<b>Available On \([^()]*\)<\/b>: None'
+        log.warning("Available On field is unknown, removing it..")
+        mod_string = re.sub(pattern, '', message["text"])
+        message["text"] = mod_string
 
     if cast == "Unknown":
         import re

@@ -182,6 +182,9 @@ def sonarr_grab():
         ]
     }
 
+    if funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0] == "None":
+        del message['blocks'][5]['fields'][8]
+
     if cast == "Unknown":
         del message['blocks'][6]['fields'][0]
 
