@@ -162,7 +162,7 @@ def get_movie_watch_providers(tmdb_id, imdb_id):
         log.warning("Couldn't fetch providers from TMDb. Fetching from mdblist.")
         try:
             mdblist = requests.get(f'https://mdblist.com/api/?apikey={config.MDBLIST_APIKEY}&i={imdb_id}').json()
-            for x in {mdblist['streams']}:
+            for x in mdblist['watch_providers']:
                 stream = (x['name'])
                 providers.append(stream)
         except (KeyError, TypeError, IndexError, Exception):
@@ -437,7 +437,7 @@ def get_tv_watch_providers(tvdb_id, imdb_id):
         log.warning("Couldn't fetch providers from TMDb. Fetching from mdblist.")
         try:
             mdblist = requests.get(f'https://mdblist.com/api/?apikey={config.MDBLIST_APIKEY}&i={imdb_id}&m=show').json()
-            for x in {mdblist['streams']}:
+            for x in mdblist['watch_providers']:
                 stream = (x['name'])
                 providers.append(stream)
         except (KeyError, TypeError, IndexError, Exception):
