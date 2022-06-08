@@ -495,11 +495,14 @@ def radarr_moviefile_delete():
         ]
     }
 
-    if radarr_envs.deleted_moviereleasegroup == "":
+    if radarr_envs.scene_name == "":
         del message['embeds'][0]['fields'][4]
 
+    if radarr_envs.deleted_moviereleasegroup == "":
+        del message['embeds'][0]['fields'][3]
+
     if radarr_envs.deleted_moviefilesize == 0:
-        del message['embeds'][0]['fields'][2]
+        del message['embeds'][0]['fields'][1]
 
     if radarr_envs.deleted_moviefilereason == "":
         del message['embeds'][0]['description']

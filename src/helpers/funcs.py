@@ -467,7 +467,7 @@ def get_sonarr_overview(tvdb_id, imdb_id):
     try:
         series = requests_retry_session().get(
             f'https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}?api_key={config.TMDB_APIKEY}&language=en',
-            timeout=20).json()
+            timeout=60).json()
         overview = series["overview"]
         if overview == "":
             overview = ""
@@ -506,14 +506,14 @@ def get_sonarr_episodesample(tvdb_id, imdb_id, season, episode, skyhook):
     try:
         episode_data = requests_retry_session().get(
             f'https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}/season/{season}/episode/{episode}/images?api_key={config.TMDB_APIKEY}&language=en',
-            timeout=20).json()
+            timeout=60).json()
         sample = episode_data['stills'][0]['file_path']
         sample = 'https://image.tmdb.org/t/p/original' + sample
     except (KeyError, TypeError, IndexError, Exception):
         try:
             sp = requests_retry_session().get(
                 f'https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}/images?api_key={config.TMDB_APIKEY}&language=en',
-                timeout=20).json()
+                timeout=60).json()
             poster = sp['posters'][0]['file_path']
             sample = 'https://image.tmdb.org/t/p/original' + poster
         except (KeyError, TypeError, IndexError, Exception):
@@ -548,9 +548,9 @@ def get_sonarr_episodeoverview(season, episode, tvdb_id, imdb_id):
         overview = episode_data['overview']
     except (KeyError, TypeError, IndexError, Exception):
         log.warning("Couldn't fetch episode overview. Falling back to series overview.")
-        series = f'https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}?api_key={config.TMDB_APIKEY}&language=en'
-        series_data = requests_retry_session().get(series, timeout=20).json()
-        overview = series_data['overview']
+        series = requests_retry_session().get(f'https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}?api_key={config.TMDB_APIKEY}&language=en',
+            timeout=60).json()
+        overview = series['overview']
 
     if len(overview) >= 300:
         overview = overview[:250]

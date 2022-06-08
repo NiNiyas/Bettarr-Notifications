@@ -78,7 +78,6 @@ def sonarr_grab():
                    f"\n<b>Network</b>: {funcs.get_sonarr_network(skyhook)}"
                    f"\n<b>Content Rating</b>: {funcs.get_sonarr_contentrating(skyhook)}"
                    f"\n<b>Genre(s)</b>: {funcs.get_sonarrgenres(skyhook)}"
-                   f"\n<b>Air Date</b>: {sonarr_envs.air_date} UTC"
                    f"\n<b>Cast</b>: {cast}"
                    f"\n<b>Director</b>: <a href={funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0]}>{funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1]}</a>"
                    f"\n<b>Available On</b> ({funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1]}): {funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0]}"
@@ -115,7 +114,7 @@ def sonarr_grab():
 
     if sonarr_envs.release_group == "":
         import re
-        pattern = r'<b>Release Group<\/b>: Unknown'
+        pattern = r'<b>Release Group<\/b>: '
         log.warning("Release Group field is unknown, removing it..")
         mod_string = re.sub(pattern, '', message["message"])
         message["message"] = mod_string
@@ -154,6 +153,11 @@ def sonarr_import():
     else:
         content = f'Downloaded <b>{sonarr_envs.media_title}</b> - <b>S{season}E{episode}</b> - <b>{sonarr_envs.import_episode_title}</b>'
 
+    if sonarr_envs.scene_name != "":
+        release_name = f"\n<b>Release Name</b>: {sonarr_envs.scene_name}"
+    else:
+        release_name = ""
+
     message = {
         "html": 1,
         "user": config.PUSHOVER_USER,
@@ -171,20 +175,28 @@ def sonarr_import():
                    f"\n<b>Content Rating</b>: {funcs.get_sonarr_contentrating(skyhook)}"
                    f"\n<b>Network</b>: {funcs.get_sonarr_network(skyhook)}"
                    f"\n<b>Genre(s)</b>: {funcs.get_sonarrgenres(skyhook)}"
-                   f"\n<b>Release Name</b>: {sonarr_envs.scene_name}"
+                   f"\n<b>Air Date</b>: {sonarr_envs.delete_air_date} UTC"
+                   f"{release_name}"
     }
+
+    if funcs.get_sonarr_episodeoverview(season, episode, sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[2] == "...":
+        import re
+        pattern = r'<strong>Overview<\/strong> ...'
+        log.warning("Overview field is unknown, removing it..")
+        mod_string = re.sub(pattern, '', message["message"])
+        message["message"] = mod_string
+
+    if sonarr_envs.delete_air_date == "":
+        import re
+        pattern = r'<b>Air Date<\/b> UTC'
+        log.warning("Air Date field is unknown, removing it..")
+        mod_string = re.sub(pattern, '', message["message"])
+        message["message"] = mod_string
 
     if funcs.get_sonarr_contentrating(skyhook) == "Unknown":
         import re
         pattern = r'<b>Content Rating<\/b>: '
         log.warning("Content Rating field is unknown, removing it..")
-        mod_string = re.sub(pattern, '', message["message"])
-        message["message"] = mod_string
-
-    if sonarr_envs.scene_name == "":
-        import re
-        pattern = r'<b>Release Name<\/b>: Unknown'
-        log.warning("Release Name field is unknown, removing it..")
         mod_string = re.sub(pattern, '', message["message"])
         message["message"] = mod_string
 
@@ -276,7 +288,7 @@ def sonarr_delete_episode():
 
     if sonarr_envs.delete_release_group == "":
         import re
-        pattern = r'<b>Release Group<\/b>: Unknown'
+        pattern = r'<b>Release Group<\/b>: '
         log.warning("Release Group field is unknown, removing it..")
         mod_string = re.sub(pattern, '', message["message"])
         message["message"] = mod_string

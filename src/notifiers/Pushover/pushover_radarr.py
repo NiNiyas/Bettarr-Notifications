@@ -103,7 +103,7 @@ def radarr_grab():
     if radarr_envs.release_group == "":
         import re
         string = message["message"]
-        pattern = r'<b>Release Group<\/b>: Unknown'
+        pattern = r'<b>Release Group<\/b>: '
         log.warning("Release group field is unknown, removing it..")
         mod_string = re.sub(pattern, '', string)
         message["message"] = mod_string
@@ -130,7 +130,7 @@ def radarr_grab():
             log.error("-------------------------------------------------------")
     except RequestException as e:
         log.error(e)
-        log.error("Error occured when trying to grab test notification to Pushover.")
+        log.error("Error occured when trying to grab notification to Pushover.")
 
 
 def radarr_import():
@@ -167,7 +167,7 @@ def radarr_import():
     if radarr_envs.scene_name == "":
         import re
         string = message["message"]
-        pattern = r'<b>Release Name<\/b>: Unknown'
+        pattern = r'<b>Release Name<\/b>: '
         log.warning("Scene name field is unknown, removing it..")
         mod_string = re.sub(pattern, '', string)
         message["message"] = mod_string
@@ -190,7 +190,7 @@ def radarr_import():
             log.error("-------------------------------------------------------")
     except RequestException as e:
         log.error(e)
-        log.error("Error occured when trying to import test notification to Pushover.")
+        log.error("Error occured when trying to import notification to Pushover.")
 
 
 def radarr_health():
@@ -226,7 +226,7 @@ def radarr_health():
             log.error("-------------------------------------------------------")
     except RequestException as e:
         log.error(e)
-        log.error("Error occured when trying to health test notification to Pushover.")
+        log.error("Error occured when trying to health notification to Pushover.")
 
 
 def radarr_update():
@@ -339,7 +339,7 @@ def radarr_moviefile_delete():
     if radarr_envs.scene_name == "":
         import re
         string = message["message"]
-        pattern = r'<b>Release Name<\/b>: Unknown'
+        pattern = r'<b>Release Name<\/b>: '
         log.warning("Release Name field is Unknown, removing it..")
         mod_string = re.sub(pattern, '', string)
         message["message"] = mod_string
@@ -347,7 +347,7 @@ def radarr_moviefile_delete():
     if radarr_envs.deleted_moviereleasegroup == "":
         import re
         string = message["message"]
-        pattern = r'<b>Release Group<\/b>: Unknown'
+        pattern = r'<b>Release Group<\/b>: '
         log.warning("Release Group field is Unknown, removing it..")
         mod_string = re.sub(pattern, '', string)
         message["message"] = mod_string

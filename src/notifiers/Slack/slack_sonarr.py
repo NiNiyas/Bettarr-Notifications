@@ -139,10 +139,6 @@ def sonarr_grab():
                     {
                         "type": "mrkdwn",
                         "text": f"*Director*\n<{funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0]}|{funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1]}>"
-                    },
-                    {
-                        "type": "mrkdwn",
-                        "text": f'*Air Date*\n{sonarr_envs.air_date} UTC'
                     }
                 ]
             },
@@ -292,6 +288,10 @@ def sonarr_import():
                     },
                     {
                         "type": "mrkdwn",
+                        "text": f"*Air Date*\n{sonarr_envs.delete_air_date} UTC"
+                    },
+                    {
+                        "type": "mrkdwn",
                         "text": f"*Release Name*\n`{sonarr_envs.scene_name}`"
                     }
                 ]
@@ -324,8 +324,15 @@ def sonarr_import():
         ]
     }
 
-    if sonarr_envs.scene_name == "":
+    if sonarr_envs.delete_air_date == "":
         del message['blocks'][5]['fields'][5]
+
+    if funcs.get_sonarr_episodeoverview(season, episode, sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1] == "":
+        del message['blocks'][1]
+        del message['blocks'][1]
+
+    if sonarr_envs.scene_name == "":
+        del message['blocks'][5]['fields'][6]
 
     if funcs.get_sonarr_contentrating(skyhook) == "Unknown":
         del message['blocks'][5]['fields'][2]

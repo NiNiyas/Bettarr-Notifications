@@ -631,6 +631,9 @@ def radarr_moviefile_delete():
         ]
     }
 
+    if radarr_envs.scene_name == "":
+        del message['blocks'][4]['fields'][4]
+
     if radarr_envs.deleted_moviefilereason == "":
         del message['blocks'][1]
         del message['blocks'][2]

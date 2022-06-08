@@ -90,7 +90,7 @@ def radarr_grab():
     if radarr_envs.release_group == "":
         import re
         string = message["text"]
-        pattern = r'<b>Release Group<\/b>: Unknown'
+        pattern = r'<b>Release Group<\/b>: '
         mod_string = re.sub(pattern, '', string)
         message["text"] = mod_string
 
@@ -139,7 +139,7 @@ def radarr_import():
     if radarr_envs.scene_name == "":
         import re
         string = message["text"]
-        pattern = r'<b>Release Name<\/b>: Unknown'
+        pattern = r'<b>Release Name<\/b>: '
         mod_string = re.sub(pattern, '', string)
         message["text"] = mod_string
 
@@ -278,7 +278,7 @@ def radarr_moviefile_delete():
     if radarr_envs.scene_name == "":
         import re
         string = message["text"]
-        pattern = r'<b>Release Name<\/b>: Unknown'
+        pattern = r'<b>Release Name<\/b>: '
         log.warning("Release Name field is Unknown, removing it..")
         mod_string = re.sub(pattern, '', string)
         message["text"] = mod_string
@@ -286,7 +286,7 @@ def radarr_moviefile_delete():
     if radarr_envs.deleted_moviereleasegroup == "":
         import re
         string = message["text"]
-        pattern = r'<b>Release Group<\/b>: Unknown'
+        pattern = r'<b>Release Group<\/b>: '
         log.warning("Release Group field is Unknown, removing it..")
         mod_string = re.sub(pattern, '', string)
         message["text"] = mod_string

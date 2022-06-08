@@ -63,7 +63,6 @@ def sonarr_grab():
                 f"\n<b>Network</b>: {funcs.get_sonarr_network(skyhook)}"
                 f"\n<b>Content Rating</b>: {funcs.get_sonarr_contentrating(skyhook)}"
                 f"\n<b>Genre(s)</b>: {funcs.get_sonarrgenres(skyhook)}"
-                f"\n<b>Air Date</b>: {sonarr_envs.air_date} UTC"
                 f"\n<a href='{funcs.get_posterseries(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)}'>&#8204;</a>"
                 f"\n<b>Cast</b>: {cast}"
                 f"\n<b>Director</b>: <a href='{funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0]}'>{funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1]}</a>"
@@ -135,6 +134,11 @@ def sonarr_import():
     else:
         content = f'Downloaded <b>{sonarr_envs.media_title}</b> - <b>S{season}E{episode}</b> - <b>{sonarr_envs.import_episode_title}</b>'
 
+    if sonarr_envs.scene_name != "":
+        release_name = f"\n<b>Release Name</b>: {sonarr_envs.scene_name}"
+    else:
+        release_name = ""
+
     message = {
         "chat_id": config.TELEGRAM_CHAT_ID,
         "parse_mode": "HTML",
@@ -146,10 +150,24 @@ def sonarr_import():
                 f"\n<b>Content Rating</b>: {funcs.get_sonarr_contentrating(skyhook)}"
                 f"\n<b>Network</b>: {funcs.get_sonarr_network(skyhook)}"
                 f"\n<b>Genre(s)</b>: {funcs.get_sonarrgenres(skyhook)}"
-                f"\n<b>Release Name</b>: {sonarr_envs.scene_name}"
+                f"\n<b>Air Date</b>: {sonarr_envs.delete_air_date} UTC"
+                f"{release_name}"
                 f"\n<a href='{funcs.get_sonarr_episodesample(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, season, episode, skyhook)}'>&#8204;</a>"
-
     }
+
+    if funcs.get_sonarr_episodeoverview(season, episode, sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[2] == "...":
+        import re
+        pattern = r'<strong>Overview<\/strong> ...'
+        log.warning("Overview field is unknown, removing it..")
+        mod_string = re.sub(pattern, '', message["text"])
+        message["text"] = mod_string
+
+    if sonarr_envs.delete_air_date == "":
+        import re
+        pattern = r'<b>Air Date<\/b> UTC'
+        log.warning("Air Date field is unknown, removing it..")
+        mod_string = re.sub(pattern, '', message["text"])
+        message["text"] = mod_string
 
     if funcs.get_sonarr_contentrating(skyhook) == "Unknown":
         import re
@@ -157,13 +175,6 @@ def sonarr_import():
         log.warning("Content Rating field is unknown, removing it..")
         mod_string = re.sub(pattern, '', message["text"])
         message["text"] = mod_string
-
-    if sonarr_envs.scene_name == "":
-        import re
-        pattern = r'<b>Release Name<\/b>: Unknown'
-        mod_string = re.sub(pattern, '', message["text"])
-        message["text"] = mod_string
-        log.warning("Scene name field is unknown, removing it..")
 
     try:
         sender = requests.post(config.TELEGRAM_SONARR_URL, headers=HEADERS, json=message)
@@ -243,7 +254,7 @@ def sonarr_delete_episode():
 
     if sonarr_envs.scene_name == "":
         import re
-        pattern = r'<b>Release Name<\/b>: Unknown'
+        pattern = r'<b>Release Name<\/b>: '
         mod_string = re.sub(pattern, '', message["text"])
         message["text"] = mod_string
         log.warning("Scene name field is unknown, removing it..")

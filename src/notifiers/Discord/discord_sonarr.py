@@ -115,11 +115,6 @@ def sonarr_grab():
                         "inline": False
                     },
                     {
-                        "name": "Air Date",
-                        "value": f'{sonarr_envs.air_date} UTC',
-                        "inline": False
-                    },
-                    {
                         "name": "Cast",
                         "value": cast,
                         "inline": False
@@ -150,7 +145,7 @@ def sonarr_grab():
     }
 
     if funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0] == "None":
-        del message['embeds'][0]['fields'][11]
+        del message['embeds'][0]['fields'][10]
 
     if cast == "Unknown":
         del message['embeds'][0]['fields'][9]
@@ -159,7 +154,7 @@ def sonarr_grab():
         del message['embeds'][0]['fields'][4]
 
     if funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1] == "Unknown":
-        del message['embeds'][0]['fields'][10]
+        del message['embeds'][0]['fields'][9]
 
     if funcs.get_sonarr_contentrating(skyhook) == "Unknown":
         del message['embeds'][0]['fields'][6]
@@ -246,6 +241,11 @@ def sonarr_import():
                         "inline": False
                     },
                     {
+                        "name": "Air Date",
+                        "value": f'{sonarr_envs.delete_air_date} UTC',
+                        "inline": False
+                    },
+                    {
                         "name": "Release Name",
                         "value": f"`{sonarr_envs.scene_name}`",
                         "inline": False
@@ -255,11 +255,18 @@ def sonarr_import():
         ]
     }
 
+    if funcs.get_sonarr_episodeoverview(season, episode, sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[
+        0] == "**Overview**\n":
+        del message['embeds'][0]['description']
+
     if sonarr_envs.scene_name == "":
-        del message['embeds'][0]['fields'][5]
+        del message['embeds'][0]['fields'][6]
 
     if funcs.get_sonarr_contentrating(skyhook) == "Unknown":
         del message['embeds'][0]['fields'][2]
+
+    if sonarr_envs.delete_air_date == "":
+        del message['embeds'][0]['fields'][5]
 
     try:
         sender = requests.post(config.SONARR_DISCORD_WEBHOOK, headers=HEADERS, json=message)
