@@ -1,7 +1,7 @@
 import os
 
-import requests
 import config
+import requests
 from loguru import logger as log
 
 
@@ -56,20 +56,24 @@ def mdblist_movie():
             discord_ratings = f"\n\n**Ratings**\n**IMDb**: {imdb_rating} | **Metacritic**: {metacritic} | **Rotten Tomatoes**: {rottentomatoes} | **TMDb**: {tmdb_rating} | **Trakt**: {trakt_rating} | **LetterBoxd**: {letterboxd}"
             slack_ratings = f"\n\n*Ratings*\n*IMDb*: {imdb_rating} | *Metacritic*: {metacritic} | *Rotten Tomatoes*: {rottentomatoes} | *TMDb*: {tmdb_rating} | *Trakt*: {trakt_rating} | *LetterBoxd*: {letterboxd}"
             html_ratings = f"\n<strong>Ratings</strong>\n<b>IMDb</b>: {imdb_rating}\n<b>Metacritic</b>: {metacritic}\n<b>Rotten Tomatoes</b>: {rottentomatoes}\n<b>TMDb</b>: {tmdb_rating}\n<b>Trakt</b>: {trakt_rating}\n<b>LetterBoxd</b>: {letterboxd}"
+            ntfy_ratings = f"\nRatings\nIMDb: {imdb_rating}\nMetacritic: {metacritic}\nRotten Tomatoes: {rottentomatoes}\nTMDb: {tmdb_rating}\nTrakt: {trakt_rating}\nLetterBoxd: {letterboxd}"
+
         else:
             discord_ratings = ""
             slack_ratings = ""
             html_ratings = ""
             certification = "Unknown"
+            ntfy_ratings = ""
             log.warning("Failed to fetch ratings and trailer. API limit reached.")
     else:
         discord_ratings = ""
         slack_ratings = ""
         html_ratings = ""
         certification = "Unknown"
+        ntfy_ratings = ""
         log.warning("Didn't fetch ratings, trailer and certification because MDBLIST_APIKEY is not set in config.")
 
-    return discord_ratings, certification, slack_ratings, html_ratings
+    return discord_ratings, certification, slack_ratings, html_ratings, ntfy_ratings
 
 
 def mdblist_tv():
@@ -135,6 +139,7 @@ def mdblist_tv():
             discord_ratings = f"\n\n**Ratings**\n**IMDb**: {imdb_rating} | **Metacritic**: {metacritic} | **Rotten Tomatoes**: {rottentomatoes} | **TMDb**: {tmdb_rating} | **Trakt**: {trakt_rating} | **LetterBoxd**: {letterboxd}"
             slack_ratings = f"\n\n*Ratings*\n*IMDb*: {imdb_rating} | *Metacritic*: {metacritic} | *Rotten Tomatoes*: {rottentomatoes} | *TMDb*: {tmdb_rating} | *Trakt*: {trakt_rating} | *LetterBoxd*: {letterboxd}"
             html_ratings = f"\n<b>Ratings</b>\n<b>IMDb</b>: {imdb_rating}\n<b>Metacritic</b>: {metacritic}\n<b>Rotten Tomatoes</b>: {rottentomatoes}\n<b>TMDb</b>: {tmdb_rating}\n<b>Trakt</b>: {trakt_rating}\n<b>LetterBoxd</b>: {letterboxd}"
+            ntfy_ratings = f"\nRatings\nIMDb: {imdb_rating}\nMetacritic: {metacritic}\nRotten Tomatoes: {rottentomatoes}\nTMDb: {tmdb_rating}\nTrakt: {trakt_rating}\nLetterBoxd: {letterboxd}"
 
             try:
                 trailer = mdblist_data['trailer']
@@ -150,6 +155,7 @@ def mdblist_tv():
             slack_ratings = ""
             html_ratings = ""
             certification = ""
+            ntfy_ratings = ""
             backdrop = "https://i.imgur.com/IMQb6ia.png"
             poster = "https://i.imgur.com/GoqfZJe.jpg"
             log.warning("Failed to fetch ratings and trailer. API limit reached.")
@@ -159,8 +165,9 @@ def mdblist_tv():
         certification = ""
         slack_ratings = ""
         html_ratings = ""
+        ntfy_ratings = ""
         backdrop = "https://i.imgur.com/IMQb6ia.png"
         poster = "https://i.imgur.com/GoqfZJe.jpg"
         log.warning("Didn't fetch ratings, trailer and certification because MDBLIST_APIKEY is not set in config.")
 
-    return discord_ratings, certification, trailer, poster, backdrop, slack_ratings, html_ratings
+    return discord_ratings, certification, trailer, poster, backdrop, slack_ratings, html_ratings, ntfy_ratings

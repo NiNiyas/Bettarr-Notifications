@@ -6,7 +6,7 @@ from helpers import funcs, ratings, radarr_envs
 from loguru import logger as log
 from requests import RequestException
 
-HEADERS = {"content-type": "application/json"}
+config.NTFY_HEADERS = {"content-type": "application/json"}
 
 
 def radarr_test():
@@ -24,7 +24,7 @@ def radarr_test():
         "message": "<b>Bettarr Notifications for Radarr test message.\nThank you for using the script!</b>"}
 
     try:
-        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=test)
+        sender = requests.post(config.PUSHOVER_API_URL, headers=config.NTFY_HEADERS, json=test)
         if sender.status_code == 200:
             log.success("Successfully sent test notification to Pushover.")
         else:
@@ -80,7 +80,7 @@ def radarr_grab():
 
     if funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0] == "None":
         import re
-        pattern = r'<b>Available On \([^()]*\)<\/b>: None'
+        pattern = r'<b>Available On<\/b> \([^()]*\): None'
         log.warning("Available On field is unknown, removing it..")
         mod_string = re.sub(pattern, '', message["message"])
         message["message"] = mod_string
@@ -138,9 +138,14 @@ def radarr_import():
     radarr = radarr.json()
 
     if radarr_envs.is_upgrade == "True":
-        content = f"Upgraded <b>{radarr_envs.media_title}</b> ({radarr_envs.year})\n\n"
+        content = f"Upgraded <b>{radarr_envs.media_title}</b> ({radarr_envs.year}).\n\n"
     else:
-        content = f"Downloaded <b>{radarr_envs.media_title}</b> ({radarr_envs.year})\n\n"
+        content = f"Downloaded <b>{radarr_envs.media_title}</b> ({radarr_envs.year}).\n\n"
+
+    if funcs.get_radarr_physicalrelease(radarr) != "Unknown":
+        physical_releasedate = f"\n<b>Physical Release</b>: {funcs.get_radarr_physicalrelease(radarr)}"
+    else:
+        physical_releasedate = ""
 
     message = {
         "html": 1,
@@ -157,7 +162,7 @@ def radarr_import():
                    f"<strong>Overview</strong>\n{funcs.get_radarr_overview(radarr)[2]}"
                    f"\n\n<b>Quality</b>: {radarr_envs.import_quality}"
                    f"\n<b>Release Date</b>: {funcs.get_radarr_releasedate(radarr_envs.tmdb_id)}"
-                   f"\n<b>Physical Release</b>: {funcs.get_radarr_physicalrelease(radarr)}"
+                   f"{physical_releasedate}"
                    f"\n<b>Genre(s)</b>: {funcs.get_radarr_genres(radarr)}"
                    f"\n<b>Trailer</b>: <a href={funcs.get_radarr_trailer(radarr)}>Youtube</a>"
                    f"\n<b>Release Name</b>: {radarr_envs.scene_name}"
@@ -205,7 +210,7 @@ def radarr_health():
         "expire": 3600,
         "url": config.RADARR_URL,
         "url_title": "Visit Radarr",
-        "message": "<b>An issue has occured on Radarr</b>"
+        "message": "<b>An issue has occured on Radarr.</b>"
                    f"\n\n<b>Error Level</b>: {radarr_envs.issue_level}"
                    f"\n<b>Error Type</b>: {radarr_envs.issue_type}"
                    f"\n<b>Error Message</b>: {radarr_envs.issue_message}"
@@ -213,7 +218,7 @@ def radarr_health():
     }
 
     try:
-        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=message)
+        sender = requests.post(config.PUSHOVER_API_URL, headers=config.NTFY_HEADERS, json=message)
         if sender.status_code == 200:
             log.success("Successfully sent health notification to Pushover.")
         else:
@@ -230,6 +235,12 @@ def radarr_health():
 
 
 def radarr_update():
+    update_message = radarr_envs.update_message
+
+    if len(update_message) >= 250:
+        update_message = update_message[:200]
+        update_message += '...'
+
     message = {
         "html": 1,
         "user": config.PUSHOVER_USER,
@@ -244,11 +255,11 @@ def radarr_update():
         "message": f"A new update <b>({radarr_envs.new_version})</b> is available for Radarr."
                    f"\n\nNew version: {radarr_envs.new_version}"
                    f"\nOld version: {radarr_envs.old_version}"
-                   f"\nUpdate Notes:\n{radarr_envs.update_message}"
+                   f"\nUpdate Notes:\n{update_message}"
     }
 
     try:
-        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=message)
+        sender = requests.post(config.PUSHOVER_API_URL, headers=config.NTFY_HEADERS, json=message)
         if sender.status_code == 200:
             log.success("Successfully sent app update notification to Pushover.")
         else:
@@ -291,7 +302,7 @@ def radarr_movie_delete():
         message["message"] = mod_string
 
     try:
-        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=message)
+        sender = requests.post(config.PUSHOVER_API_URL, headers=config.NTFY_HEADERS, json=message)
         if sender.status_code == 200:
             log.success("Successfully sent movie delete notification to Pushover.")
         else:
@@ -323,8 +334,9 @@ def radarr_moviefile_delete():
                    f"\n<b>Quality</b>: {radarr_envs.import_quality}"
                    f"\n<b>Size</b>: {funcs.convert_size(int(radarr_envs.deleted_moviefilesize))}"
                    f"\n<b>Release Group</b>: {radarr_envs.deleted_moviereleasegroup}"
-                   f"\n\n<b>File name</b>: {radarr_envs.scene_name}"
-                   f"\n\n<b>File location</b>: {radarr_envs.deleted_moviefilepath}"
+                   f"\n\n<b>File name</b>:\n{radarr_envs.scene_name}"
+                   f"\n\n<b>File location</b>:\n"
+                   f"{radarr_envs.deleted_moviefilepath}"
                    f"\n\n<b>View Details</b>: <a href={funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[0]}>IMDb</a> | <a href={funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[1]}>TheMovieDb</a> | <a href={funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[2]}>Trakt</a> | <a href={funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[3]}>MovieChat</a>"
     }
 
@@ -353,7 +365,7 @@ def radarr_moviefile_delete():
         message["message"] = mod_string
 
     try:
-        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=message)
+        sender = requests.post(config.PUSHOVER_API_URL, headers=config.NTFY_HEADERS, json=message)
         if sender.status_code == 200:
             log.success("Successfully sent movie file delete notification to Pushover.")
         else:

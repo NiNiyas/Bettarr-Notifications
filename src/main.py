@@ -15,7 +15,7 @@ from notifiers.Telegram import *
 from notifiers.ntfy import *
 
 fmt = "{time:YYYY-MM-DD HH:mm:ss Z} | {name} | {level} | {message}"
-LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG")
+LOG_LEVEL = config.LOG_LEVEL
 log.add(sys.stderr, level="INFO")
 log.remove()
 dir_path = os.path.dirname(os.path.realpath(__file__))

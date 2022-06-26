@@ -98,10 +98,10 @@ Create an application on [Pushover](https://pushover.net).
 
 Fill in `PUSHOVER_USER` with your user token.
 
-If you want to change priority, fill in `PUSHOVER_PRIORITY`. [List](https://pushover.net/api#priority) of available
-priorities.\
-If you want to change notification sound, fill in `PUSHOVER_SOUND`. [List](https://pushover.net/api#sounds) of available
-notification sounds.\
+If you want to change priority, fill in `PUSHOVER_PRIORITY`. List of available
+priorities can be found [here](https://pushover.net/api#priority).\
+If you want to change notification sound, fill in `PUSHOVER_SOUND`. List of available
+notification sounds can be found [here](https://pushover.net/api#sounds).\
 If you want to route message to different device, fill in`PUSHOVER_DEVICE`.
 
 Emergency priority (2) has default 30 second timeout between retries and will expire after 1 hour.
@@ -116,4 +116,14 @@ Emergency priority (2) has default 30 second timeout between retries and will ex
 
 ## [ntfy](https://ntfy.sh)
 
-I probably will be supporting ntfy in the near future.
+Fill in your server url `NTFY_URL`. \
+If you have got authentication set up, fill in `NTFY_HEADER` with **Basic Auth** headers. More details can be found [here](https://ntfy.sh/docs/publish/#authentication). \
+If you want to change the priority, fill in `NTFY_*_PRIORITY`. List of available priorities can be found [here](https://ntfy.sh/docs/publish/#message-priority). Default is `3`(i.e., Default priority.).
+
+##### Radarr
+
+- Fill in `NTFY_RADARR_TOPIC`, `NTFY_RADARR_HEALTH_TOPIC` and `NTFY_RADARR_MISC_TOPIC`.
+
+##### Sonarr
+
+- Fill in `NTFY_SONARR_TOPIC`, `NTFY_SONARR_HEALTH_TOPIC` and `NTFY_SONARR_MISC_TOPIC`.

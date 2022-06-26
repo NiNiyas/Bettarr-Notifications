@@ -374,7 +374,7 @@ def get_posterseries(tvdb_id, imdb_id):
         poster = poster_path['poster_path']
         poster = "https://image.tmdb.org/t/p/original/" + poster
     except (KeyError, TypeError, IndexError, Exception):
-        poster = 'http://gearr.scannain.com/wp-content/uploads/2015/02/noposter.jpg'
+        poster = 'https://i.imgur.com/PgwcPyw.jpg'
 
     return poster
 

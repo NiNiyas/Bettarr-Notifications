@@ -1,25 +1,28 @@
 # Required
-SONARR = False # set to True to enable
-SONARR_URL = "http://localhost:8989/" # with url trailing
+SONARR = False  # set to True to enable
+SONARR_URL = "http://localhost:8989/"  # with url trailing
 SONARR_APIKEY = ""
 
-RADARR = False # set to True to enable
-RADARR_URL = "http://localhost:7878/" # with url trailing
+RADARR = False  # set to True to enable
+RADARR_URL = "http://localhost:7878/"  # with url trailing
 RADARR_APIKEY = ""
 
 TMDB_APIKEY = ""
-TMDB_URL = "api.themoviedb.org" # no need to change this if your isp doesn't block it
+TMDB_URL = "api.themoviedb.org"  # no need to change this if your isp doesn't block it
 TMDB_COUNTRY_CODE = "US"
 
 # Optional
 MDBLIST_APIKEY = ""
 
+# Logging
+LOG_LEVEL = "INFO"  # or `DEBUG`
+
 # Notifiers
-DISCORD = False # set to True to enable
-SLACK = False # set to True to enable
-PUSHOVER = False # set to True to enable
-TELEGRAM = False # set to True to enable
-ntfy = False # NOT IMPLEMENTED
+DISCORD = False  # set to True to enable
+SLACK = False  # set to True to enable
+PUSHOVER = False  # set to True to enable
+TELEGRAM = False  # set to True to enable
+ntfy = False  # set to True to enable
 
 # Discord Configuration
 ## Radarr
@@ -49,7 +52,7 @@ SONARR_HEALTH_SLACK_WEBHOOK = ""
 SONARR_MISC_SLACK_WEBHOOK = ""
 
 # Pushover Configuration
-PUSHOVER_API_URL = "https://api.pushover.net/1/messages.json" # no need to change this
+PUSHOVER_API_URL = "https://api.pushover.net/1/messages.json"  # no need to change this
 PUSHOVER_USER = ""
 PUSHOVER_PRIORITY = ""
 PUSHOVER_SOUND = ""
@@ -82,15 +85,24 @@ SONARR_TELEGRAM_BOT_ID = ""
 SONARR_HEALTH_TELEGRAM_BOT_ID = ""
 SONARR_MISC_TELEGRAM_BOT_ID = ""
 
-TELEGRAM_RADARR_URL = f"https://api.telegram.org/bot{RADARR_TELEGRAM_BOT_ID}/sendMessage" # no need to change this
-TELEGRAM_SONARR_URL = f"https://api.telegram.org/bot{SONARR_TELEGRAM_BOT_ID}/sendMessage" # no need to change this
-TELEGRAM_RADARR_HEALTH_URL = f"https://api.telegram.org/bot{RADARR_HEALTH_TELEGRAM_BOT_ID}/sendMessage" # no need to change this
-TELEGRAM_SONARR_HEALTH_URL = f"https://api.telegram.org/bot{SONARR_HEALTH_TELEGRAM_BOT_ID}/sendMessage" # no need to change this
-TELEGRAM_RADARR_MISC_URL = f"https://api.telegram.org/bot{RADARR_MISC_TELEGRAM_BOT_ID}/sendMessage" # no need to change this
-TELEGRAM_SONARR_MISC_URL = f"https://api.telegram.org/bot{SONARR_MISC_TELEGRAM_BOT_ID}/sendMessage" # no need to change this
+TELEGRAM_RADARR_URL = f"https://api.telegram.org/bot{RADARR_TELEGRAM_BOT_ID}/sendMessage"  # no need to change this
+TELEGRAM_SONARR_URL = f"https://api.telegram.org/bot{SONARR_TELEGRAM_BOT_ID}/sendMessage"  # no need to change this
+TELEGRAM_RADARR_HEALTH_URL = f"https://api.telegram.org/bot{RADARR_HEALTH_TELEGRAM_BOT_ID}/sendMessage"  # no need to change this
+TELEGRAM_SONARR_HEALTH_URL = f"https://api.telegram.org/bot{SONARR_HEALTH_TELEGRAM_BOT_ID}/sendMessage"  # no need to change this
+TELEGRAM_RADARR_MISC_URL = f"https://api.telegram.org/bot{RADARR_MISC_TELEGRAM_BOT_ID}/sendMessage"  # no need to change this
+TELEGRAM_SONARR_MISC_URL = f"https://api.telegram.org/bot{SONARR_MISC_TELEGRAM_BOT_ID}/sendMessage"  # no need to change this
 
 # ntfy Configuration
 NTFY_URL = ""
+NTFY_HEADER = {'Authorization': 'Basic qwrqwasdasd'}
 ## Radarr
 NTFY_RADARR_TOPIC = ""
-NTFY_RADARR_PRIORITY = ""
+NTFY_RADARR_PRIORITY = 3
+NTFY_RADARR_HEALTH_TOPIC = ""
+NTFY_RADARR_MISC_TOPIC = ""
+
+## Sonarr
+NTFY_SONARR_TOPIC = ""
+NTFY_SONARR_PRIORITY = ""
+NTFY_SONARR_HEALTH_TOPIC = ""
+NTFY_SONARR_MISC_TOPIC = ""

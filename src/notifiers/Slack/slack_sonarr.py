@@ -217,9 +217,9 @@ def sonarr_import():
     episode = funcs.format_season_episode(sonarr_envs.import_season, sonarr_envs.import_episode)[1]
 
     if sonarr_envs.is_upgrade == "True":
-        content = f'Upgraded *{sonarr_envs.media_title}* - *S{season}E{episode}* - *{sonarr_envs.import_episode_title}*'
+        content = f'Upgraded *{sonarr_envs.media_title}* - *S{season}E{episode}* - *{sonarr_envs.import_episode_title}*.'
     else:
-        content = f'Downloaded *{sonarr_envs.media_title}* - *S{season}E{episode}* - *{sonarr_envs.import_episode_title}*'
+        content = f'Downloaded *{sonarr_envs.media_title}* - *S{season}E{episode}* - *{sonarr_envs.import_episode_title}*.'
 
     message = {
         "channel": config.SLACK_CHANNEL,
@@ -370,7 +370,7 @@ def sonarr_health():
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*An issue has occured on Sonarr*."
+                    "text": "*An issue has occured on Sonarr.*"
                 }
             },
             {
@@ -447,13 +447,13 @@ def sonarr_delete_episode():
 
     message = {
         "channel": config.SLACK_CHANNEL,
-        "text": f"Deleted *{sonarr_envs.media_title}* - *S{season}E{episode}* - *{sonarr_envs.delete_episode_name}*",
+        "text": f"Deleted *{sonarr_envs.media_title}* - *S{season}E{episode}* - *{sonarr_envs.delete_episode_name}*.",
         "blocks": [
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"Deleted *{sonarr_envs.media_title}* - *S{season}E{episode}* - *{sonarr_envs.delete_episode_name}*",
+                    "text": f"Deleted *{sonarr_envs.media_title}* - *S{season}E{episode}* - *{sonarr_envs.delete_episode_name}*.",
                 }
             },
             {

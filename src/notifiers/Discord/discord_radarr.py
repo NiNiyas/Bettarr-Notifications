@@ -46,7 +46,7 @@ def radarr_grab():
 
     message = {
         "username": config.RADARR_DISCORD_USERNAME,
-        "content": f"Grabbed **{radarr_envs.media_title} ({radarr_envs.year})** from **{radarr_envs.release_indexer}**",
+        "content": f"Grabbed **{radarr_envs.media_title} ({radarr_envs.year})** from **{radarr_envs.release_indexer}**.",
         "embeds": [
             {
                 "description": f"{funcs.get_radarr_overview(radarr)[0]}{ratings.mdblist_movie()[0]}",
@@ -168,9 +168,9 @@ def radarr_import():
     radarr = radarr.json()
 
     if radarr_envs.is_upgrade == "True":
-        content = f"Upgraded **{radarr_envs.media_title}** ({radarr_envs.year})"
+        content = f"Upgraded **{radarr_envs.media_title}** ({radarr_envs.year})."
     else:
-        content = f"Downloaded **{radarr_envs.media_title}** ({radarr_envs.year})"
+        content = f"Downloaded **{radarr_envs.media_title}** ({radarr_envs.year})."
 
     message = {
         "username": config.RADARR_DISCORD_USERNAME,
@@ -234,8 +234,13 @@ def radarr_import():
         ]
     }
 
+    if funcs.get_radarr_physicalrelease(radarr) == "Unknown":
+        del message["embeds"][0]["fields"][2]
+        if radarr_envs.scene_name == "":
+            del message["embeds"][0]["fields"][4]
+
     if radarr_envs.scene_name == "":
-        del message["embeds"][0]["fields"][4]
+        del message["embeds"][0]["fields"][5]
 
     try:
         sender = requests.post(config.RADARR_DISCORD_WEBHOOK, headers=HEADERS, json=message, timeout=60)
@@ -415,7 +420,7 @@ def radarr_movie_delete():
         ]
     }
 
-    if radarr_envs.deleted_files == "False":
+    if radarr_envs.deleted_size == 0:
         del message['embeds'][0]['fields'][0]
 
     try:

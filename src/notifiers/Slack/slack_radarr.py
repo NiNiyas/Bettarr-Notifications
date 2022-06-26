@@ -45,13 +45,13 @@ def radarr_grab():
 
     message = {
         "channel": config.SLACK_CHANNEL,
-        "text": f"Grabbed *{radarr_envs.media_title} ({radarr_envs.year})* from *{radarr_envs.release_indexer}*",
+        "text": f"Grabbed *{radarr_envs.media_title} ({radarr_envs.year})* from *{radarr_envs.release_indexer}*.",
         "blocks": [
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"Grabbed *{radarr_envs.media_title}* ({radarr_envs.year}) from *{radarr_envs.release_indexer}*{ratings.mdblist_movie()[2]}"
+                    "text": f"Grabbed *{radarr_envs.media_title}* ({radarr_envs.year}) from *{radarr_envs.release_indexer}*.{ratings.mdblist_movie()[2]}"
                 }
             },
             {
@@ -196,9 +196,9 @@ def radarr_import():
     radarr = radarr.json()
 
     if radarr_envs.is_upgrade == "True":
-        content = f"Upgraded *{radarr_envs.media_title}* ({radarr_envs.year})"
+        content = f"Upgraded *{radarr_envs.media_title}* ({radarr_envs.year})."
     else:
-        content = f"Downloaded *{radarr_envs.media_title}* ({radarr_envs.year})"
+        content = f"Downloaded *{radarr_envs.media_title}* ({radarr_envs.year})."
 
     message = {
         "channel": config.SLACK_CHANNEL,
@@ -301,6 +301,11 @@ def radarr_import():
         ]
     }
 
+    if funcs.get_radarr_physicalrelease(radarr) == "Unknown":
+        del message["blocks"][5]["fields"][2]
+        if radarr_envs.scene_name == "":
+            del message["blocks"][5]["fields"][3]
+
     if radarr_envs.scene_name == "":
         del message["blocks"][5]["fields"][4]
 
@@ -324,13 +329,13 @@ def radarr_import():
 def radarr_health():
     message = {
         "channel": config.SLACK_CHANNEL,
-        "text": "*An issue has occured on Radarr*.",
+        "text": "*An issue has occured on Radarr.*",
         "blocks": [
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "*An issue has occured on Radarr*."
+                    "text": "*An issue has occured on Radarr.*"
                 }
             },
             {
@@ -532,7 +537,7 @@ def radarr_movie_delete():
         ]
     }
 
-    if radarr_envs.deleted_files == "False":
+    if radarr_envs.deleted_size == 0:
         del message['blocks'][2]['fields'][0]
 
     try:

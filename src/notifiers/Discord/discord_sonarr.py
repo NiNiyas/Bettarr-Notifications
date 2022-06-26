@@ -152,6 +152,8 @@ def sonarr_grab():
 
     if sonarr_envs.release_group == "":
         del message['embeds'][0]['fields'][4]
+        if funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1] == "Unknown":
+            del message['embeds'][0]['fields'][8]
 
     if funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1] == "Unknown":
         del message['embeds'][0]['fields'][9]
@@ -183,9 +185,9 @@ def sonarr_import():
     episode = funcs.format_season_episode(sonarr_envs.import_season, sonarr_envs.import_episode)[1]
 
     if sonarr_envs.is_upgrade == "True":
-        content = f'Upgraded **{sonarr_envs.media_title}** - **S{season}E{episode}** - **{sonarr_envs.import_episode_title}**'
+        content = f'Upgraded **{sonarr_envs.media_title}** - **S{season}E{episode}** - **{sonarr_envs.import_episode_title}**.'
     else:
-        content = f'Downloaded **{sonarr_envs.media_title}** - **S{season}E{episode}** - **{sonarr_envs.import_episode_title}**'
+        content = f'Downloaded **{sonarr_envs.media_title}** - **S{season}E{episode}** - **{sonarr_envs.import_episode_title}**.'
 
     message = {
         "username": config.SONARR_DISCORD_USERNAME,
@@ -288,6 +290,7 @@ def sonarr_import():
 def sonarr_health():
     message = {
         'username': config.SONARR_DISCORD_USERNAME,
+        'title': "**An issue has occured on Sonarr.**",
         'embeds': [
             {
                 'author': {
@@ -299,7 +302,6 @@ def sonarr_health():
                     "icon_url": config.SONARR_DISCORD_USERICON,
                     "text": "Sonarr"
                 },
-                'description': "**An issue has occured on Sonarr.**",
                 'timestamp': funcs.utc_now_iso(),
                 'color': random.choice(funcs.colors),
                 'fields': [
@@ -358,7 +360,7 @@ def sonarr_delete_episode():
 
     message = {
         'username': config.SONARR_DISCORD_USERNAME,
-        'content': f"Deleted **{sonarr_envs.media_title}** - **S{season}E{episode}** - **{sonarr_envs.delete_episode_name}**",
+        'content': f"Deleted **{sonarr_envs.media_title}** - **S{season}E{episode}** - **{sonarr_envs.delete_episode_name}**.",
         'embeds': [
             {
                 'author': {
@@ -472,7 +474,7 @@ def sonarr_delete_series():
                     "text": "Sonarr"
                 },
                 'timestamp': funcs.utc_now_iso(),
-                'title': f"Deleted `{sonarr_envs.media_title}` from Sonarr.",
+                'title': f"Deleted `{sonarr_envs.media_title}` from Sonarr",
                 'color': random.choice(funcs.colors),
                 'fields': [
                     {
@@ -533,7 +535,7 @@ def sonarr_update():
                     "text": "Sonarr"
                 },
                 'timestamp': funcs.utc_now_iso(),
-                'title': f"A new update `({sonarr_envs.new_version})` is available for Sonarr.",
+                'title': f"A new update `({sonarr_envs.new_version})` is available for Sonarr",
                 'description': f"**Update Notes**\n```{sonarr_envs.update_message}```",
                 'color': random.choice(funcs.colors),
                 'fields': [

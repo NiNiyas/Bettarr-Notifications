@@ -59,7 +59,7 @@ def radarr_grab():
                 f"\n<b>Release Date</b>: {funcs.get_radarr_releasedate(radarr_envs.tmdb_id)}"
                 f"\n<b>Content Rating</b>: {ratings.mdblist_movie()[1]}"
                 f"\n<b>Genre(s)</b>: {funcs.get_radarr_genres(radarr)}"
-                f"\n<a href='{funcs.get_radarrposter(radarr_envs.tmdb_id)}'>&#8204;</a>"
+                f"<a href='{funcs.get_radarrposter(radarr_envs.tmdb_id)}'>&#8204;</a>"
                 f"\n<b>Cast</b>: {cast}"
                 f"\n<b>Director</b>: <a href='{funcs.get_movie_crew(radarr_envs.tmdb_id)[0][0]}'>{funcs.get_movie_crew(radarr_envs.tmdb_id)[1][0]}</a>"
                 f"\n<b>Available On</b> ({funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[1]}): {funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0]}"
@@ -68,7 +68,7 @@ def radarr_grab():
 
     if funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0] == "None":
         import re
-        pattern = r'<b>Available On \([^()]*\)<\/b>: None'
+        pattern = r'<b>Available On<\/b> \([^()]*\): None'
         log.warning("Available On field is unknown, removing it..")
         mod_string = re.sub(pattern, '', message["text"])
         message["text"] = mod_string
@@ -116,9 +116,14 @@ def radarr_import():
     radarr = radarr.json()
 
     if radarr_envs.is_upgrade == "True":
-        content = f"Upgraded <b>{radarr_envs.media_title}</b> ({radarr_envs.year})\n\n"
+        content = f"Upgraded <b>{radarr_envs.media_title}</b> ({radarr_envs.year}).\n\n"
     else:
-        content = f"Downloaded <b>{radarr_envs.media_title}</b> ({radarr_envs.year})\n\n"
+        content = f"Downloaded <b>{radarr_envs.media_title}</b> ({radarr_envs.year}).\n\n"
+
+    if funcs.get_radarr_physicalrelease(radarr) != "Unknown":
+        physical_releasedate = f"\n<b>Physical Release</b>: {funcs.get_radarr_physicalrelease(radarr)}"
+    else:
+        physical_releasedate = ""
 
     message = {
         "chat_id": config.TELEGRAM_CHAT_ID,
@@ -129,9 +134,9 @@ def radarr_import():
                 f"<strong>Overview</strong>\n{funcs.get_radarr_overview(radarr)[2]}"
                 f"\n<b>Quality</b>: {radarr_envs.import_quality}"
                 f"\n<b>Release Date</b>: {funcs.get_radarr_releasedate(radarr_envs.tmdb_id)}"
-                f"\n<b>Physical Release</b>: {funcs.get_radarr_physicalrelease(radarr)}"
+                f"{physical_releasedate}"
                 f"\n<b>Genre(s)</b>: {funcs.get_radarr_genres(radarr)}"
-                f"\n<a href='{funcs.get_radarr_backdrop(radarr_envs.tmdb_id)}'>&#8204;</a>"
+                f"<a href='{funcs.get_radarr_backdrop(radarr_envs.tmdb_id)}'>&#8204;</a>"
                 f"\n<b>Trailer</b>: <a href='{funcs.get_radarr_trailer(radarr)}'>Youtube</a>"
                 f"\n<b>Release Name</b>: {radarr_envs.scene_name}"
     }
@@ -165,7 +170,7 @@ def radarr_health():
         "chat_id": config.TELEGRAM_HEALTH_CHAT_ID,
         "parse_mode": "HTML",
         "disable_notification": config.TELEGRAM_SILENT,
-        "text": "<b>An issue has occured on Radarr</b>"
+        "text": "<b>An issue has occured on Radarr.</b>"
                 f"\n\n<b>Error Level</b>: {radarr_envs.issue_level}"
                 f"\n<b>Error Type</b>: {radarr_envs.issue_type}"
                 f"\n<b>Error Message</b>: {radarr_envs.issue_message}"
@@ -262,8 +267,8 @@ def radarr_moviefile_delete():
                 f"\n<b>Quality</b>: {radarr_envs.import_quality}"
                 f"\n<b>Size</b>: {funcs.convert_size(int(radarr_envs.deleted_moviefilesize))}"
                 f"\n<b>Release Group</b>: {radarr_envs.deleted_moviereleasegroup}"
-                f"\n\n<b>File name</b>: {radarr_envs.scene_name}"
-                f"\n\n<b>File location</b>: {radarr_envs.deleted_moviefilepath}"
+                f"\n\n<b>File name</b>:\n{radarr_envs.scene_name}"
+                f"\n\n<b>File location</b>:\n{radarr_envs.deleted_moviefilepath}"
                 f"\n\n<b>View Details</b>: <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[0]}'>IMDb</a> | <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[1]}'>TheMovieDb</a> | <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[2]}'>Trakt</a> | <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[3]}'>MovieChat</a>"
     }
 

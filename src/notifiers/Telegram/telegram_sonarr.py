@@ -42,12 +42,17 @@ def sonarr_grab():
     title = f"Grabbed <b>{sonarr_envs.media_title}</b> - <b>S{season}E{episode}</b> - <b>{sonarr_envs.episode_title}</b> from <b>{sonarr_envs.release_indexer}</b>."
 
     try:
-        cast = f"<a href='{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}'>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}</a>, <a href='{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][2]}'>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][1]}</a>, <a href='{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][1]}'>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][2]}</a>"
+        cast = f"\nCast: <a href='{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}'>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}</a>, <a href='{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][2]}'>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][1]}</a>, <a href='{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][1]}'>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][2]}</a>"
     except (KeyError, TypeError, IndexError, Exception):
         try:
-            cast = f"<a href='{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}'>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}</a>"
+            cast = f"\nCast: <a href='{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}'>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}</a>"
         except (KeyError, TypeError, IndexError, Exception):
-            cast = "Unknown"
+            cast = ""
+
+    if funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1] == "Unknown":
+        director = ""
+    else:
+        director = f"\n<b>Director</b>: <a href='{funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0]}'>{funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1]}</a>"
 
     message = {
         "chat_id": config.TELEGRAM_CHAT_ID,
@@ -63,9 +68,9 @@ def sonarr_grab():
                 f"\n<b>Network</b>: {funcs.get_sonarr_network(skyhook)}"
                 f"\n<b>Content Rating</b>: {funcs.get_sonarr_contentrating(skyhook)}"
                 f"\n<b>Genre(s)</b>: {funcs.get_sonarrgenres(skyhook)}"
-                f"\n<a href='{funcs.get_posterseries(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)}'>&#8204;</a>"
-                f"\n<b>Cast</b>: {cast}"
-                f"\n<b>Director</b>: <a href='{funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0]}'>{funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1]}</a>"
+                f"<a href='{funcs.get_posterseries(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)}'>&#8204;</a>"
+                f"{cast}"
+                f"{director}"
                 f"\n<b>Available On</b> ({funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1]}):  {funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0]}"
                 f"\n<b>Trailer</b>: <a href='{funcs.get_sonarr_trailer()}'>YouTube</a>"
                 f"\n<b>View Details</b>: <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[3]}'>IMDb</a>, <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[0]}'>TheTVDB</a>, <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[4]}'>TheMovieDb</a>, <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[2]}'>Trakt</a>, <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[1]}'>TVmaze</a>"
@@ -79,26 +84,12 @@ def sonarr_grab():
         mod_string = re.sub(pattern, '', message["text"])
         message["text"] = mod_string
 
-    if cast == "Unknown":
-        import re
-        pattern = r'<b>Cast<\/b>: Unknown'
-        log.warning("Cast field is unknown, removing it..")
-        mod_string = re.sub(pattern, '', message["text"])
-        message["text"] = mod_string
-
     if funcs.get_sonarr_contentrating(skyhook) == "Unknown":
         import re
         pattern = r'<b>Content Rating<\/b>: '
         log.warning("Content Rating field is unknown, removing it..")
         mod_string = re.sub(pattern, '', message["text"])
         message["text"] = mod_string
-
-    if funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1] == "Unknown":
-        import re
-        pattern = r"<b>Director<\/b>: <a href='\[\]'>Unknown<\/a>"
-        mod_string = re.sub(pattern, '', message["text"])
-        message["text"] = mod_string
-        log.warning("Director field is unknown, removing it..")
 
     if sonarr_envs.release_group == "":
         import re
@@ -130,9 +121,9 @@ def sonarr_import():
     episode = funcs.format_season_episode(sonarr_envs.import_season, sonarr_envs.import_episode)[1]
 
     if sonarr_envs.is_upgrade == "True":
-        content = f'Upgraded <b>{sonarr_envs.media_title}</b> - <b>S{season}E{episode}</b> - <b>{sonarr_envs.import_episode_title}</b>'
+        content = f'Upgraded <b>{sonarr_envs.media_title}</b> - <b>S{season}E{episode}</b> - <b>{sonarr_envs.import_episode_title}</b>.'
     else:
-        content = f'Downloaded <b>{sonarr_envs.media_title}</b> - <b>S{season}E{episode}</b> - <b>{sonarr_envs.import_episode_title}</b>'
+        content = f'Downloaded <b>{sonarr_envs.media_title}</b> - <b>S{season}E{episode}</b> - <b>{sonarr_envs.import_episode_title}</b>.'
 
     if sonarr_envs.scene_name != "":
         release_name = f"\n<b>Release Name</b>: {sonarr_envs.scene_name}"
@@ -152,7 +143,7 @@ def sonarr_import():
                 f"\n<b>Genre(s)</b>: {funcs.get_sonarrgenres(skyhook)}"
                 f"\n<b>Air Date</b>: {sonarr_envs.delete_air_date} UTC"
                 f"{release_name}"
-                f"\n<a href='{funcs.get_sonarr_episodesample(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, season, episode, skyhook)}'>&#8204;</a>"
+                f"<a href='{funcs.get_sonarr_episodesample(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, season, episode, skyhook)}'>&#8204;</a>"
     }
 
     if funcs.get_sonarr_episodeoverview(season, episode, sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[2] == "...":
@@ -164,7 +155,7 @@ def sonarr_import():
 
     if sonarr_envs.delete_air_date == "":
         import re
-        pattern = r'<b>Air Date<\/b> UTC'
+        pattern = r'<b>Air Date<\/b>: UTC'
         log.warning("Air Date field is unknown, removing it..")
         mod_string = re.sub(pattern, '', message["text"])
         message["text"] = mod_string
@@ -198,8 +189,8 @@ def sonarr_health():
         "chat_id": config.TELEGRAM_HEALTH_CHAT_ID,
         "parse_mode": "HTML",
         "disable_notification": config.TELEGRAM_SILENT,
-        "text": "<b>An issue has occured on Sonarr</b>"
-                f"\n<b>Error Level</b>: {sonarr_envs.issue_level}"
+        "text": "<b>An issue has occured on Sonarr.</b>"
+                f"\n\n<b>Error Level</b>: {sonarr_envs.issue_level}"
                 f"\n<b>Error Type</b>: {sonarr_envs.issue_type}"
                 f"\n<b>Error Message</b>: {sonarr_envs.issue_message}"
                 f"\n<b>Visit Wiki</b>: <a href='{sonarr_envs.wiki_link}'>Visit</a>"
@@ -232,7 +223,7 @@ def sonarr_delete_episode():
         "chat_id": config.TELEGRAM_MISC_CHAT_ID,
         "parse_mode": "HTML",
         "disable_notification": config.TELEGRAM_SILENT,
-        "text": f"Deleted <b>{sonarr_envs.media_title}</b> - <b>S{season}E{episode}</b> - <b>{sonarr_envs.delete_episode_name}</b>"
+        "text": f"Deleted <b>{sonarr_envs.media_title}</b> - <b>S{season}E{episode}</b> - <b>{sonarr_envs.delete_episode_name}</b>."
                 f"\n\n<b>Series name</b>: {sonarr_envs.media_title}"
                 f"\n<b>Episode name</b>: {sonarr_envs.delete_episode_name}"
                 f"\n<b>Season</b>: {season}"
@@ -240,8 +231,8 @@ def sonarr_delete_episode():
                 f"\n<b>Quality</b>: {sonarr_envs.delete_quality}"
                 f"\n<b>Release Group</b>: {sonarr_envs.delete_release_group}"
                 f"\n<b>Aired on</b>: {sonarr_envs.delete_air_date} UTC"
-                f"\n\n<b>File name</b>: {sonarr_envs.scene_name}"
-                f"\n\n<b>File location</b>: {sonarr_envs.episode_path}"
+                f"\n\n<b>File name</b>:\n{sonarr_envs.scene_name}"
+                f"\n\n<b>File location</b>:\n{sonarr_envs.episode_path}"
                 f"\n\n<b>View Details</b>: <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[3]}'>IMDb</a> | <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[0]}'>TheTVDB</a> | <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[4]}'>TheMovieDb</a> | <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[2]}'>Trakt</a> | <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[1]}'>TVmaze</a>"
     }
 
