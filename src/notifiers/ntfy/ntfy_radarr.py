@@ -11,7 +11,7 @@ def radarr_test():
     test = {
         "title": "Radarr",
         "topic": config.NTFY_RADARR_TOPIC,
-        "tags": ["radarr"],
+        "tags": ["radarr", "movie_camera", "test"],
         "priority": config.NTFY_RADARR_PRIORITY,
         "actions": [{"action": "view", "label": "Visit Radarr", "url": f"{config.RADARR_URL}"}],
         "message": "Bettarr Notifications for Radarr test message.\nThank you for using the script!"}
@@ -53,21 +53,26 @@ def radarr_grab():
     else:
         director = f"\nDirector: {funcs.get_movie_crew(radarr_envs.tmdb_id)[1][0]}"
 
+    if radarr_envs.release_group == "":
+        release_group = ""
+    else:
+        release_group = f"\nRelease Group: {radarr_envs.release_group}"
+
     message = {
         "title": "Radarr",
         "topic": config.NTFY_RADARR_TOPIC,
-        "tags": ["radarr"],
+        "tags": ["radarr", "movie_camera", "grabbed"],
         "priority": config.NTFY_RADARR_PRIORITY,
         "attach": funcs.get_radarrposter(radarr_envs.tmdb_id),
         "filename": "poster.jpg",
         "actions": [{"action": "view", "label": "Visit Radarr", "url": f"{config.RADARR_URL}"},
                     {"action": "view", "label": "View Trailer", "url": f"{funcs.get_radarr_trailer(radarr)}"}],
         "message": f"Grabbed {radarr_envs.media_title} ({radarr_envs.year}) from {radarr_envs.release_indexer}."
-                   f"\n\nOverview\n{funcs.get_radarr_overview(radarr)[2]}\n{ratings.mdblist_movie()[4]}"
+                   f"\n\nOverview\n{funcs.get_radarr_overview(radarr)[3]}\n{ratings.mdblist_movie()[4]}"
                    f"\n\nQuality: {radarr_envs.quality}"
                    f"\nSize: {funcs.convert_size(int(radarr_envs.release_size))}"
                    f"\nDownload Client: {radarr_envs.download_client}"
-                   f"\nRelease Group: {radarr_envs.release_group}"
+                   f"{release_group}"
                    f"\nRelease Date: {funcs.get_radarr_releasedate(radarr_envs.tmdb_id)}"
                    f"\nContent Rating: {ratings.mdblist_movie()[1]}"
                    f"\nGenre(s): {funcs.get_radarr_genres(radarr)}"
@@ -86,13 +91,15 @@ def radarr_grab():
         mod_string = re.sub(pattern, '', message["message"])
         message["message"] = mod_string
 
-    if radarr_envs.release_group == "":
-        import re
-        string = message["message"]
-        pattern = r'Release Group: '
-        log.warning("Release group field is unknown, removing it..")
-        mod_string = re.sub(pattern, '', string)
-        message["message"] = mod_string
+    """
+        if radarr_envs.release_group == "":
+            import re
+            string = message["message"]
+            pattern = r'Release Group: '
+            log.warning("Release group field is unknown, removing it..")
+            mod_string = re.sub(pattern, '', string)
+            message["message"] = mod_string
+    """
 
     try:
         sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message)
@@ -125,22 +132,27 @@ def radarr_import():
     else:
         physical_releasedate = ""
 
+    if radarr_envs.scene_name != "":
+        release_name = f"\n\nRelease Name\n{radarr_envs.scene_name}"
+    else:
+        release_name = ""
+
     message = {
         "title": "Radarr",
         "topic": config.NTFY_RADARR_TOPIC,
-        "tags": ["radarr"],
+        "tags": ["radarr", "movie_camera", "downloaded"],
         "priority": config.NTFY_RADARR_PRIORITY,
         "attach": funcs.get_radarr_backdrop(radarr_envs.tmdb_id),
         "filename": "backdrop.jpg",
         "actions": [{"action": "view", "label": "Visit Radarr", "url": f"{config.RADARR_URL}"},
                     {"action": "view", "label": "View Trailer", "url": f"{funcs.get_radarr_trailer(radarr)}"}],
         "message": f"{content}"
-                   f"Overview\n{funcs.get_radarr_overview(radarr)[2]}"
+                   f"Overview\n{funcs.get_radarr_overview(radarr)[3]}"
                    f"\n\nQuality: {radarr_envs.import_quality}"
                    f"\nRelease Date: {funcs.get_radarr_releasedate(radarr_envs.tmdb_id)}"
                    f"{physical_releasedate}"
                    f"\nGenre(s): {funcs.get_radarr_genres(radarr)}"
-                   f"\nRelease Name: {radarr_envs.scene_name}"
+                   f"{release_name}"
 
     }
 
@@ -176,7 +188,7 @@ def radarr_health():
     message = {
         "title": "Radarr",
         "topic": config.NTFY_RADARR_HEALTH_TOPIC,
-        "tags": ["radarr"],
+        "tags": ["radarr", "movie_camera", "heartpulse"],
         "priority": config.NTFY_RADARR_PRIORITY,
         "actions": [{"action": "view", "label": "Visit Radarr", "url": f"{config.RADARR_URL}"},
                     {"action": "view", "label": "Visit Wiki", "url": f"{radarr_envs.wiki_link}"}],
@@ -216,13 +228,13 @@ def radarr_update():
     message = {
         "title": "Radarr",
         "topic": config.NTFY_RADARR_MISC_TOPIC,
-        "tags": ["radarr"],
+        "tags": ["radarr", "movie_camera", "update"],
         "priority": config.NTFY_RADARR_PRIORITY,
         "actions": [{"action": "view", "label": "Visit Radarr", "url": f"{config.RADARR_URL}"}],
-        "message": f"A new update ({radarr_envs.new_version}) is available for Radarr."
-                   f"\n\nNew version: {radarr_envs.new_version}"
-                   f"\nOld version: {radarr_envs.old_version}"
-                   f"\nUpdate Notes:\n{update_message}"
+        "message": f"Radarr has been updated to {radarr_envs.new_version}."
+        # f"\n\nNew version: {radarr_envs.new_version}"
+                   f"\n\nOld version: {radarr_envs.old_version}"
+                   f"\n\nUpdate Notes\n{update_message}"
     }
 
     if config.NTFY_RADARR_PRIORITY == "":
@@ -249,7 +261,7 @@ def radarr_movie_delete():
     message = {
         "title": "Radarr",
         "topic": config.NTFY_RADARR_MISC_TOPIC,
-        "tags": ["radarr"],
+        "tags": ["radarr", "movie_camera", "delete"],
         "priority": config.NTFY_RADARR_PRIORITY,
         "actions": [{"action": "view", "label": "Visit Radarr", "url": f"{config.RADARR_URL}"},
                     {"action": "view", "label": "IMDb",
@@ -294,7 +306,7 @@ def radarr_moviefile_delete():
     message = {
         "title": "Radarr",
         "topic": config.NTFY_RADARR_MISC_TOPIC,
-        "tags": ["radarr"],
+        "tags": ["radarr", "movie_camera", "delete"],
         "priority": config.NTFY_RADARR_PRIORITY,
         "actions": [{"action": "view", "label": "Visit Radarr", "url": f"{config.RADARR_URL}"},
                     {"action": "view", "label": "IMDb",

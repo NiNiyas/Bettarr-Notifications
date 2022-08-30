@@ -45,6 +45,11 @@ def radarr_grab():
         except (KeyError, TypeError, IndexError, Exception):
             cast = "Unknown"
 
+    if radarr_envs.release_group == "":
+        release_group = ""
+    else:
+        release_group = f"\n<b>Release Group</b>: {radarr_envs.release_group}"
+
     message = {
         "chat_id": config.TELEGRAM_CHAT_ID,
         "parse_mode": "HTML",
@@ -55,7 +60,7 @@ def radarr_grab():
                 f"\n\n<b>Quality</b>: {radarr_envs.quality}"
                 f"\n<b>Size</b>: {funcs.convert_size(int(radarr_envs.release_size))}"
                 f"\n<b>Download Client</b>: {radarr_envs.download_client}"
-                f"\n<b>Release Group</b>: {radarr_envs.release_group}"
+                f"{release_group}"
                 f"\n<b>Release Date</b>: {funcs.get_radarr_releasedate(radarr_envs.tmdb_id)}"
                 f"\n<b>Content Rating</b>: {ratings.mdblist_movie()[1]}"
                 f"\n<b>Genre(s)</b>: {funcs.get_radarr_genres(radarr)}"
@@ -87,12 +92,14 @@ def radarr_grab():
         mod_string = re.sub(pattern, '', string)
         message["text"] = mod_string
 
+    """
     if radarr_envs.release_group == "":
         import re
         string = message["text"]
         pattern = r'<b>Release Group<\/b>: '
         mod_string = re.sub(pattern, '', string)
         message["text"] = mod_string
+    """
 
     try:
         sender = requests.post(config.TELEGRAM_RADARR_URL, headers=HEADERS, json=message)
@@ -125,6 +132,11 @@ def radarr_import():
     else:
         physical_releasedate = ""
 
+    if radarr_envs.scene_name != "":
+        release_name = f"\n\n<b>Release Name</b>\n{radarr_envs.scene_name}"
+    else:
+        release_name = ""
+
     message = {
         "chat_id": config.TELEGRAM_CHAT_ID,
         "parse_mode": "HTML",
@@ -138,7 +150,7 @@ def radarr_import():
                 f"\n<b>Genre(s)</b>: {funcs.get_radarr_genres(radarr)}"
                 f"<a href='{funcs.get_radarr_backdrop(radarr_envs.tmdb_id)}'>&#8204;</a>"
                 f"\n<b>Trailer</b>: <a href='{funcs.get_radarr_trailer(radarr)}'>Youtube</a>"
-                f"\n<b>Release Name</b>: {radarr_envs.scene_name}"
+                f"{release_name}"
     }
 
     if radarr_envs.scene_name == "":
@@ -199,10 +211,9 @@ def radarr_update():
         "chat_id": config.TELEGRAM_MISC_CHAT_ID,
         "parse_mode": "HTML",
         "disable_notification": config.TELEGRAM_SILENT,
-        "text": f"A new update <b>({radarr_envs.new_version})</b> is available for Radarr."
-                f"\n\nNew version: {radarr_envs.new_version}"
-                f"\nOld version: {radarr_envs.old_version}"
-                f"\nUpdate Notes:\n{radarr_envs.update_message}"
+        "text": f"Radarr has been updated to <b>({radarr_envs.new_version})</b>."
+                f"\n\nOld version: {radarr_envs.old_version}"
+                f"\n\nUpdate Notes\n{radarr_envs.update_message}"
     }
 
     try:

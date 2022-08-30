@@ -327,7 +327,7 @@ def radarr_health():
 def radarr_update():
     message = {
         'username': config.RADARR_DISCORD_USERNAME,
-        'content': f"A new update `({radarr_envs.new_version})` is available for Radarr.",
+        'content': f"Radarr has been updated to `{radarr_envs.new_version}`.",
         'embeds': [
             {
                 'author': {
@@ -340,15 +340,10 @@ def radarr_update():
                     "text": "Radarr"
                 },
                 'timestamp': funcs.utc_now_iso(),
-                'title': f"A new update `({radarr_envs.new_version})` is available for Radarr.",
+                'title': f"Radarr has been updated to `{radarr_envs.new_version}`.",
                 'description': f"**Update Notes**\n```{radarr_envs.update_message}```",
                 'color': random.choice(funcs.colors),
                 'fields': [
-                    {
-                        "name": "New version",
-                        "value": radarr_envs.new_version,
-                        "inline": False
-                    },
                     {
                         "name": "Old version",
                         "value": radarr_envs.old_version,

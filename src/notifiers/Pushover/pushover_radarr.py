@@ -52,6 +52,11 @@ def radarr_grab():
         except (KeyError, TypeError, IndexError, Exception):
             cast = "Unknown"
 
+    if radarr_envs.release_group == "":
+        release_group = ""
+    else:
+        release_group = f"\n<b>Release Group</b>: {radarr_envs.release_group}"
+
     message = {
         "html": 1,
         "user": config.PUSHOVER_USER,
@@ -68,7 +73,7 @@ def radarr_grab():
                    f"\n\n<b>Quality</b>: {radarr_envs.quality}"
                    f"\n<b>Size</b>: {funcs.convert_size(int(radarr_envs.release_size))}"
                    f"\n<b>Download Client</b>: {radarr_envs.download_client}"
-                   f"\n<b>Release Group</b>: {radarr_envs.release_group}"
+                   f"{release_group}"
                    f"\n<b>Release Date</b>: {funcs.get_radarr_releasedate(radarr_envs.tmdb_id)}"
                    f"\n<b>Content Rating</b>: {ratings.mdblist_movie()[1]}"
                    f"\n<b>Genre(s)</b>: {funcs.get_radarr_genres(radarr)}"
@@ -100,6 +105,7 @@ def radarr_grab():
         mod_string = re.sub(pattern, '', string)
         message["message"] = mod_string
 
+    """
     if radarr_envs.release_group == "":
         import re
         string = message["message"]
@@ -107,6 +113,7 @@ def radarr_grab():
         log.warning("Release group field is unknown, removing it..")
         mod_string = re.sub(pattern, '', string)
         message["message"] = mod_string
+    """
 
     if len(message["message"]) > 1024:
         log.warning(
@@ -147,6 +154,11 @@ def radarr_import():
     else:
         physical_releasedate = ""
 
+    if radarr_envs.scene_name != "":
+        release_name = f"\n\n<b>Release Name</b>\n{radarr_envs.scene_name}"
+    else:
+        release_name = ""
+
     message = {
         "html": 1,
         "user": config.PUSHOVER_USER,
@@ -165,7 +177,7 @@ def radarr_import():
                    f"{physical_releasedate}"
                    f"\n<b>Genre(s)</b>: {funcs.get_radarr_genres(radarr)}"
                    f"\n<b>Trailer</b>: <a href={funcs.get_radarr_trailer(radarr)}>Youtube</a>"
-                   f"\n<b>Release Name</b>: {radarr_envs.scene_name}"
+                   f"{release_name}"
 
     }
 
@@ -252,10 +264,9 @@ def radarr_update():
         "expire": 3600,
         "url": config.RADARR_URL,
         "url_title": "Visit Radarr",
-        "message": f"A new update <b>({radarr_envs.new_version})</b> is available for Radarr."
-                   f"\n\nNew version: {radarr_envs.new_version}"
-                   f"\nOld version: {radarr_envs.old_version}"
-                   f"\nUpdate Notes:\n{update_message}"
+        "message": f"Radarr has been updated to <b>({radarr_envs.new_version})</b>."
+                   f"\n\nOld version: {radarr_envs.old_version}"
+                   f"\n\nUpdate Notes\n{update_message}"
     }
 
     try:

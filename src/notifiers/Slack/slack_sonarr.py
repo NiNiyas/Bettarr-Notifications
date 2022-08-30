@@ -637,13 +637,13 @@ def sonarr_delete_series():
 
 def sonarr_update():
     message = {
-        "text": f"A new update `({sonarr_envs.new_version})` is available for Sonarr.",
+        "text": f"Sonarr has ben updated to `{sonarr_envs.new_version}`.",
         "blocks": [
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"A new update `({sonarr_envs.new_version})` is available for Sonarr.",
+                    "text": f"Sonarr has ben updated to `{sonarr_envs.new_version}`.",
                 }
             },
             {
@@ -663,10 +663,6 @@ def sonarr_update():
             {
                 "type": "section",
                 "fields": [
-                    {
-                        "type": "mrkdwn",
-                        "text": f"*New version*\n`{sonarr_envs.new_version}`"
-                    },
                     {
                         "type": "mrkdwn",
                         "text": f"*Old version*\n`{sonarr_envs.old_version}`"

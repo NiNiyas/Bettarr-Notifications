@@ -76,18 +76,33 @@ def get_radarr_overview(radarr):
         overview = radarr["overview"]
     except (KeyError, TypeError, IndexError, Exception):
         log.warning("Error getting overview from Radarr.")
-        overview = "Unknown"
+        overview = ""
 
-    if len(overview) >= 300:
-        overview = overview[:250]
-        overview += "..."
+    """
+        if len(overview) >= 300:
+            overview = overview[:250]
+            overview += "..."
+        
+        if overview == "":
+        discord_overview = ""
+        slack_overview = ""
+        ntfy_overview = ""
+        html_overview = ""
+    else:
+        discord_overview = f"**Overview**\n{overview}"
+        slack_overview = overview
+        ntfy_overview = overview
+        html_overview = overview[:100]
+        html_overview += "..."
+    """
 
     discord_overview = f"**Overview**\n{overview}"
-    slack_overview = f"{overview}"
+    slack_overview = overview
+    ntfy_overview = overview
     html_overview = overview[:100]
     html_overview += "..."
 
-    return discord_overview, slack_overview, html_overview
+    return discord_overview, slack_overview, html_overview, ntfy_overview
 
 
 def get_radarr_genres(radarr):
@@ -478,12 +493,19 @@ def get_sonarr_overview(tvdb_id, imdb_id):
         overview = overview[:250]
         overview += '...'
 
-    discord_overview = f"**Overview**\n{overview}"
-    slack_overview = overview
-    html_overview = overview[:100]
-    html_overview += "..."
+    if overview != "":
+        discord_overview = f"**Overview**\n{overview}"
+        slack_overview = overview
+        html_overview = f"\n\n<strong>Overview</strong>\n{overview[:100]}\n"
+        html_overview += "..."
+        ntfy_overview = f"\n\nOverview\n{overview}\n"
+    else:
+        discord_overview = f""
+        slack_overview = ""
+        html_overview = ""
+        ntfy_overview = "\n"
 
-    return discord_overview, slack_overview, html_overview
+    return discord_overview, slack_overview, html_overview, ntfy_overview
 
 
 def format_season_episode(season, episode):
@@ -548,7 +570,8 @@ def get_sonarr_episodeoverview(season, episode, tvdb_id, imdb_id):
         overview = episode_data['overview']
     except (KeyError, TypeError, IndexError, Exception):
         log.warning("Couldn't fetch episode overview. Falling back to series overview.")
-        series = requests_retry_session().get(f'https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}?api_key={config.TMDB_APIKEY}&language=en',
+        series = requests_retry_session().get(
+            f'https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}?api_key={config.TMDB_APIKEY}&language=en',
             timeout=60).json()
         overview = series['overview']
 
@@ -556,9 +579,16 @@ def get_sonarr_episodeoverview(season, episode, tvdb_id, imdb_id):
         overview = overview[:250]
         overview += '...'
 
-    discord_overview = f"**Overview**\n{overview}"
-    slack_overview = overview
-    html_overview = overview[:100]
-    html_overview += "..."
+    if overview != "":
+        discord_overview = f"**Overview**\n{overview}"
+        slack_overview = overview
+        html_overview = f"\n\n<strong>Overview</strong>\n{overview[:100]}\n"
+        html_overview += "..."
+        ntfy_overview = f"\n\nOverview\n{overview}\n"
+    else:
+        discord_overview = f""
+        slack_overview = ""
+        html_overview = ""
+        ntfy_overview = "\n"
 
-    return discord_overview, slack_overview, html_overview
+    return discord_overview, slack_overview, html_overview, ntfy_overview

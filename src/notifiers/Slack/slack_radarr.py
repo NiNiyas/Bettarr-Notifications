@@ -407,13 +407,13 @@ def radarr_health():
 def radarr_update():
     message = {
         "channel": config.SLACK_CHANNEL,
-        "text": f"A new update `({radarr_envs.new_version})` is available for Radarr.",
+        "text": f"Radarr has ben updated to `{radarr_envs.new_version}`.",
         "blocks": [
             {
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"A new update `({radarr_envs.new_version})` is available for Radarr.",
+                    "text": f"Radarr has ben updated to `{radarr_envs.new_version}`.",
                 }
             },
             {
@@ -436,10 +436,6 @@ def radarr_update():
             {
                 "type": "section",
                 "fields": [
-                    {
-                        "type": "mrkdwn",
-                        "text": f"*New version*\n{radarr_envs.new_version}",
-                    },
                     {
                         "type": "mrkdwn",
                         "text": f"*Old version*\n{radarr_envs.old_version}",

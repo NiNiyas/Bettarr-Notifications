@@ -63,6 +63,11 @@ def sonarr_grab():
     else:
         director = f"\n<b>Director</b>: <a href={funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0]}>{funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1]}</a>"
 
+    if sonarr_envs.release_group == "":
+        release_group = ""
+    else:
+        release_group = f"\n<b>Release Group</b>: {sonarr_envs.release_group}"
+
     message = {
         "html": 1,
         "user": config.PUSHOVER_USER,
@@ -74,12 +79,12 @@ def sonarr_grab():
         "expire": 3600,
         "url": config.SONARR_URL,
         "url_title": "Visit Sonarr",
-        "message": f"{title}\n\n<strong>Overview</strong>\n{funcs.get_sonarr_overview(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[2]}\n{ratings.mdblist_tv()[6]}\n"
+        "message": f"{title}{funcs.get_sonarr_overview(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[2]}{ratings.mdblist_tv()[6]}\n"
                    f"\n<b>Episode</b>: S{season}E{episode}"
                    f"\n<b>Quality</b>: {sonarr_envs.quality}"
                    f"\n<b>Size</b>: {funcs.convert_size(int(sonarr_envs.size))}"
                    f"\n<b>Download Client</b>: {sonarr_envs.download_client}"
-                   f"\n<b>Release Group</b>: {sonarr_envs.release_group}"
+                   f"{release_group}"
                    f"\n<b>Network</b>: {funcs.get_sonarr_network(skyhook)}"
                    f"\n<b>Content Rating</b>: {funcs.get_sonarr_contentrating(skyhook)}"
                    f"\n<b>Genre(s)</b>: {funcs.get_sonarrgenres(skyhook)}"
@@ -103,12 +108,14 @@ def sonarr_grab():
         mod_string = re.sub(pattern, '', message["message"])
         message["message"] = mod_string
 
+    """
     if sonarr_envs.release_group == "":
         import re
         pattern = r'<b>Release Group<\/b>: '
         log.warning("Release Group field is unknown, removing it..")
         mod_string = re.sub(pattern, '', message["message"])
         message["message"] = mod_string
+    """
 
     if len(message["message"]) > 1024:
         log.warning(
@@ -145,7 +152,7 @@ def sonarr_import():
         content = f'Downloaded <b>{sonarr_envs.media_title}</b> - <b>S{season}E{episode}</b> - <b>{sonarr_envs.import_episode_title}</b>.'
 
     if sonarr_envs.scene_name != "":
-        release_name = f"\n<b>Release Name</b>: {sonarr_envs.scene_name}"
+        release_name = f"\n\n<b>Release Name</b>\n{sonarr_envs.scene_name}"
     else:
         release_name = ""
 
@@ -160,7 +167,7 @@ def sonarr_import():
         "expire": 3600,
         "url": config.SONARR_URL,
         "url_title": "Visit Sonarr",
-        "message": f"{content}\n\n<strong>Overview</strong>\n{funcs.get_sonarr_episodeoverview(season, episode, sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[2]}\n"
+        "message": f"{content}{funcs.get_sonarr_episodeoverview(season, episode, sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[2]}"
                    f"\n<b>Episode</b>: S{season}E{episode}"
                    f"\n<b>Quality</b>: {sonarr_envs.import_quality}"
                    f"\n<b>Content Rating</b>: {funcs.get_sonarr_contentrating(skyhook)}"
@@ -364,10 +371,9 @@ def sonarr_update():
         "expire": 3600,
         "url": config.SONARR_URL,
         "url_title": "Visit Sonarr",
-        "message": f"A new update <b>({sonarr_envs.new_version})</b> is available for Sonarr."
-                   f"\n\n<b>New version</b>: {sonarr_envs.new_version}"
-                   f"\n<b>Old version</b>: {sonarr_envs.old_version}"
-                   f"\n<b>Update Notes</b>: {update_message}"
+        "message": f"Sonarr has been updated to <b>({sonarr_envs.new_version})</b>."
+                   f"\n\n<b>Old version</b>: {sonarr_envs.old_version}"
+                   f"\n\n<b>Update Notes</b>\n{update_message}"
     }
 
     try:

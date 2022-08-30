@@ -522,7 +522,7 @@ def sonarr_delete_series():
 def sonarr_update():
     message = {
         'username': config.SONARR_DISCORD_USERNAME,
-        'content': f"A new update `({sonarr_envs.new_version})` is available for Sonarr.",
+        'content': f"Sonarr has been updated to `{sonarr_envs.new_version}`.",
         'embeds': [
             {
                 'author': {
@@ -535,15 +535,10 @@ def sonarr_update():
                     "text": "Sonarr"
                 },
                 'timestamp': funcs.utc_now_iso(),
-                'title': f"A new update `({sonarr_envs.new_version})` is available for Sonarr",
+                'title': f"Sonarr has been updated to `{sonarr_envs.new_version}`.",
                 'description': f"**Update Notes**\n```{sonarr_envs.update_message}```",
                 'color': random.choice(funcs.colors),
                 'fields': [
-                    {
-                        "name": "New version",
-                        "value": sonarr_envs.new_version,
-                        "inline": False
-                    },
                     {
                         "name": "Old version",
                         "value": sonarr_envs.old_version,

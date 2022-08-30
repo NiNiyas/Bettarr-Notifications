@@ -11,7 +11,7 @@ def sonarr_test():
     test = {
         "title": "Sonarr",
         "topic": config.NTFY_SONARR_TOPIC,
-        "tags": ["sonarr"],
+        "tags": ["sonarr", "tv", "test"],
         "priority": config.NTFY_SONARR_PRIORITY,
         "actions": [{"action": "view", "label": "Visit Sonarr", "url": f"{config.SONARR_URL}"}],
         "message": "Bettarr Notifications for Sonarr test message.\nThank you for using the script!"}
@@ -59,21 +59,26 @@ def sonarr_grab():
     else:
         director = f"\nDirector: {funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1]}\n"
 
+    if sonarr_envs.release_group == "":
+        release_group = ""
+    else:
+        release_group = f"\nRelease Group: {sonarr_envs.release_group}"
+
     message = {
         "title": "Sonarr",
         "topic": config.NTFY_SONARR_TOPIC,
-        "tags": ["sonarr"],
+        "tags": ["sonarr", "tv", "grabbed"],
         "priority": config.NTFY_SONARR_PRIORITY,
         "actions": [{"action": "view", "label": "Visit Sonarr", "url": f"{config.SONARR_URL}"},
                     {"action": "view", "label": "View Trailer", "url": f"{funcs.get_sonarr_trailer()}"}],
         "attach": funcs.get_posterseries(sonarr_envs.tvdb_id, sonarr_envs.imdb_id),
         "filename": "poster.jpg",
-        "message": f"{title}\n\nOverview\n{funcs.get_sonarr_overview(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1]}\n{ratings.mdblist_tv()[7]}\n"
+        "message": f"{title}{funcs.get_sonarr_overview(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[3]}{ratings.mdblist_tv()[7]}\n"
                    f"\nEpisode: S{season}E{episode}"
                    f"\nQuality: {sonarr_envs.quality}"
                    f"\nSize: {funcs.convert_size(int(sonarr_envs.size))}"
                    f"\nDownload Client: {sonarr_envs.download_client}"
-                   f"\nRelease Group: {sonarr_envs.release_group}"
+                   f"{release_group}"
                    f"\nNetwork: {funcs.get_sonarr_network(skyhook)}"
                    f"\nContent Rating: {funcs.get_sonarr_contentrating(skyhook)}"
                    f"\nGenre(s): {funcs.get_sonarrgenres(skyhook)}"
@@ -106,12 +111,14 @@ def sonarr_grab():
         mod_string = re.sub(pattern, '', message["message"])
         message["message"] = mod_string
 
+    """
     if sonarr_envs.release_group == "":
         import re
         pattern = r'Release Group: '
         log.warning("Release Group field is unknown, removing it..")
         mod_string = re.sub(pattern, '', message["message"])
         message["message"] = mod_string
+    """
 
     try:
         sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message)
@@ -141,19 +148,19 @@ def sonarr_import():
         content = f'Downloaded {sonarr_envs.media_title} - S{season}E{episode} - {sonarr_envs.import_episode_title}.'
 
     if sonarr_envs.scene_name != "":
-        release_name = f"\nRelease Name: {sonarr_envs.scene_name}"
+        release_name = f"\n\nRelease Name\n{sonarr_envs.scene_name}"
     else:
         release_name = ""
 
     message = {
         "title": "Sonarr",
         "topic": config.NTFY_SONARR_TOPIC,
-        "tags": ["sonarr"],
+        "tags": ["sonarr", "tv", "downloaded"],
         "priority": config.NTFY_SONARR_PRIORITY,
         "actions": [{"action": "view", "label": "Visit Sonarr", "url": f"{config.SONARR_URL}"}],
         "attach": funcs.get_sonarr_episodesample(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, season, episode, skyhook),
         "filename": "episode_sample.jpg",
-        "message": f"{content}\n\nOverview\n{funcs.get_sonarr_episodeoverview(season, episode, sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1]}\n"
+        "message": f"{content}{funcs.get_sonarr_episodeoverview(season, episode, sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[3]}"
                    f"\nEpisode: S{season}E{episode}"
                    f"\nQuality: {sonarr_envs.import_quality}"
                    f"\nContent Rating: {funcs.get_sonarr_contentrating(skyhook)}"
@@ -166,12 +173,14 @@ def sonarr_import():
     if config.NTFY_SONARR_PRIORITY == "":
         del message["priority"]
 
-    if funcs.get_sonarr_episodeoverview(season, episode, sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1] == "...":
+    """
+    if funcs.get_sonarr_episodeoverview(season, episode, sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1] == "":
         import re
         pattern = r'Overview ...'
         log.warning("Overview field is unknown, removing it..")
         mod_string = re.sub(pattern, '', message["message"])
         message["message"] = mod_string
+    """
 
     if sonarr_envs.delete_air_date == "":
         import re
@@ -208,7 +217,7 @@ def sonarr_health():
     message = {
         "title": "Sonarr",
         "topic": config.NTFY_SONARR_HEALTH_TOPIC,
-        "tags": ["sonarr"],
+        "tags": ["sonarr", "tv", "heartpulse"],
         "priority": config.NTFY_SONARR_PRIORITY,
         "actions": [{"action": "view", "label": "Visit Sonarr", "url": f"{config.SONARR_URL}"},
                     {"action": "view", "label": "Visit Wiki", "url": f"{sonarr_envs.wiki_link}"}],
@@ -247,7 +256,7 @@ def sonarr_delete_episode():
     message = {
         "title": "Sonarr",
         "topic": config.NTFY_SONARR_MISC_TOPIC,
-        "tags": ["sonarr"],
+        "tags": ["sonarr", "tv", "delete"],
         "priority": config.NTFY_SONARR_PRIORITY,
         "actions": [{"action": "view", "label": "Visit Sonarr", "url": f"{config.SONARR_URL}"},
                     {"action": "view", "label": "IMDb",
@@ -308,7 +317,7 @@ def sonarr_delete_series():
     message = {
         "title": "Sonarr",
         "topic": config.NTFY_SONARR_MISC_TOPIC,
-        "tags": ["sonarr"],
+        "tags": ["sonarr", "tv", "delete"],
         "priority": config.NTFY_SONARR_PRIORITY,
         "actions": [{"action": "view", "label": "Visit Sonarr", "url": f"{config.SONARR_URL}"},
                     {"action": "view", "label": "IMDb",
@@ -351,13 +360,13 @@ def sonarr_update():
     message = {
         "title": "Sonarr",
         "topic": config.NTFY_SONARR_MISC_TOPIC,
-        "tags": ["sonarr"],
+        "tags": ["sonarr", "tv", "update"],
         "priority": config.NTFY_SONARR_PRIORITY,
         "actions": [{"action": "view", "label": "Visit Sonarr", "url": f"{config.SONARR_URL}"}],
-        "message": f"A new update ({sonarr_envs.new_version}) is available for Sonarr."
-                   f"\n\nNew version: {sonarr_envs.new_version}"
-                   f"\nOld version: {sonarr_envs.old_version}"
-                   f"\nUpdate Notes: {update_message}"
+        "message": f"Sonarr has been updated to {sonarr_envs.new_version}."
+                   #f"\n\nNew version: {sonarr_envs.new_version}"
+                   f"\n\nOld version: {sonarr_envs.old_version}"
+                   f"\n\nUpdate Notes\n{update_message}"
     }
 
     if config.NTFY_SONARR_PRIORITY == "":
