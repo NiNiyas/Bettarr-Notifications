@@ -3,7 +3,7 @@ import random
 
 import config
 import requests
-from helpers import funcs, ratings, radarr_envs
+from helpers import funcs, ratings, radarr_envs, omdb
 from loguru import logger as log
 from requests import RequestException
 
@@ -126,11 +126,19 @@ def radarr_grab():
                         "name": "View Details",
                         "value": f"[IMDb]({funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[0]}) | [TheMovieDb]({funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[1]}) | [Trakt]({funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[2]}) | [MovieChat]({funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[3]})",
                         "inline": False
+                    },
+                    {
+                        "name": "Awards",
+                        "value": omdb.omdb_radarr(radarr_envs.imdb_id),
+                        "inline": False
                     }
                 ]
             }
         ]
     }
+
+    if omdb.omdb_radarr(radarr_envs.imdb_id) == "":
+        del message['embeds'][0]['12']
 
     if funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0] == "None":
         del message['embeds'][0]['fields'][9]

@@ -3,7 +3,7 @@
 Better Notifications for Sonarr and Radarr. \
 Discord is based on script by @samwiseg0 - [Link to his repo](https://github.com/samwiseg0/better-discord-notifications)
 
-Tested with v3.0.8.1507 of Sonarr and v4.1.0.6175 of Radarr.
+Tested with v3.0.9.1549 of Sonarr and v4.2.4.6635 of Radarr.
 
 ## Installation
 
@@ -32,16 +32,20 @@ Tested with v3.0.8.1507 of Sonarr and v4.1.0.6175 of Radarr.
 - If you need the JustWatch providers for your country, fill in the `TMDB_COUNTRY_CODE`.
 - For country codes, see [here](https://www.justwatch.com/), scroll down to the very bottom of the page.
 
-If your ISP block access to TMDB API like mine does, host a [tmdb-proxy](https://github.com/chervontsev/tmdb-proxy) on
-Heroku or Railway and fill in `TMDB_URL`. I personally host mine in Railway.
+If your ISP block access to TMDB API like mine does, host a [tmdb-proxy](https://github.com/chervontsev/tmdb-proxy) on Railway and fill in `TMDB_URL`. I personally host mine in [Railway](https://railway.app).
 
 ### mdblist (Optional)
 
 To get ratings, you should set `MDBLIST_APIKEY` in `config.py` file.
 
 - Create your mdblist API key from [here](https://mdblist.com/).
-- You will need a [Trakt](https://trakt.tv) account for this. This has a 1000 calls per day limit which is more than
-  enough.
+- You will need a [Trakt](https://trakt.tv) account for this. This has a 1000 calls per day limit.
+
+### OMDb API (Optional)
+
+To get awards, you should set `OMDB_APIKEY` in `config.py` file.
+
+- Create your API key [here](https://www.omdbapi.com/apikey.aspx). This has a 1000 calls per day limit.
 
 # Notifiers
 

@@ -2,7 +2,7 @@ import json
 
 import config
 import requests
-from helpers import funcs, ratings, radarr_envs
+from helpers import funcs, ratings, radarr_envs, omdb
 from loguru import logger as log
 from requests import RequestException
 
@@ -58,6 +58,11 @@ def radarr_grab():
     else:
         release_group = f"\nRelease Group: {radarr_envs.release_group}"
 
+    if omdb.omdb_sonarr(radarr_envs.imdb_id) == "":
+        awards = ""
+    else:
+        awards = f"\nAwards: {omdb.omdb_sonarr(radarr_envs.imdb_id)}"
+
     message = {
         "title": "Radarr",
         "topic": config.NTFY_RADARR_TOPIC,
@@ -79,6 +84,7 @@ def radarr_grab():
                    f"{cast}"
                    f"{director}"
                    f"\nAvailable On ({funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[1]}): {funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0]}"
+                   f"{awards}"
     }
 
     if config.NTFY_RADARR_PRIORITY == "":
@@ -100,6 +106,8 @@ def radarr_grab():
             mod_string = re.sub(pattern, '', string)
             message["message"] = mod_string
     """
+
+    message['message'].rstrip()
 
     try:
         sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message)

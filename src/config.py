@@ -1,9 +1,9 @@
-# Required
-SONARR = False  # set to True to enable
+# Required, set to True to enable
+SONARR = False
 SONARR_URL = "http://localhost:8989/"  # with url trailing
 SONARR_APIKEY = ""
 
-RADARR = False  # set to True to enable
+RADARR = False
 RADARR_URL = "http://localhost:7878/"  # with url trailing
 RADARR_APIKEY = ""
 
@@ -13,16 +13,17 @@ TMDB_COUNTRY_CODE = "US"
 
 # Optional
 MDBLIST_APIKEY = ""
+OMDB_APIKEY = ""
 
 # Logging
 LOG_LEVEL = "INFO"  # or `DEBUG`
 
-# Notifiers
-DISCORD = False  # set to True to enable
-SLACK = False  # set to True to enable
-PUSHOVER = False  # set to True to enable
-TELEGRAM = False  # set to True to enable
-ntfy = False  # set to True to enable
+# Notifiers, set to True to enable
+DISCORD = False
+SLACK = False
+PUSHOVER = False
+TELEGRAM = False
+ntfy = False
 
 # Discord Configuration
 ## Radarr

@@ -2,7 +2,7 @@ import json
 
 import config
 import requests
-from helpers import funcs, ratings, radarr_envs
+from helpers import funcs, ratings, radarr_envs, omdb
 from loguru import logger as log
 from requests import RequestException
 
@@ -50,6 +50,11 @@ def radarr_grab():
     else:
         release_group = f"\n<b>Release Group</b>: {radarr_envs.release_group}"
 
+    if omdb.omdb_sonarr(radarr_envs.imdb_id) == "":
+        awards = ""
+    else:
+        awards = f"\n<b>Awards</b>: {omdb.omdb_sonarr(radarr_envs.imdb_id)}"
+
     message = {
         "chat_id": config.TELEGRAM_CHAT_ID,
         "parse_mode": "HTML",
@@ -69,6 +74,7 @@ def radarr_grab():
                 f"\n<b>Director</b>: <a href='{funcs.get_movie_crew(radarr_envs.tmdb_id)[0][0]}'>{funcs.get_movie_crew(radarr_envs.tmdb_id)[1][0]}</a>"
                 f"\n<b>Available On</b> ({funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[1]}): {funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0]}"
                 f"\n<b>View Details</b>: <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[0]}'>IMDb</a>, <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[1]}'>TheMovieDb</a>, <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[2]}'>Trakt</a>, <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[3]}'>MovieChat</a>"
+                f"{awards}"
     }
 
     if funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0] == "None":
@@ -100,6 +106,8 @@ def radarr_grab():
         mod_string = re.sub(pattern, '', string)
         message["text"] = mod_string
     """
+
+    message['text'].rstrip()
 
     try:
         sender = requests.post(config.TELEGRAM_RADARR_URL, headers=HEADERS, json=message)

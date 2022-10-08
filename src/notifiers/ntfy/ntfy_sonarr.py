@@ -2,7 +2,7 @@ import json
 
 import config
 import requests
-from helpers import funcs, ratings, sonarr_envs
+from helpers import funcs, ratings, sonarr_envs, omdb
 from loguru import logger as log
 from requests import RequestException
 
@@ -44,7 +44,7 @@ def sonarr_grab():
     title = f"Grabbed {sonarr_envs.media_title} - S{season}E{episode} - {sonarr_envs.episode_title} from {sonarr_envs.release_indexer}."
     if len(title) >= 150:
         title = title[:100]
-        title += '...'
+        title += f'... from {sonarr_envs.release_indexer}.'
 
     try:
         cast = f"\nCast: {funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}, {funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][1]}, {funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][2]}"
@@ -63,6 +63,11 @@ def sonarr_grab():
         release_group = ""
     else:
         release_group = f"\nRelease Group: {sonarr_envs.release_group}"
+
+    if omdb.omdb_sonarr(sonarr_envs.imdb_id) == "":
+        awards = ""
+    else:
+        awards = f"\nAwards: {omdb.omdb_sonarr(sonarr_envs.imdb_id)}"
 
     message = {
         "title": "Sonarr",
@@ -85,6 +90,7 @@ def sonarr_grab():
                    f"{cast}"
                    f"{director}"
                    f"\nAvailable On ({funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1]}): {funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0]}"
+                   f"{awards}"
     }
 
     if config.NTFY_SONARR_PRIORITY == "":
@@ -110,6 +116,8 @@ def sonarr_grab():
         log.warning("Director field is unknown, removing it..")
         mod_string = re.sub(pattern, '', message["message"])
         message["message"] = mod_string
+
+    message['message'].rstrip()
 
     """
     if sonarr_envs.release_group == "":

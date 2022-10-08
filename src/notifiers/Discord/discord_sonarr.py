@@ -3,7 +3,7 @@ import random
 
 import config
 import requests
-from helpers import funcs, ratings, sonarr_envs
+from helpers import funcs, ratings, sonarr_envs, omdb
 from loguru import logger as log
 from requests import RequestException
 
@@ -138,11 +138,19 @@ def sonarr_grab():
                         "name": "View Details",
                         "value": f"[IMDb]({funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[3]}) | [TheTVDB]({funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[0]}) | [TheMovieDb]({funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[4]}) | [Trakt]({funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[2]}) | [TVmaze]({funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[1]})",
                         "inline": False
+                    },
+                    {
+                        "name": "Awards",
+                        "value": omdb.omdb_sonarr(sonarr_envs.imdb_id),
+                        "inline": False
                     }
                 ]
             }
         ]
     }
+
+    if omdb.omdb_sonarr(sonarr_envs.imdb_id) == "":
+        del message['embeds'][0]['13']
 
     if funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0] == "None":
         del message['embeds'][0]['fields'][10]

@@ -2,7 +2,7 @@ import json
 
 import config
 import requests
-from helpers import funcs, ratings, sonarr_envs
+from helpers import funcs, ratings, sonarr_envs, omdb
 from loguru import logger as log
 from requests import RequestException
 
@@ -48,7 +48,7 @@ def sonarr_grab():
     title = f"Grabbed <b>{sonarr_envs.media_title}</b> - <b>S{season}E{episode}</b> - <b>{sonarr_envs.episode_title}</b> from <b>{sonarr_envs.release_indexer}</b>."
     if len(title) >= 150:
         title = title[:100]
-        title += '...</b>'
+        title += f'...</b> from <b>{sonarr_envs.release_indexer}</b>.'
 
     try:
         cast = f"\nCast: <a href={funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}</a>, <a href={funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][2]}>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][1]}</a>, <a href={funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][1]}>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][2]}</a>"
@@ -67,6 +67,11 @@ def sonarr_grab():
         release_group = ""
     else:
         release_group = f"\n<b>Release Group</b>: {sonarr_envs.release_group}"
+
+    if omdb.omdb_sonarr(sonarr_envs.imdb_id) == "":
+        awards = ""
+    else:
+        awards = f"\n<b>Awards</b>: {omdb.omdb_sonarr(sonarr_envs.imdb_id)}"
 
     message = {
         "html": 1,
@@ -92,6 +97,7 @@ def sonarr_grab():
                    f"{director}"
                    f"\n<b>Available On</b> ({funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1]}): {funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0]}"
                    f"\n<a href={funcs.get_sonarr_trailer()}>Trailer</a>"
+                   f"{awards}"
     }
 
     if funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0] == "None":
@@ -120,6 +126,8 @@ def sonarr_grab():
     if len(message["message"]) > 1024:
         log.warning(
             f"Pushover message length is greater than 1024, current length: {len(message['message'])}. Some of the message will be removed.")
+
+    message['message'].rstrip()
 
     try:
         sender = requests.post(config.PUSHOVER_API_URL, data=message,

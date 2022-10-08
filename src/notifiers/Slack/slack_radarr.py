@@ -2,7 +2,7 @@ import json
 
 import config
 import requests
-from helpers import funcs, ratings, radarr_envs
+from helpers import funcs, ratings, radarr_envs, omdb
 from loguru import logger as log
 from requests import RequestException
 
@@ -132,6 +132,10 @@ def radarr_grab():
                         "type": "mrkdwn",
                         "text": f"*Director*\n<{funcs.get_movie_crew(radarr_envs.tmdb_id)[0][0]}|{funcs.get_movie_crew(radarr_envs.tmdb_id)[1][0]}>"
                     },
+                    {
+                        "type": "mrkdwn",
+                        "text": f"*Awards*\n{omdb.omdb_radarr(radarr_envs.imdb_id)}"
+                    },
                 ]
             },
             {
@@ -164,6 +168,9 @@ def radarr_grab():
 
     if funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0] == "None":
         del message["blocks"][5]["fields"][7]
+
+    if omdb.omdb_radarr(radarr_envs.imdb_id) == "":
+        del message["blocks"][6]["fields"][2]
 
     if cast == "Unknown":
         del message["blocks"][6]["fields"][0]

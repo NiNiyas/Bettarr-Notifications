@@ -2,7 +2,7 @@ import json
 
 import config
 import requests
-from helpers import funcs, ratings, sonarr_envs
+from helpers import funcs, ratings, sonarr_envs, omdb
 from loguru import logger as log
 from requests import RequestException
 
@@ -140,6 +140,11 @@ def sonarr_grab():
                         "type": "mrkdwn",
                         "text": f"*Director*\n<{funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0]}|{funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1]}>"
                     }
+                    ,
+                    {
+                        "type": "mrkdwn",
+                        "text": f"*Awards*\n{omdb.omdb_sonarr(sonarr_envs.imdb_id)}"
+                    }
                 ]
             },
             {
@@ -183,6 +188,9 @@ def sonarr_grab():
 
     if cast == "Unknown":
         del message['blocks'][6]['fields'][0]
+
+    if omdb.omdb_sonarr(sonarr_envs.imdb_id) == "":
+        del message['blocks'][6]['fields'][2]
 
     if funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1] == "Unknown":
         del message['blocks'][6]['fields'][1]

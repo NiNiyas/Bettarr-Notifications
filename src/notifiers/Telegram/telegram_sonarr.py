@@ -2,7 +2,7 @@ import json
 
 import config
 import requests
-from helpers import funcs, ratings, sonarr_envs
+from helpers import funcs, ratings, sonarr_envs, omdb
 from loguru import logger as log
 from requests import RequestException
 
@@ -40,6 +40,9 @@ def sonarr_grab():
     episode = funcs.format_season_episode(sonarr_envs.season, sonarr_envs.episode)[1]
 
     title = f"Grabbed <b>{sonarr_envs.media_title}</b> - <b>S{season}E{episode}</b> - <b>{sonarr_envs.episode_title}</b> from <b>{sonarr_envs.release_indexer}</b>."
+    if len(title) >= 150:
+        title = title[:100]
+        title += f'...</b> from <b>{sonarr_envs.release_indexer}</b>.'
 
     try:
         cast = f"\nCast: <a href='{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}'>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}</a>, <a href='{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][2]}'>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][1]}</a>, <a href='{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][1]}'>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][2]}</a>"
@@ -58,6 +61,11 @@ def sonarr_grab():
         release_group = ""
     else:
         release_group = f"\n<b>Release Group</b>: {sonarr_envs.release_group}"
+
+    if omdb.omdb_sonarr(sonarr_envs.imdb_id) == "":
+        awards = ""
+    else:
+        awards = f"\n<b>Awards</b>: {omdb.omdb_sonarr(sonarr_envs.imdb_id)}"
 
     message = {
         "chat_id": config.TELEGRAM_CHAT_ID,
@@ -79,6 +87,7 @@ def sonarr_grab():
                 f"\n<b>Available On</b> ({funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1]}):  {funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0]}"
                 f"\n<b>Trailer</b>: <a href='{funcs.get_sonarr_trailer()}'>YouTube</a>"
                 f"\n<b>View Details</b>: <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[3]}'>IMDb</a>, <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[0]}'>TheTVDB</a>, <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[4]}'>TheMovieDb</a>, <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[2]}'>Trakt</a>, <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[1]}'>TVmaze</a>"
+                f"{awards}"
 
     }
 
@@ -101,7 +110,10 @@ def sonarr_grab():
         pattern = r'<b>Release Group<\/b>: Unknown'
         mod_string = re.sub(pattern, '', message["text"])
         message["text"] = mod_string
-        log.warning("Release group field is unknown, removing it..")"""
+        log.warning("Release group field is unknown, removing it..")
+    """
+
+    message['text'].rstrip()
 
     try:
         sender = requests.post(config.TELEGRAM_SONARR_URL, headers=HEADERS, json=message)
