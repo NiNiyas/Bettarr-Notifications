@@ -16,7 +16,7 @@ def radarr_test():
         "actions": [{"action": "view", "label": "Visit Radarr", "url": f"{config.RADARR_URL}"}],
         "message": "Bettarr Notifications for Radarr test message.\nThank you for using the script!"}
 
-    if config.NTFY_SONARR_PRIORITY == "":
+    if config.NTFY_RADARR_PRIORITY == "":
         del test["priority"]
 
     try:
@@ -58,10 +58,10 @@ def radarr_grab():
     else:
         release_group = f"\nRelease Group: {radarr_envs.release_group}"
 
-    if omdb.omdb_sonarr(radarr_envs.imdb_id) == "":
+    if omdb.omdb_radarr(radarr_envs.imdb_id) == "":
         awards = ""
     else:
-        awards = f"\nAwards: {omdb.omdb_sonarr(radarr_envs.imdb_id)}"
+        awards = f"\nAwards: {omdb.omdb_radarr(radarr_envs.imdb_id)}"
 
     message = {
         "title": "Radarr",
@@ -83,8 +83,8 @@ def radarr_grab():
                    f"\nGenre(s): {funcs.get_radarr_genres(radarr)}"
                    f"{cast}"
                    f"{director}"
-                   f"\nAvailable On ({funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[1]}): {funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0]}"
                    f"{awards}"
+                   f"\nAvailable On ({funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[1]}): {funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0]}"
     }
 
     if config.NTFY_RADARR_PRIORITY == "":
@@ -227,12 +227,6 @@ def radarr_health():
 
 
 def radarr_update():
-    update_message = radarr_envs.update_message
-
-    if len(update_message) >= 250:
-        update_message = update_message[:200]
-        update_message += '...'
-
     message = {
         "title": "Radarr",
         "topic": config.NTFY_RADARR_MISC_TOPIC,
@@ -240,9 +234,7 @@ def radarr_update():
         "priority": config.NTFY_RADARR_PRIORITY,
         "actions": [{"action": "view", "label": "Visit Radarr", "url": f"{config.RADARR_URL}"}],
         "message": f"Radarr has been updated to {radarr_envs.new_version}."
-        # f"\n\nNew version: {radarr_envs.new_version}"
                    f"\n\nOld version: {radarr_envs.old_version}"
-                   f"\n\nUpdate Notes\n{update_message}"
     }
 
     if config.NTFY_RADARR_PRIORITY == "":

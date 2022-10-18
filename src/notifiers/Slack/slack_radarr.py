@@ -424,23 +424,6 @@ def radarr_update():
                 }
             },
             {
-                "type": "header",
-                "text": {
-                    "type": "plain_text",
-                    "text": "Update Notes"
-                }
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"```{radarr_envs.update_message}```"
-                },
-            },
-            {
-                "type": "divider"
-            },
-            {
                 "type": "section",
                 "fields": [
                     {

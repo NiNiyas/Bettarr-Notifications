@@ -3,7 +3,7 @@
 echo "**** installing python3 and pip ****"
 apk add --update --no-cache python3 py-pip gcc musl-dev python3-dev libffi-dev openssl-dev cargo make
 
-echo "**** installing requests module ****"
+echo "**** installing requirements ****"
 pip install --no-cache-dir --upgrade requests requests[security] cryptography loguru
 apk del \
         libressl-dev \

@@ -28,6 +28,7 @@ if not config.SONARR:
 
 RADARR_EVENT_TYPE = os.environ.get("radarr_eventtype")
 SONARR_EVENT_TYPE = os.environ.get("sonarr_eventtype")
+PROWLARR_EVENT_TYPE = os.environ.get("prowlarr_eventtype")
 
 
 def initialize_sonarr():
@@ -56,6 +57,18 @@ def initialize_radarr():
                     "Required variables for Radarr are not set. Please check your config and make sure you set everything correct.")
                 log.error("Exiting...")
                 exit(1)
+
+
+def initialize_prowlarr():
+    """
+    Checking if required variables are set for prowlarr
+    """
+    if config.PROWLARR:
+        if config.PROWLARR_URL == "":
+            log.error(
+                "Required variables for Radarr are not set. Please check your config and make sure you set everything correct.")
+            log.error("Exiting...")
+            exit(1)
 
 
 def check_sonarr_connection():
@@ -96,6 +109,26 @@ def check_radarr_connection():
         except RequestException as e:
             log.error(e)
             log.error("Error occured when trying to connect to Radarr.")
+
+
+def check_prowlarr_connection():
+    """
+    Checking connection for radarr.
+    """
+    initialize_prowlarr()
+    if config.PROWLARR:
+        try:
+            cmd = requests.get(config.PROWLARR_URL)
+            if cmd.status_code == 200:
+                log.debug("Successfully connected to Prowlarr.")
+            else:
+                log.error(
+                    "Error occurred when trying to connect to Prowlarr. Please check your config and make sure you set everything correct.")
+                log.error("Exiting...")
+                exit(1)
+        except RequestException as e:
+            log.error(e)
+            log.error("Error occured when trying to connect to Prowlarr.")
 
 
 def radarr_send():
@@ -272,8 +305,58 @@ def sonarr_send():
             ntfy_sonarr.sonarr_update()
 
 
+def prowlarr_send():
+    """
+    Sends prowlarr notifications to respective platforms
+    """
+
+    check_prowlarr_connection()
+    if config.DISCORD:
+        if PROWLARR_EVENT_TYPE == "Test":
+            discord_prowlarr.prowlarr_test()
+        elif PROWLARR_EVENT_TYPE == "HealthIssue":
+            discord_prowlarr.prowlarr_health()
+        elif PROWLARR_EVENT_TYPE == "ApplicationUpdate":
+            discord_prowlarr.prowlarr_update()
+
+    if config.SLACK:
+        if PROWLARR_EVENT_TYPE == "Test":
+            slack_prowlarr.prowlarr_test()
+        elif PROWLARR_EVENT_TYPE == "HealthIssue":
+            slack_prowlarr.prowlarr_health()
+        elif PROWLARR_EVENT_TYPE == "ApplicationUpdate":
+            slack_prowlarr.prowlarr_update()
+
+    if config.PUSHOVER:
+        if PROWLARR_EVENT_TYPE == "Test":
+            pushover_prowlarr.prowlarr_test()
+        elif PROWLARR_EVENT_TYPE == "HealthIssue":
+            pushover_prowlarr.prowlarr_health()
+        elif PROWLARR_EVENT_TYPE == "ApplicationUpdate":
+            pushover_prowlarr.prowlarr_update()
+
+    if config.TELEGRAM:
+        if PROWLARR_EVENT_TYPE == "Test":
+            telegram_prowlarr.prowlarr_test()
+        elif PROWLARR_EVENT_TYPE == "HealthIssue":
+            telegram_prowlarr.prowlarr_health()
+        elif PROWLARR_EVENT_TYPE == "ApplicationUpdate":
+            telegram_prowlarr.prowlarr_update()
+
+    if config.ntfy:
+        if PROWLARR_EVENT_TYPE == "Test":
+            ntfy_prowlarr.prowlarr_test()
+        elif PROWLARR_EVENT_TYPE == "HealthIssue":
+            ntfy_prowlarr.prowlarr_health()
+        elif PROWLARR_EVENT_TYPE == "ApplicationUpdate":
+            ntfy_prowlarr.prowlarr_update()
+
+
 if SONARR_EVENT_TYPE:
     sonarr_send()
 
 if RADARR_EVENT_TYPE:
     radarr_send()
+
+if PROWLARR_EVENT_TYPE:
+    prowlarr_send()

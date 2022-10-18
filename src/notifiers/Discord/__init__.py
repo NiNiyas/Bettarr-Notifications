@@ -1,1 +1,1 @@
-__all__ = ["discord_radarr", "discord_sonarr"]
+__all__ = ["discord_radarr", "discord_sonarr", "discord_prowlarr"]

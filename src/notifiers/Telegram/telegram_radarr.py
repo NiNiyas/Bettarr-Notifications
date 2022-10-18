@@ -50,10 +50,10 @@ def radarr_grab():
     else:
         release_group = f"\n<b>Release Group</b>: {radarr_envs.release_group}"
 
-    if omdb.omdb_sonarr(radarr_envs.imdb_id) == "":
+    if omdb.omdb_radarr(radarr_envs.imdb_id) == "":
         awards = ""
     else:
-        awards = f"\n<b>Awards</b>: {omdb.omdb_sonarr(radarr_envs.imdb_id)}"
+        awards = f"\n<b>Awards</b>: {omdb.omdb_radarr(radarr_envs.imdb_id)}"
 
     message = {
         "chat_id": config.TELEGRAM_CHAT_ID,
@@ -73,8 +73,8 @@ def radarr_grab():
                 f"\n<b>Cast</b>: {cast}"
                 f"\n<b>Director</b>: <a href='{funcs.get_movie_crew(radarr_envs.tmdb_id)[0][0]}'>{funcs.get_movie_crew(radarr_envs.tmdb_id)[1][0]}</a>"
                 f"\n<b>Available On</b> ({funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[1]}): {funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0]}"
-                f"\n<b>View Details</b>: <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[0]}'>IMDb</a>, <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[1]}'>TheMovieDb</a>, <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[2]}'>Trakt</a>, <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[3]}'>MovieChat</a>"
                 f"{awards}"
+                f"\n<b>View Details</b>: <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[0]}'>IMDb</a>, <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[1]}'>TheMovieDb</a>, <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[2]}'>Trakt</a>, <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[3]}'>MovieChat</a>"
     }
 
     if funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0] == "None":
@@ -221,7 +221,6 @@ def radarr_update():
         "disable_notification": config.TELEGRAM_SILENT,
         "text": f"Radarr has been updated to <b>({radarr_envs.new_version})</b>."
                 f"\n\nOld version: {radarr_envs.old_version}"
-                f"\n\nUpdate Notes\n{radarr_envs.update_message}"
     }
 
     try:

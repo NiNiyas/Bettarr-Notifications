@@ -7,6 +7,9 @@ RADARR = False
 RADARR_URL = "http://localhost:7878/"  # with url trailing
 RADARR_APIKEY = ""
 
+PROWLARR = False
+PROWLARR_URL = "http://localhost:9696/"  # with url trailing
+
 TMDB_APIKEY = ""
 TMDB_URL = "api.themoviedb.org"  # no need to change this if your isp doesn't block it
 TMDB_COUNTRY_CODE = "US"
@@ -40,6 +43,12 @@ SONARR_DISCORD_WEBHOOK = ""
 SONARR_DISCORD_USERICON = "https://user-images.githubusercontent.com/31781818/33885790-bc32aec0-df1a-11e7-83df-3bf737de68c5.png"
 SONARR_DISCORD_USERNAME = "Sonarr"
 
+## Prowlarr
+PROWLARR_DISCORD_USERNAME = "Prowlarr"
+PROWLARR_DISCORD_WEBHOOK = ""
+PROWLARR_DISCORD_USERICON = "https://opencollective-production.s3.us-west-1.amazonaws.com/94607900-7a43-11eb-9165-3d3bf77287f3.png"
+PROWLARR_MISC_DISCORD_WEBHOOK = ""
+
 # Slack Configuration
 SLACK_CHANNEL = ""
 ## Radarr
@@ -51,6 +60,10 @@ RADARR_MISC_SLACK_WEBHOOK = ""
 SONARR_SLACK_WEBHOOK = ""
 SONARR_HEALTH_SLACK_WEBHOOK = ""
 SONARR_MISC_SLACK_WEBHOOK = ""
+
+## Prowlarr
+PROWLARR_SLACK_WEBHOOK = ""
+PROWLARR_MISC_SLACK_WEBHOOK = ""
 
 # Pushover Configuration
 PUSHOVER_API_URL = "https://api.pushover.net/1/messages.json"  # no need to change this
@@ -69,6 +82,10 @@ SONARR_PUSHOVER_TOKEN = ""
 SONARR_HEALTH_PUSHOVER_TOKEN = ""
 SONARR_MISC_PUSHOVER_TOKEN = ""
 
+## Prowlarr
+PROWLARR_PUSHOVER_TOKEN = ""
+PROWLARR_MISC_PUSHOVER_TOKEN = ""
+
 # Telegram Configuration
 TELEGRAM_CHAT_ID = ""
 TELEGRAM_MISC_CHAT_ID = ""
@@ -86,12 +103,18 @@ SONARR_TELEGRAM_BOT_ID = ""
 SONARR_HEALTH_TELEGRAM_BOT_ID = ""
 SONARR_MISC_TELEGRAM_BOT_ID = ""
 
+## Prowlarr
+PROWLARR_TELEGRAM_BOT_ID = ""
+PROWLARR_MISC_TELEGRAM_BOT_ID = ""
+
 TELEGRAM_RADARR_URL = f"https://api.telegram.org/bot{RADARR_TELEGRAM_BOT_ID}/sendMessage"  # no need to change this
 TELEGRAM_SONARR_URL = f"https://api.telegram.org/bot{SONARR_TELEGRAM_BOT_ID}/sendMessage"  # no need to change this
+TELEGRAM_PROWLARR_URL = f"https://api.telegram.org/bot{PROWLARR_TELEGRAM_BOT_ID}/sendMessage"  # no need to change this
 TELEGRAM_RADARR_HEALTH_URL = f"https://api.telegram.org/bot{RADARR_HEALTH_TELEGRAM_BOT_ID}/sendMessage"  # no need to change this
 TELEGRAM_SONARR_HEALTH_URL = f"https://api.telegram.org/bot{SONARR_HEALTH_TELEGRAM_BOT_ID}/sendMessage"  # no need to change this
 TELEGRAM_RADARR_MISC_URL = f"https://api.telegram.org/bot{RADARR_MISC_TELEGRAM_BOT_ID}/sendMessage"  # no need to change this
 TELEGRAM_SONARR_MISC_URL = f"https://api.telegram.org/bot{SONARR_MISC_TELEGRAM_BOT_ID}/sendMessage"  # no need to change this
+TELEGRAM_PROWLARR_MISC_URL = f"https://api.telegram.org/bot{PROWLARR_MISC_TELEGRAM_BOT_ID}/sendMessage"  # no need to change this
 
 # ntfy Configuration
 NTFY_URL = ""
@@ -107,3 +130,8 @@ NTFY_SONARR_TOPIC = ""
 NTFY_SONARR_PRIORITY = 3
 NTFY_SONARR_HEALTH_TOPIC = ""
 NTFY_SONARR_MISC_TOPIC = ""
+
+## Prowlarr
+NTFY_PROWLARR_TOPIC = ""
+NTFY_PROWLARR_PRIORITY = 3
+NTFY_PROWLARR_MISC_TOPIC = ""

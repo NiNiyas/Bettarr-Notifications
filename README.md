@@ -1,16 +1,17 @@
 # Bettarr Notifications
 
-Better Notifications for Sonarr and Radarr. \
-Discord is based on script by @samwiseg0 - [Link to his repo](https://github.com/samwiseg0/better-discord-notifications)
+Better Notifications for Sonarr, Radarr and Prowlarr.
 
-Tested with v3.0.9.1549 of Sonarr and v4.2.4.6635 of Radarr.
+Tested with v3.0.9.1549 of Sonarr, v4.2.4.6635 of Radarr and v0.4.7.2016 of Prowlarr.
 
 ## Installation
 
-- Clone the repo, `git clone https://github.com/NiNiyas/Bettarr-Notifications.git` and `cd Bettarr-Notifications`.
+- Clone the repo, `git clone https://github.com/NiNiyas/Bettarr-Notifications.git` and `cd Bettarr-Notifications/src`.
 - Install requirements `pip install --no-cache --upgrade -r requirements.txt`.
-- On Sonarr and/or Radarr, add a custom script in `Settings -> Connect`.
-- Select everything except `On Rename`.
+- On *arrs, add a custom script in `Settings -> Connect`.
+    - `Sonarr`: select everything except `On Rename`.
+    - `Radarr`: select everything except `On Rename` and `On Movie Added`.
+    - `Prowlarr`: select everything.
 
 ## Docker Installation
 
@@ -32,7 +33,8 @@ Tested with v3.0.9.1549 of Sonarr and v4.2.4.6635 of Radarr.
 - If you need the JustWatch providers for your country, fill in the `TMDB_COUNTRY_CODE`.
 - For country codes, see [here](https://www.justwatch.com/), scroll down to the very bottom of the page.
 
-If your ISP block access to TMDB API like mine does, host a [tmdb-proxy](https://github.com/chervontsev/tmdb-proxy) on Railway and fill in `TMDB_URL`. I personally host mine in [Railway](https://railway.app).
+If your ISP block access to TMDB API like mine does, host a [tmdb-proxy](https://github.com/chervontsev/tmdb-proxy) on
+Railway and fill in `TMDB_URL`. I personally host mine in [Railway](https://railway.app).
 
 ### mdblist (Optional)
 
@@ -65,6 +67,10 @@ Create a [webhook](https://support.discord.com/hc/en-us/articles/228383668-Intro
 
 - Fill in `SONARR_DISCORD_WEBHOOK`, `SONARR_HEALTH_DISCORD_WEBHOOK` and `SONARR_MISC_DISCORD_WEBHOOK`.
 
+##### Prowlarr
+
+- Fill in `PROWLARR_DISCORD_WEBHOOK` and `PROWLARR_MISC_DISCORD_WEBHOOK`.
+
 ## [Slack](https://slack.com)
 
 Create a webhook. More info [here](https://api.slack.com/messaging/webhooks#create_a_webhook).
@@ -76,6 +82,10 @@ Create a webhook. More info [here](https://api.slack.com/messaging/webhooks#crea
 ##### Sonarr
 
 - Fill in `SOANRR_SLACK_WEBHOOK`, `SONARR_HEALTH_SLACK_WEBHOOK` and `SONARR_MISC_SLACK_WEBHOOK`.
+
+##### Prowlarr
+
+- Fill in `PROWLARR_SLACK_WEBHOOK` and `PROWLARR_MISC_SLACK_WEBHOOK`.
 
 ## [Telegram](https://telegram.org/)
 
@@ -90,11 +100,15 @@ Fill in `TELEGRAM_CHAT_ID`,`TELEGRAM_MISC_CHAT_ID` and `TELEGRAM_HEALTH_CHAT_ID`
 
 ##### Radarr
 
-- Fill in `RADARR_TELEGRAM_BOT_ID`, `RADARR_HEALTH_TELEGRAM_BOT_ID`, `RADARR_MISC_TELEGRAM_BOT_ID`.
+- Fill in `RADARR_TELEGRAM_BOT_ID`, `RADARR_HEALTH_TELEGRAM_BOT_ID` and `RADARR_MISC_TELEGRAM_BOT_ID`.
 
 ##### Sonarr
 
-- Fill in `SONARR_TELEGRAM_BOT_ID`, `SONARR_HEALTH_TELEGRAM_BOT_ID`, `SONARR_MISC_TELEGRAM_BOT_ID`.
+- Fill in `SONARR_TELEGRAM_BOT_ID`, `SONARR_HEALTH_TELEGRAM_BOT_ID` and `SONARR_MISC_TELEGRAM_BOT_ID`.
+
+##### Prowlarr
+
+- Fill in `PROWLARR_TELEGRAM_BOT_ID` and `PROWLARR_MISC_TELEGRAM_BOT_ID`.
 
 ## [Pushover](https://pushover.net)
 
@@ -118,11 +132,17 @@ Emergency priority (2) has default 30 second timeout between retries and will ex
 
 - Fill in `SONARR_PUSHOVER_TOKEN`, `SONARR_HEALTH_PUSHOVER_TOKEN` and `SONARR_MISC_PUSHOVER_TOKEN`.
 
+##### Prowlarr
+
+- Fill in `PROWLARR_PUSHOVER_TOKEN` and `PROWLARR_MISC_PUSHOVER_TOKEN`.
+
 ## [ntfy](https://ntfy.sh)
 
 Fill in your server url `NTFY_URL`. \
-If you have got authentication set up, fill in `NTFY_HEADER` with **Basic Auth** headers. More details can be found [here](https://ntfy.sh/docs/publish/#authentication). \
-If you want to change the priority, fill in `NTFY_*_PRIORITY`. List of available priorities can be found [here](https://ntfy.sh/docs/publish/#message-priority). Default is `3`(i.e., Default priority.).
+If you have got authentication set up, fill in `NTFY_HEADER` with **Basic Auth** headers. More details can be
+found [here](https://ntfy.sh/docs/publish/#authentication). \
+If you want to change the priority, fill in `NTFY_*_PRIORITY`. List of available priorities can be
+found [here](https://ntfy.sh/docs/publish/#message-priority). Default is `3`(i.e., Default priority.).
 
 ##### Radarr
 
@@ -131,3 +151,7 @@ If you want to change the priority, fill in `NTFY_*_PRIORITY`. List of available
 ##### Sonarr
 
 - Fill in `NTFY_SONARR_TOPIC`, `NTFY_SONARR_HEALTH_TOPIC` and `NTFY_SONARR_MISC_TOPIC`.
+
+##### Prowlarr
+
+- Fill in `NTFY_PROWLARR_TOPIC` and `NTFY_PROWLARR_MISC_TOPIC`.

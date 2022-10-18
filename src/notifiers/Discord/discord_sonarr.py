@@ -12,7 +12,7 @@ HEADERS = {"content-type": "application/json"}
 
 def sonarr_test():
     test = {
-        "username": config.RADARR_DISCORD_USERNAME,
+        "username": config.SONARR_DISCORD_USERNAME,
         "content": "**Bettarr Notifications for Sonarr test message.\nThank you for using the script!**"}
 
     try:

@@ -349,7 +349,6 @@ def radarr_update():
                 },
                 'timestamp': funcs.utc_now_iso(),
                 'title': f"Radarr has been updated to `{radarr_envs.new_version}`.",
-                'description': f"**Update Notes**\n```{radarr_envs.update_message}```",
                 'color': random.choice(funcs.colors),
                 'fields': [
                     {
