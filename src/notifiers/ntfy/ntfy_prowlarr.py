@@ -43,13 +43,13 @@ def prowlarr_test():
 
 def prowlarr_health():
     message = {
-        "title": "prowlarr",
+        "title": "Prowlarr",
         "topic": config.NTFY_PROWLARR_TOPIC,
         "tags": ["prowlarr", "heartpulse"],
         "priority": config.NTFY_PROWLARR_PRIORITY,
-        "actions": [{"action": "view", "label": "Visit prowlarr", "url": f"{config.PROWLARR_URL}"},
+        "actions": [{"action": "view", "label": "Visit Prowlarr", "url": f"{config.PROWLARR_URL}"},
                     {"action": "view", "label": "Visit Wiki", "url": f"{wiki_link}"}],
-        "message": "An issue has occured on prowlarr."
+        "message": "An issue has occured on Prowlarr."
                    f"\n\nError Level: {issue_level}"
                    f"\nError Type: {issue_type}"
                    f"\nError Message: {issue_message}"
@@ -74,15 +74,13 @@ def prowlarr_health():
 
 def prowlarr_update():
     message = {
-        "title": "prowlarr",
+        "title": "Prowlarr",
         "topic": config.NTFY_PROWLARR_MISC_TOPIC,
         "tags": ["prowlarr", "update"],
         "priority": config.NTFY_PROWLARR_PRIORITY,
-        "actions": [{"action": "view", "label": "Visit prowlarr", "url": f"{config.PROWLARR_URL}"}],
-        "message": f"prowlarr has been updated to {new_version}."
-        # f"\n\nNew version: {new_version}"
+        "actions": [{"action": "view", "label": "Visit Prowlarr", "url": f"{config.PROWLARR_URL}"}],
+        "message": f"Prowlarr has been updated to {new_version}."
                    f"\n\nOld version: {old_version}"
-                   f"\n\nUpdate Notes\n{_update_message}"
     }
 
     try:
