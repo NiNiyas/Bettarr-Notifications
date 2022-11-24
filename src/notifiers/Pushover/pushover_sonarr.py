@@ -68,7 +68,7 @@ def sonarr_grab():
     else:
         release_group = f"\n<b>Release Group</b>: {sonarr_envs.release_group}"
 
-    if omdb.omdb_sonarr(sonarr_envs.imdb_id) == "":
+    if omdb.omdb_sonarr(sonarr_envs.imdb_id) == "N/A":
         awards = ""
     else:
         awards = f"\n<b>Awards</b>: {omdb.omdb_sonarr(sonarr_envs.imdb_id)}"

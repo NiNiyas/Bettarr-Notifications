@@ -57,7 +57,7 @@ def radarr_grab():
     else:
         release_group = f"\n<b>Release Group</b>: {radarr_envs.release_group}"
 
-    if omdb.omdb_radarr(radarr_envs.imdb_id) == "":
+    if omdb.omdb_radarr(radarr_envs.imdb_id) == "N/A":
         awards = ""
     else:
         awards = f"\n<b>Awards</b>: {omdb.omdb_radarr(radarr_envs.imdb_id)}"

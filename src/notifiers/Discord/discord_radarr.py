@@ -137,7 +137,7 @@ def radarr_grab():
         ]
     }
 
-    if omdb.omdb_radarr(radarr_envs.imdb_id) == "":
+    if omdb.omdb_radarr(radarr_envs.imdb_id) == "N/A":
         del message['embeds'][0]['12']
 
     if funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0] == "None":

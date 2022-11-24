@@ -64,7 +64,7 @@ def sonarr_grab():
     else:
         release_group = f"\nRelease Group: {sonarr_envs.release_group}"
 
-    if omdb.omdb_sonarr(sonarr_envs.imdb_id) == "":
+    if omdb.omdb_sonarr(sonarr_envs.imdb_id) == "N/A":
         awards = ""
     else:
         awards = f"\nAwards: {omdb.omdb_sonarr(sonarr_envs.imdb_id)}"
@@ -92,6 +92,10 @@ def sonarr_grab():
                    f"\nAvailable On ({funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1]}): {funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0]}"
                    f"{awards}"
     }
+
+    if message["attach"] == "https://i.imgur.com/PgwcPyw.jpg":
+        del message["attach"]
+        del message["filename"]
 
     if config.NTFY_SONARR_PRIORITY == "":
         del message["priority"]

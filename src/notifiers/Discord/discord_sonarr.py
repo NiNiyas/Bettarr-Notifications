@@ -149,7 +149,7 @@ def sonarr_grab():
         ]
     }
 
-    if omdb.omdb_sonarr(sonarr_envs.imdb_id) == "":
+    if omdb.omdb_sonarr(sonarr_envs.imdb_id) == "N/A":
         del message['embeds'][0]['13']
 
     if funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0] == "None":

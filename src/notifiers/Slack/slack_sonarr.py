@@ -189,7 +189,7 @@ def sonarr_grab():
     if cast == "Unknown":
         del message['blocks'][6]['fields'][0]
 
-    if omdb.omdb_sonarr(sonarr_envs.imdb_id) == "":
+    if omdb.omdb_sonarr(sonarr_envs.imdb_id) == "N/A":
         del message['blocks'][6]['fields'][2]
 
     if funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1] == "Unknown":

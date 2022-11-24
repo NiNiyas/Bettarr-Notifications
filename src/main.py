@@ -73,7 +73,7 @@ def initialize_prowlarr():
 
 def check_sonarr_connection():
     """
-    Checking connection for sonarr.
+    Checking sonarr connection.
     """
     initialize_sonarr()
     if config.SONARR:
@@ -87,13 +87,13 @@ def check_sonarr_connection():
                 log.error("Exiting...")
                 exit(1)
         except RequestException as e:
-            log.error(e)
             log.error("Error occured when trying to connect to Sonarr.")
+            log.exception(e)
 
 
 def check_radarr_connection():
     """
-    Checking connection for radarr.
+    Checking radarr connection.
     """
     initialize_radarr()
     if config.RADARR:
@@ -107,13 +107,13 @@ def check_radarr_connection():
                 log.error("Exiting...")
                 exit(1)
         except RequestException as e:
-            log.error(e)
             log.error("Error occured when trying to connect to Radarr.")
+            log.exception(e)
 
 
 def check_prowlarr_connection():
     """
-    Checking connection for radarr.
+    Checking prowlarr connection.
     """
     initialize_prowlarr()
     if config.PROWLARR:
@@ -127,8 +127,8 @@ def check_prowlarr_connection():
                 log.error("Exiting...")
                 exit(1)
         except RequestException as e:
-            log.error(e)
             log.error("Error occured when trying to connect to Prowlarr.")
+            log.exception(e)
 
 
 def radarr_send():
