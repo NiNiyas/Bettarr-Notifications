@@ -15,7 +15,7 @@ def sonarr_test():
         "text": "*Bettarr Notifications for Sonarr test message. Thank you for using the script!*"}
 
     try:
-        sender = requests.post(config.SONARR_SLACK_WEBHOOK, headers=HEADERS, json=test)
+        sender = requests.post(config.SONARR_SLACK_WEBHOOK, headers=HEADERS, json=test, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent test notification to Slack.")
         else:
@@ -202,7 +202,7 @@ def sonarr_grab():
         del message['blocks'][5]['fields'][5]
 
     try:
-        sender = requests.post(config.SONARR_SLACK_WEBHOOK, headers=HEADERS, json=message)
+        sender = requests.post(config.SONARR_SLACK_WEBHOOK, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent grab notification to Slack.")
         else:
@@ -346,7 +346,7 @@ def sonarr_import():
         del message['blocks'][5]['fields'][2]
 
     try:
-        sender = requests.post(config.SONARR_SLACK_WEBHOOK, headers=HEADERS, json=message)
+        sender = requests.post(config.SONARR_SLACK_WEBHOOK, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent import notification to Slack.")
         else:
@@ -431,7 +431,7 @@ def sonarr_health():
     }
 
     try:
-        sender = requests.post(config.SONARR_HEALTH_SLACK_WEBHOOK, headers=HEADERS, json=message)
+        sender = requests.post(config.SONARR_HEALTH_SLACK_WEBHOOK, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent health notification to Slack.")
         else:
@@ -558,7 +558,7 @@ def sonarr_delete_episode():
         del message['blocks'][4]['fields'][5]
 
     try:
-        sender = requests.post(config.SONARR_MISC_SLACK_WEBHOOK, headers=HEADERS, json=message)
+        sender = requests.post(config.SONARR_MISC_SLACK_WEBHOOK, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent delete episode notification to Slack.")
         else:
@@ -627,7 +627,7 @@ def sonarr_delete_series():
     }
 
     try:
-        sender = requests.post(config.SONARR_MISC_SLACK_WEBHOOK, headers=HEADERS, json=message)
+        sender = requests.post(config.SONARR_MISC_SLACK_WEBHOOK, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent delete series notification to Slack.")
         else:
@@ -647,27 +647,6 @@ def sonarr_update():
     message = {
         "text": f"Sonarr has ben updated to `{sonarr_envs.new_version}`.",
         "blocks": [
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"Sonarr has ben updated to `{sonarr_envs.new_version}`.",
-                }
-            },
-            {
-                "type": "header",
-                "text": {
-                    "type": "plain_text",
-                    "text": "Update Notes"
-                }
-            },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"```{sonarr_envs.update_message}```"
-                },
-            },
             {
                 "type": "section",
                 "fields": [
@@ -697,7 +676,7 @@ def sonarr_update():
     }
 
     try:
-        sender = requests.post(config.SONARR_MISC_SLACK_WEBHOOK, headers=HEADERS, json=message)
+        sender = requests.post(config.SONARR_MISC_SLACK_WEBHOOK, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent app update notification to Slack.")
         else:

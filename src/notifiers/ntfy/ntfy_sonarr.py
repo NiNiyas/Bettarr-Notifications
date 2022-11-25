@@ -16,11 +16,11 @@ def sonarr_test():
         "actions": [{"action": "view", "label": "Visit Sonarr", "url": f"{config.SONARR_URL}"}],
         "message": "Bettarr Notifications for Sonarr test message.\nThank you for using the script!"}
 
-    if config.NTFY_SONARR_PRIORITY == "":
+    if test["priority"] == "":
         del test["priority"]
 
     try:
-        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=test)
+        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=test, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent test notification to ntfy.")
         else:
@@ -97,7 +97,7 @@ def sonarr_grab():
         del message["attach"]
         del message["filename"]
 
-    if config.NTFY_SONARR_PRIORITY == "":
+    if message["priority"] == "":
         del message["priority"]
 
     if funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0] == "None":
@@ -133,7 +133,7 @@ def sonarr_grab():
     """
 
     try:
-        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message)
+        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent grab notification to ntfy.")
         else:
@@ -182,7 +182,7 @@ def sonarr_import():
                    f"{release_name}"
     }
 
-    if config.NTFY_SONARR_PRIORITY == "":
+    if message["priority"] == "":
         del message["priority"]
 
     """
@@ -209,7 +209,7 @@ def sonarr_import():
         message["message"] = mod_string
 
     try:
-        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message)
+        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent import notification to ntfy.")
         else:
@@ -239,11 +239,11 @@ def sonarr_health():
                    f"\nError Message: {sonarr_envs.issue_message}"
     }
 
-    if config.NTFY_SONARR_PRIORITY == "":
+    if message["priority"] == "":
         del message["priority"]
 
     try:
-        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message)
+        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent health notification to ntfy.")
         else:
@@ -288,7 +288,7 @@ def sonarr_delete_episode():
         # f"\n\nView Details: TheMovieDb: {funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[4]}, Trakt: {funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[2]}, TVMaze: {funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[1]}"
     }
 
-    if config.NTFY_SONARR_PRIORITY == "":
+    if message["priority"] == "":
         del message["priority"]
 
     if sonarr_envs.delete_release_group == "":
@@ -306,7 +306,7 @@ def sonarr_delete_episode():
         message["message"] = mod_string
 
     try:
-        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message)
+        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent delete episode notification to ntfy.")
         else:
@@ -342,11 +342,11 @@ def sonarr_delete_series():
         # f"\n\nView Details: TheMovieDb: {funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[4]}, Trakt: {funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[2]}, TVMaze: {funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[1]}"
     }
 
-    if config.NTFY_SONARR_PRIORITY == "":
+    if message["priority"] == "":
         del message["priority"]
 
     try:
-        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message)
+        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent series delete notification to ntfy.")
         else:
@@ -363,12 +363,6 @@ def sonarr_delete_series():
 
 
 def sonarr_update():
-    update_message = sonarr_envs.update_message
-
-    if len(update_message) >= 250:
-        update_message = update_message[:200]
-        update_message += '...'
-
     message = {
         "title": "Sonarr",
         "topic": config.NTFY_SONARR_MISC_TOPIC,
@@ -376,16 +370,14 @@ def sonarr_update():
         "priority": config.NTFY_SONARR_PRIORITY,
         "actions": [{"action": "view", "label": "Visit Sonarr", "url": f"{config.SONARR_URL}"}],
         "message": f"Sonarr has been updated to {sonarr_envs.new_version}."
-                   #f"\n\nNew version: {sonarr_envs.new_version}"
                    f"\n\nOld version: {sonarr_envs.old_version}"
-                   f"\n\nUpdate Notes\n{update_message}"
     }
 
-    if config.NTFY_SONARR_PRIORITY == "":
+    if message["priority"] == "":
         del message["priority"]
 
     try:
-        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message)
+        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent app update notification to ntfy.")
         else:

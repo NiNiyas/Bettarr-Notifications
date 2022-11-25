@@ -15,7 +15,7 @@ def radarr_test():
         "text": "*Bettarr Notifications for Radarr test message. Thank you for using the script!*"}
 
     try:
-        sender = requests.post(config.RADARR_SLACK_WEBHOOK, headers=HEADERS, json=test)
+        sender = requests.post(config.RADARR_SLACK_WEBHOOK, headers=HEADERS, json=test, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent test notification to Slack.")
         else:
@@ -416,13 +416,6 @@ def radarr_update():
         "channel": config.SLACK_CHANNEL,
         "text": f"Radarr has ben updated to `{radarr_envs.new_version}`.",
         "blocks": [
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"Radarr has ben updated to `{radarr_envs.new_version}`.",
-                }
-            },
             {
                 "type": "section",
                 "fields": [

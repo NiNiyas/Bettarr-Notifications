@@ -12,7 +12,6 @@ issue_level = os.environ.get("prowlarr_health_issue_level")
 wiki_link = os.environ.get("prowlarr_health_issue_wiki")
 issue_type = os.environ.get("prowlarr_health_issue_type")
 issue_message = os.environ.get("prowlarr_health_issue_message")
-_update_message = os.environ.get("prowlarr_update_message")
 new_version = os.environ.get("prowlarr_update_newversion")
 old_version = os.environ.get("prowlarr_update_previousversion")
 
@@ -25,7 +24,7 @@ def prowlarr_test():
         "content": "**Bettarr Notifications for Prowlarr test message.\nThank you for using the script!**"}
 
     try:
-        sender = requests.post(config.PROWLARR_DISCORD_WEBHOOK, headers=HEADERS, json=test)
+        sender = requests.post(config.PROWLARR_DISCORD_WEBHOOK, headers=HEADERS, json=test, timeout=60)
         if sender.status_code == 204:
             log.success("Successfully sent test notification to Discord.")
         else:

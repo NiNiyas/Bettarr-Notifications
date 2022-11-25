@@ -24,7 +24,7 @@ def radarr_test():
         "message": "<b>Bettarr Notifications for Radarr test message.\nThank you for using the script!</b>"}
 
     try:
-        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=test)
+        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=test, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent test notification to Pushover.")
         else:
@@ -131,7 +131,7 @@ def radarr_grab():
         sender = requests.post(config.PUSHOVER_API_URL, data=message,
                                files={"attachment": (
                                    "poster.jpg", open(funcs.get_pushover_radarrposter(radarr_envs.tmdb_id),
-                                                      "rb"), "image/jpeg")})
+                                                      "rb"), "image/jpeg")}, timeout=60)
 
         if sender.status_code == 200:
             log.success("Successfully sent grab notification to Pushover.")
@@ -201,7 +201,7 @@ def radarr_import():
         sender = requests.post(config.PUSHOVER_API_URL, data=message,
                                files={
                                    "attachment": ("still.jpg", open(funcs.get_pushover_radarrstill(radarr_envs.tmdb_id),
-                                                                    "rb"), "image/jpeg")})
+                                                                    "rb"), "image/jpeg")}, timeout=60)
 
         if sender.status_code == 200:
             log.success("Successfully sent import notification to Pushover.")
@@ -238,7 +238,7 @@ def radarr_health():
     }
 
     try:
-        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=message)
+        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent health notification to Pushover.")
         else:
@@ -255,12 +255,6 @@ def radarr_health():
 
 
 def radarr_update():
-    update_message = radarr_envs.update_message
-
-    if len(update_message) >= 250:
-        update_message = update_message[:200]
-        update_message += '...'
-
     message = {
         "html": 1,
         "user": config.PUSHOVER_USER,
@@ -274,11 +268,10 @@ def radarr_update():
         "url_title": "Visit Radarr",
         "message": f"Radarr has been updated to <b>({radarr_envs.new_version})</b>."
                    f"\n\nOld version: {radarr_envs.old_version}"
-                   f"\n\nUpdate Notes\n{update_message}"
     }
 
     try:
-        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=message)
+        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent app update notification to Pushover.")
         else:
@@ -321,7 +314,7 @@ def radarr_movie_delete():
         message["message"] = mod_string
 
     try:
-        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=message)
+        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent movie delete notification to Pushover.")
         else:
@@ -384,7 +377,7 @@ def radarr_moviefile_delete():
         message["message"] = mod_string
 
     try:
-        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=message)
+        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent movie file delete notification to Pushover.")
         else:

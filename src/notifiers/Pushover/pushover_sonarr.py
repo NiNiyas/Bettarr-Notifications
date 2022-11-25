@@ -24,7 +24,7 @@ def sonarr_test():
         "message": "<b>Bettarr Notifications for Sonarr test message.\nThank you for using the script!</b>"}
 
     try:
-        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=test)
+        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=test, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent test notification to Pushover.")
         else:
@@ -133,7 +133,7 @@ def sonarr_grab():
         sender = requests.post(config.PUSHOVER_API_URL, data=message,
                                files={"attachment": ("poster.jpg", open(
                                    funcs.get_pushover_sonarrposter(sonarr_envs.tvdb_id, sonarr_envs.imdb_id), "rb"),
-                                                     "image/jpeg")})
+                                                     "image/jpeg")}, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent grab notification to Pushover.")
         else:
@@ -210,7 +210,7 @@ def sonarr_import():
         sender = requests.post(config.PUSHOVER_API_URL, data=message,
                                files={"attachment": ("still.jpg", open(
                                    funcs.get_pushover_sonarrstill(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, season,
-                                                                  episode, skyhook), "rb"), "image/jpeg")})
+                                                                  episode, skyhook), "rb"), "image/jpeg")}, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent import notification to Pushover.")
         else:
@@ -246,7 +246,7 @@ def sonarr_health():
     }
 
     try:
-        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=message)
+        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent health notification to Pushover.")
         else:
@@ -307,7 +307,7 @@ def sonarr_delete_episode():
         message["message"] = mod_string
 
     try:
-        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=message)
+        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent delete episode notification to Pushover.")
         else:
@@ -345,7 +345,7 @@ def sonarr_delete_series():
     }
 
     try:
-        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=message)
+        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent series delete notification to Pushover.")
         else:
@@ -362,12 +362,6 @@ def sonarr_delete_series():
 
 
 def sonarr_update():
-    update_message = sonarr_envs.update_message
-
-    if len(update_message) >= 250:
-        update_message = update_message[:200]
-        update_message += '...</b>'
-
     message = {
         "html": 1,
         "user": config.PUSHOVER_USER,
@@ -381,11 +375,10 @@ def sonarr_update():
         "url_title": "Visit Sonarr",
         "message": f"Sonarr has been updated to <b>({sonarr_envs.new_version})</b>."
                    f"\n\n<b>Old version</b>: {sonarr_envs.old_version}"
-                   f"\n\n<b>Update Notes</b>\n{update_message}"
     }
 
     try:
-        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=message)
+        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent app update notification to Pushover.")
         else:

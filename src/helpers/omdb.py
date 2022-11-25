@@ -10,6 +10,7 @@ def omdb_radarr(radarr_imdb):
             log.debug("Fetching awards from OMDB API.")
             try:
                 awards = omdb["Awards"]
+                log.debug("Successfully fetched awards.")
             except KeyError:
                 awards = ""
         else:
@@ -31,6 +32,7 @@ def omdb_sonarr(sonarr_imdb):
             log.debug("Fetching awards from OMDB API.")
             try:
                 awards = omdb["Awards"]
+                log.debug("Successfully fetched awards.")
             except KeyError:
                 awards = ""
         else:

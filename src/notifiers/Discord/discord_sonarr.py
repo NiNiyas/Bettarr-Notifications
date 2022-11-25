@@ -16,7 +16,7 @@ def sonarr_test():
         "content": "**Bettarr Notifications for Sonarr test message.\nThank you for using the script!**"}
 
     try:
-        sender = requests.post(config.SONARR_DISCORD_WEBHOOK, headers=HEADERS, json=test)
+        sender = requests.post(config.SONARR_DISCORD_WEBHOOK, headers=HEADERS, json=test, timeout=60)
         if sender.status_code == 204:
             log.success("Successfully sent test notification to Discord.")
         else:
@@ -170,7 +170,7 @@ def sonarr_grab():
         del message['embeds'][0]['fields'][6]
 
     try:
-        sender = requests.post(config.SONARR_DISCORD_WEBHOOK, headers=HEADERS, json=message)
+        sender = requests.post(config.SONARR_DISCORD_WEBHOOK, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 204:
             log.success("Successfully sent grab notification to Discord.")
         else:
@@ -279,7 +279,7 @@ def sonarr_import():
         del message['embeds'][0]['fields'][5]
 
     try:
-        sender = requests.post(config.SONARR_DISCORD_WEBHOOK, headers=HEADERS, json=message)
+        sender = requests.post(config.SONARR_DISCORD_WEBHOOK, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 204:
             log.success("Successfully sent import notification to Discord.")
         else:
@@ -344,7 +344,7 @@ def sonarr_health():
     }
 
     try:
-        sender = requests.post(config.SONARR_HEALTH_DISCORD_WEBHOOK, headers=HEADERS, json=message)
+        sender = requests.post(config.SONARR_HEALTH_DISCORD_WEBHOOK, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 204:
             log.success("Successfully sent health notification to Discord.")
         else:
@@ -447,7 +447,7 @@ def sonarr_delete_episode():
         del message['embeds'][0]['fields'][5]
 
     try:
-        sender = requests.post(config.SONARR_MISC_DISCORD_WEBHOOK, headers=HEADERS, json=message)
+        sender = requests.post(config.SONARR_MISC_DISCORD_WEBHOOK, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 204:
             log.success("Successfully sent delete episode notification to Discord.")
         else:
@@ -511,7 +511,7 @@ def sonarr_delete_series():
     }
 
     try:
-        sender = requests.post(config.SONARR_MISC_DISCORD_WEBHOOK, headers=HEADERS, json=message)
+        sender = requests.post(config.SONARR_MISC_DISCORD_WEBHOOK, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 204:
             log.success("Successfully sent delete series notification to Discord.")
         else:
@@ -544,7 +544,6 @@ def sonarr_update():
                 },
                 'timestamp': funcs.utc_now_iso(),
                 'title': f"Sonarr has been updated to `{sonarr_envs.new_version}`.",
-                'description': f"**Update Notes**\n```{sonarr_envs.update_message}```",
                 'color': random.choice(funcs.colors),
                 'fields': [
                     {
@@ -558,7 +557,7 @@ def sonarr_update():
     }
 
     try:
-        sender = requests.post(config.SONARR_MISC_DISCORD_WEBHOOK, headers=HEADERS, json=message)
+        sender = requests.post(config.SONARR_MISC_DISCORD_WEBHOOK, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 204:
             log.success("Successfully sent app update notification to Discord.")
         else:

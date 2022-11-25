@@ -17,7 +17,7 @@ def radarr_test():
         "text": "<b>Bettarr Notifications for Radarr test message.\nThank you for using the script!</b>"}
 
     try:
-        sender = requests.post(config.TELEGRAM_RADARR_URL, headers=HEADERS, json=test)
+        sender = requests.post(config.TELEGRAM_RADARR_URL, headers=HEADERS, json=test, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent test notification to Telegram.")
         else:
@@ -110,7 +110,7 @@ def radarr_grab():
     message['text'].rstrip()
 
     try:
-        sender = requests.post(config.TELEGRAM_RADARR_URL, headers=HEADERS, json=message)
+        sender = requests.post(config.TELEGRAM_RADARR_URL, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent grab notification to Telegram.")
         else:
@@ -169,7 +169,7 @@ def radarr_import():
         message["text"] = mod_string
 
     try:
-        sender = requests.post(config.TELEGRAM_RADARR_URL, headers=HEADERS, json=message)
+        sender = requests.post(config.TELEGRAM_RADARR_URL, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent import notification to Telegram.")
         else:
@@ -198,7 +198,7 @@ def radarr_health():
     }
 
     try:
-        sender = requests.post(config.TELEGRAM_RADARR_HEALTH_URL, headers=HEADERS, json=message)
+        sender = requests.post(config.TELEGRAM_RADARR_HEALTH_URL, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent health notification to Telegram.")
         else:
@@ -224,7 +224,7 @@ def radarr_update():
     }
 
     try:
-        sender = requests.post(config.TELEGRAM_RADARR_MISC_URL, headers=HEADERS, json=message)
+        sender = requests.post(config.TELEGRAM_RADARR_MISC_URL, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent app update notification to Telegram.")
         else:
@@ -260,7 +260,7 @@ def radarr_movie_delete():
         message["text"] = mod_string
 
     try:
-        sender = requests.post(config.TELEGRAM_RADARR_MISC_URL, headers=HEADERS, json=message)
+        sender = requests.post(config.TELEGRAM_RADARR_MISC_URL, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent movie delete notification to Telegram.")
         else:
@@ -315,7 +315,7 @@ def radarr_moviefile_delete():
         message["text"] = mod_string
 
     try:
-        sender = requests.post(config.TELEGRAM_RADARR_MISC_URL, headers=HEADERS, json=message)
+        sender = requests.post(config.TELEGRAM_RADARR_MISC_URL, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent movie file delete notification to Telegram.")
         else:

@@ -16,7 +16,7 @@ def radarr_test():
         "content": "**Bettarr Notifications for Radarr test message.\nThank you for using the script!**"}
 
     try:
-        sender = requests.post(config.RADARR_DISCORD_WEBHOOK, headers=HEADERS, json=test)
+        sender = requests.post(config.RADARR_DISCORD_WEBHOOK, headers=HEADERS, json=test, timeout=60)
         if sender.status_code == 204:
             log.success("Successfully sent test notification to Discord.")
         else:

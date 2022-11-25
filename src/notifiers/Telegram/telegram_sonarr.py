@@ -17,7 +17,7 @@ def sonarr_test():
         "text": "<b>Bettarr Notifications for Sonarr test message.\nThank you for using the script!</b>"}
 
     try:
-        sender = requests.post(config.TELEGRAM_SONARR_URL, headers=HEADERS, json=test)
+        sender = requests.post(config.TELEGRAM_SONARR_URL, headers=HEADERS, json=test, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent test notification to Telegram.")
         else:
@@ -116,7 +116,7 @@ def sonarr_grab():
     message['text'].rstrip()
 
     try:
-        sender = requests.post(config.TELEGRAM_SONARR_URL, headers=HEADERS, json=message)
+        sender = requests.post(config.TELEGRAM_SONARR_URL, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent grab notification to Telegram.")
         else:
@@ -185,7 +185,7 @@ def sonarr_import():
         message["text"] = mod_string
 
     try:
-        sender = requests.post(config.TELEGRAM_SONARR_URL, headers=HEADERS, json=message)
+        sender = requests.post(config.TELEGRAM_SONARR_URL, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent import notification to Telegram.")
         else:
@@ -214,7 +214,7 @@ def sonarr_health():
     }
 
     try:
-        sender = requests.post(config.TELEGRAM_SONARR_HEALTH_URL, headers=HEADERS, json=message)
+        sender = requests.post(config.TELEGRAM_SONARR_HEALTH_URL, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent health notification to Telegram.")
         else:
@@ -268,7 +268,7 @@ def sonarr_delete_episode():
         log.warning("Scene name field is unknown, removing it..")
 
     try:
-        sender = requests.post(config.TELEGRAM_SONARR_MISC_URL, headers=HEADERS, json=message)
+        sender = requests.post(config.TELEGRAM_SONARR_MISC_URL, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent episode delete notification to Telegram.")
         else:
@@ -300,7 +300,7 @@ def sonarr_delete_series():
     }
 
     try:
-        sender = requests.post(config.TELEGRAM_SONARR_MISC_URL, headers=HEADERS, json=message)
+        sender = requests.post(config.TELEGRAM_SONARR_MISC_URL, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent series delete notification to Telegram.")
         else:
@@ -323,11 +323,10 @@ def sonarr_update():
         "disable_notification": config.TELEGRAM_SILENT,
         "text": f"Sonarr has been updated to <b>({sonarr_envs.new_version})</b>."
                 f"\n\n<b>Old version</b>: {sonarr_envs.old_version}"
-                f"\n\n<b>Update Notes</b>\n{sonarr_envs.update_message}"
     }
 
     try:
-        sender = requests.post(config.TELEGRAM_SONARR_MISC_URL, headers=HEADERS, json=message)
+        sender = requests.post(config.TELEGRAM_SONARR_MISC_URL, headers=HEADERS, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent app update notification to Telegram.")
         else:

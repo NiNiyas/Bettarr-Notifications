@@ -16,11 +16,11 @@ def radarr_test():
         "actions": [{"action": "view", "label": "Visit Radarr", "url": f"{config.RADARR_URL}"}],
         "message": "Bettarr Notifications for Radarr test message.\nThank you for using the script!"}
 
-    if config.NTFY_RADARR_PRIORITY == "":
+    if test["priority"] == "":
         del test["priority"]
 
     try:
-        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=test)
+        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=test, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent test notification to ntfy.")
         else:
@@ -87,7 +87,7 @@ def radarr_grab():
                    f"\nAvailable On ({funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[1]}): {funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0]}"
     }
 
-    if config.NTFY_RADARR_PRIORITY == "":
+    if message["priority"] == "":
         del message["priority"]
 
     if funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0] == "None":
@@ -110,7 +110,7 @@ def radarr_grab():
     message['message'].rstrip()
 
     try:
-        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message)
+        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent grab notification to ntfy.")
         else:
@@ -164,7 +164,7 @@ def radarr_import():
 
     }
 
-    if config.NTFY_RADARR_PRIORITY == "":
+    if message["priority"] == "":
         del message["priority"]
 
     if radarr_envs.scene_name == "":
@@ -176,7 +176,7 @@ def radarr_import():
         message["message"] = mod_string
 
     try:
-        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message)
+        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent import notification to ntfy.")
         else:
@@ -206,11 +206,11 @@ def radarr_health():
                    f"\nError Message: {radarr_envs.issue_message}"
     }
 
-    if config.NTFY_RADARR_PRIORITY == "":
+    if message["priority"] == "":
         del message["priority"]
 
     try:
-        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message)
+        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent health notification to ntfy.")
         else:
@@ -237,11 +237,11 @@ def radarr_update():
                    f"\n\nOld version: {radarr_envs.old_version}"
     }
 
-    if config.NTFY_RADARR_PRIORITY == "":
+    if message["priority"] == "":
         del message["priority"]
 
     try:
-        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message)
+        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent app update notification to ntfy.")
         else:
@@ -274,7 +274,7 @@ def radarr_movie_delete():
         # f"\n\nView Details: Trakt: {funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[2]}\nMovieChat: {funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[3]}"
     }
 
-    if config.NTFY_RADARR_PRIORITY == "":
+    if message["priority"] == "":
         del message["priority"]
 
     if funcs.convert_size(int(radarr_envs.deleted_size)) == "0B":
@@ -286,7 +286,7 @@ def radarr_movie_delete():
         message["message"] = mod_string
 
     try:
-        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message)
+        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent movie delete notification to ntfy.")
         else:
@@ -322,7 +322,7 @@ def radarr_moviefile_delete():
         # f"\n\nView Details: Trakt: {funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[2]}\nMovieChat: {funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[3]}"
     }
 
-    if config.NTFY_RADARR_PRIORITY == "":
+    if message["priority"] == "":
         del message["priority"]
 
     if radarr_envs.deleted_moviefilesize == 0:
@@ -350,7 +350,7 @@ def radarr_moviefile_delete():
         message["message"] = mod_string
 
     try:
-        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message)
+        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent movie file delete notification to ntfy.")
         else:

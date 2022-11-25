@@ -10,7 +10,6 @@ issue_level = os.environ.get("prowlarr_health_issue_level")
 wiki_link = os.environ.get("prowlarr_health_issue_wiki")
 issue_type = os.environ.get("prowlarr_health_issue_type")
 issue_message = os.environ.get("prowlarr_health_issue_message")
-_update_message = os.environ.get("prowlarr_update_message")
 new_version = os.environ.get("prowlarr_update_newversion")
 old_version = os.environ.get("prowlarr_update_previousversion")
 
@@ -24,8 +23,11 @@ def prowlarr_test():
         "actions": [{"action": "view", "label": "Visit Prowlarr", "url": config.PROWLARR_URL}],
         "message": "Bettarr Notifications for Prowlarr test message.\nThank you for using the script!"}
 
+    if test["priority"] == "":
+        del test["priority"]
+
     try:
-        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=test)
+        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=test, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent test notification to ntfy.")
         else:
@@ -55,8 +57,11 @@ def prowlarr_health():
                    f"\nError Message: {issue_message}"
     }
 
+    if message["priority"] == "":
+        del message["priority"]
+
     try:
-        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message)
+        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent health notification to ntfy.")
         else:
@@ -83,8 +88,11 @@ def prowlarr_update():
                    f"\n\nOld version: {old_version}"
     }
 
+    if message["priority"] == "":
+        del message["priority"]
+
     try:
-        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message)
+        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent app update notification to ntfy.")
         else:

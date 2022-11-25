@@ -29,7 +29,7 @@ def convert_size(size_bytes):
     i = int(math.floor(math.log(size_bytes, 1024)))
     p = math.pow(1024, i)
     s = round(size_bytes / p, 2)
-    return "%s %s" % (s, size_name[i])
+    return f"{s} {size_name[i]}"
 
 
 def utc_now_iso():
@@ -49,7 +49,7 @@ def requests_retry_session(retries=3, backoff_factor=0.2, status_forcelist=(500,
 def get_radarr_trailer(radarr):
     try:
         trailer_link = f'https://www.youtube.com/watch?v={radarr["youTubeTrailerId"]}'
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         trailer_link = "https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab"
         log.warning("Trailer not Found. Using 'Never Gonna Give You Up'.")
 
@@ -57,16 +57,10 @@ def get_radarr_trailer(radarr):
 
 
 def get_radarr_links(imdb_id, tmdb_id):
-    try:
-        imdb_url = "https://www.imdb.com/title/" + imdb_id
-        tmdb_url = "https://www.themoviedb.org/movie/" + tmdb_id
-        moviechat = "https://moviechat.org/" + imdb_id
-        trakt_url = "https://trakt.tv/search/tmdb/" + tmdb_id + '?id_type=movie'
-    except Exception:
-        imdb_url = "https://www.imdb.com"
-        tmdb_url = "https://www.themoviedb.org"
-        moviechat = "https://moviechat.org/"
-        trakt_url = "https://trakt.tv/"
+    imdb_url = f"https://www.imdb.com/title/{imdb_id}"
+    tmdb_url = f"https://www.themoviedb.org/movie/{tmdb_id}"
+    moviechat = f"https://moviechat.org/{imdb_id}"
+    trakt_url = f"https://trakt.tv/search/tmdb/{tmdb_id}?id_type=movie"
 
     return imdb_url, tmdb_url, trakt_url, moviechat
 
@@ -74,7 +68,7 @@ def get_radarr_links(imdb_id, tmdb_id):
 def get_radarr_overview(radarr):
     try:
         overview = radarr["overview"]
-    except (KeyError, TypeError, IndexError, Exception):
+    except KeyError:
         log.warning("Error getting overview from Radarr.")
         overview = ""
 
@@ -110,7 +104,7 @@ def get_radarr_genres(radarr):
         genres_data = radarr["genres"]
         genres = str(genres_data)[1:-1]
         genres = genres.replace("'", "")
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         log.warning("Error getting genres from Radarr.")
         genres = "Unknown"
 
@@ -127,7 +121,7 @@ def radarr_tmdb_api(tmdb_id):
 
 def get_movie_cast(tmdb_id):
     crew = requests_retry_session().get(
-        f'https://{config.TMDB_URL}/3/movie/{tmdb_id}/credits?api_key={config.TMDB_APIKEY}',
+        f'https://{config.TMDB_URL}/3/movie/{tmdb_id}/credits?api_key={config.TMDB_APIKEY}&language=en-US',
         timeout=60)
     crew = crew.json()
     cast = []
@@ -146,7 +140,7 @@ def get_movie_cast(tmdb_id):
 
 def get_movie_crew(tmdb_id):
     crew = requests_retry_session().get(
-        f'https://{config.TMDB_URL}/3/movie/{tmdb_id}/credits?api_key={config.TMDB_APIKEY}',
+        f'https://{config.TMDB_URL}/3/movie/{tmdb_id}/credits?api_key={config.TMDB_APIKEY}&language=en-US',
         timeout=60)
     crew = crew.json()
     directors = []
@@ -168,11 +162,11 @@ def get_movie_watch_providers(tmdb_id, imdb_id):
     try:
         country_code = config.TMDB_COUNTRY_CODE
         justwatch = requests_retry_session().get(
-            f'https://{config.TMDB_URL}/3/movie/{tmdb_id}/watch/providers?api_key={config.TMDB_APIKEY}')
+            f'https://{config.TMDB_URL}/3/movie/{tmdb_id}/watch/providers?api_key={config.TMDB_APIKEY}&language=en-US')
         tmdbproviders = justwatch.json()
         for p in tmdbproviders["results"][country_code]['flatrate']:
             providers.append(p['provider_name'])
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         country_code = "US"
         log.warning("Couldn't fetch providers from TMDb. Fetching from mdblist.")
         try:
@@ -180,7 +174,7 @@ def get_movie_watch_providers(tmdb_id, imdb_id):
             for x in mdblist['watch_providers']:
                 stream = (x['name'])
                 providers.append(stream)
-        except (KeyError, TypeError, IndexError, Exception):
+        except (KeyError, TypeError, IndexError):
             log.warning("Error fetching stream data from mdblist.")
             stream = "None"
             providers.append(stream)
@@ -197,7 +191,7 @@ def get_radarr_releasedate(tmdb_id):
     try:
         release = radarr_tmdb_api(tmdb_id)["release_date"]
         release = datetime.datetime.strptime(release, "%Y-%m-%d").strftime("%B %d, %Y")
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         log.warning("Error getting release date from TMDB.")
         release = "Unknown"
 
@@ -208,7 +202,7 @@ def get_radarr_physicalrelease(radarr):
     try:
         physical_release = radarr['physicalRelease']
         physical_release = datetime.datetime.strptime(physical_release, "%Y-%m-%dT%H:%M:%SZ").strftime("%B %d, %Y")
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         physical_release = 'Unknown'
 
     return physical_release
@@ -220,12 +214,12 @@ def get_radarr_backdrop(tmdb_id):
             f'https://{config.TMDB_URL}/3/movie/{tmdb_id}/images?api_key={config.TMDB_APIKEY}&language=en',
             timeout=60).json()
         banner = banner_data['backdrops'][0]['file_path']
-        banner = 'https://image.tmdb.org/t/p/original' + banner
-    except (KeyError, TypeError, IndexError, Exception):
+        banner = f'https://image.tmdb.org/t/p/original{banner}'
+    except (KeyError, TypeError, IndexError):
         try:
             banner_url = radarr_tmdb_api(tmdb_id)['backdrop_path']
-            banner = 'https://image.tmdb.org/t/p/original' + banner_url
-        except (KeyError, TypeError, IndexError, Exception):
+            banner = f'https://image.tmdb.org/t/p/original{banner_url}'
+        except (KeyError, TypeError, IndexError):
             log.warning("Error retrieving backdrop. Defaulting to generic banner.")
             banner = 'https://i.imgur.com/IMQb6ia.png'
 
@@ -235,8 +229,8 @@ def get_radarr_backdrop(tmdb_id):
 def get_radarrposter(tmdb_id):
     try:
         poster_path = radarr_tmdb_api(tmdb_id)['poster_path']
-        poster_path = "https://image.tmdb.org/t/p/original" + poster_path
-    except (KeyError, TypeError, IndexError, Exception):
+        poster_path = f"https://image.tmdb.org/t/p/original{poster_path}"
+    except (KeyError, TypeError, IndexError):
         log.warning("Error getting poster from TMDB.")
         poster_path = "https://i.imgur.com/GoqfZJe.jpg"
 
@@ -288,7 +282,7 @@ def get_pushover_radarrstill(tmdb_id):
 def get_sonarr_contentrating(skyhook):
     try:
         content_rating = skyhook['contentRating']
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         content_rating = ratings.mdblist_tv()[1]
 
         if content_rating == "":
@@ -300,7 +294,7 @@ def get_sonarr_contentrating(skyhook):
 def get_sonarr_network(skyhook):
     try:
         network = skyhook["network"]
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         network = "Unknown"
 
     return network
@@ -310,7 +304,7 @@ def get_sonarrgenres(skyhook):
     try:
         genres = json.dumps(skyhook["genres"])
         genres = re.sub(r'[?|$|.|!|:|/|\]|\[|\"]', r'', genres)
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         genres = "Unknown"
 
     return genres
@@ -322,7 +316,7 @@ def sonarr_tmdbapi(tvdb_id, imdb_id):
             f'https://{config.TMDB_URL}/3/find/{tvdb_id}?api_key={config.TMDB_APIKEY}&language=en&external_source=tvdb_id',
             timeout=60).json()
         tmdb_id = tmdb['tv_results'][0]['id']
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         tmdb = requests_retry_session().get(
             f'https://{config.TMDB_URL}/3/find/{imdb_id}?api_key={config.TMDB_APIKEY}&language=en&external_source=imdb_id',
             timeout=60).json()
@@ -334,7 +328,7 @@ def sonarr_tmdbapi(tvdb_id, imdb_id):
 def get_seriescast(tvdb_id, imdb_id):
     try:
         crew = requests.get(
-            f"https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}/credits?api_key={config.TMDB_APIKEY}",
+            f'https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}/credits?api_key={config.TMDB_APIKEY}&language=en-US',
             timeout=60)
         crew = crew.json()
         cast = []
@@ -348,7 +342,7 @@ def get_seriescast(tvdb_id, imdb_id):
             actors_url = f"https://www.themoviedb.org/search?query={actors}"
             actors_url = actors_url.replace(" ", "+")
             cast_url.append(actors_url)
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         cast = []
         cast_url = []
 
@@ -358,7 +352,7 @@ def get_seriescast(tvdb_id, imdb_id):
 def get_seriescrew(tvdb_id, imdb_id):
     try:
         crew = requests.get(
-            f"https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}/credits?api_key={config.TMDB_APIKEY}",
+            f'https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}/credits?api_key={config.TMDB_APIKEY}&language=en-US',
             timeout=60)
         crew = crew.json()
         directors = []
@@ -371,7 +365,7 @@ def get_seriescrew(tvdb_id, imdb_id):
             actors_url = f"https://www.themoviedb.org/search?query={director}"
             actors_url = actors_url.replace(" ", "+")
             director_url.append(actors_url)
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         directors = []
         director_url = []
 
@@ -384,11 +378,11 @@ def get_seriescrew(tvdb_id, imdb_id):
 def get_posterseries(tvdb_id, imdb_id):
     try:
         poster_path = requests.get(
-            f"https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}?api_key={config.TMDB_APIKEY}&language=en-US",
+            f'https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}?api_key={config.TMDB_APIKEY}&language=en-US',
             timeout=60).json()
         poster = poster_path['poster_path']
-        poster = "https://image.tmdb.org/t/p/original/" + poster
-    except (KeyError, TypeError, IndexError, Exception):
+        poster = f"https://image.tmdb.org/t/p/original/{poster}"
+    except (KeyError, TypeError, IndexError):
         poster = 'https://i.imgur.com/PgwcPyw.jpg'
 
     return poster
@@ -414,26 +408,19 @@ def get_pushover_sonarrposter(tvdb_id, imdb_id):
 
 def get_sonarr_links(tvdb_id, imdb_id, skyhook, slug):
     try:
-        tvdb_url = 'https://thetvdb.com/series/' + slug
+        tvmaze_id = skyhook['tvMazeId']
+    except KeyError:
+        tvmaze_id = "Unknown"
 
-        try:
-            tvmaze_id = skyhook['tvMazeId']
-        except (KeyError, TypeError, IndexError, Exception):
-            tvmaze_id = "Unknown"
+    tvdb_url = f'https://thetvdb.com/series/{slug}'
 
-        tvmaze_url = 'https://www.tvmaze.com/shows/' + str(tvmaze_id)
+    tvmaze_url = f'https://www.tvmaze.com/shows/{str(tvmaze_id)}'
 
-        trakt_url = 'https://trakt.tv/search/tvdb/' + tvdb_id + '?id_type=show'
+    trakt_url = f'https://trakt.tv/search/tvdb/{tvdb_id}?id_type=show'
 
-        imdb_url = 'https://www.imdb.com/title/' + str(imdb_id)
+    imdb_url = f'https://www.imdb.com/title/{str(imdb_id)}'
 
-        tmdb_url = 'https://www.themoviedb.org/tv/' + str(sonarr_tmdbapi(tvdb_id, imdb_id))
-    except Exception:
-        tvdb_url = "https://thetvdb.com"
-        tvmaze_url = "https://www.tvmaze.com"
-        trakt_url = "https://trakt.tv"
-        imdb_url = "https://www.imdb.com"
-        tmdb_url = "https://www.themoviedb.org"
+    tmdb_url = f'https://www.themoviedb.org/tv/{str(sonarr_tmdbapi(tvdb_id, imdb_id))}'
 
     return tvdb_url, tvmaze_url, trakt_url, imdb_url, tmdb_url
 
@@ -447,7 +434,7 @@ def get_tv_watch_providers(tvdb_id, imdb_id):
         tmdbproviders = justwatch.json()
         for p in tmdbproviders["results"][country_code]['flatrate']:
             providers.append(p['provider_name'])
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         country_code = "US"
         log.warning("Couldn't fetch providers from TMDb. Fetching from mdblist.")
         try:
@@ -455,7 +442,7 @@ def get_tv_watch_providers(tvdb_id, imdb_id):
             for x in mdblist['watch_providers']:
                 stream = (x['name'])
                 providers.append(stream)
-        except (KeyError, TypeError, IndexError, Exception):
+        except (KeyError, TypeError, IndexError):
             log.warning("Error fetching stream data from mdblist.")
             stream = "None"
             providers.append(stream)
@@ -471,7 +458,7 @@ def get_tv_watch_providers(tvdb_id, imdb_id):
 def get_sonarr_trailer():
     try:
         trailer_link = ratings.mdblist_tv()[2]
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         log.warning("Trailer not Found. Using 'Never Gonna Give You Up'.")
         trailer_link = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ&ab'
 
@@ -486,7 +473,7 @@ def get_sonarr_overview(tvdb_id, imdb_id):
         overview = series["overview"]
         if overview == "":
             overview = ""
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         overview = ""
 
     if len(overview) >= 300:
@@ -512,13 +499,13 @@ def format_season_episode(season, episode):
     try:
         if len(str(season)) == 1:
             season = f"0{season}"
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         season = "Unknown"
 
     try:
         if len(str(episode)) == 1:
             episode = f"0{episode}"
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         episode = "Unknown"
 
     return season, episode
@@ -530,15 +517,15 @@ def get_sonarr_episodesample(tvdb_id, imdb_id, season, episode, skyhook):
             f'https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}/season/{season}/episode/{episode}/images?api_key={config.TMDB_APIKEY}&language=en',
             timeout=60).json()
         sample = episode_data['stills'][0]['file_path']
-        sample = 'https://image.tmdb.org/t/p/original' + sample
-    except (KeyError, TypeError, IndexError, Exception):
+        sample = f'https://image.tmdb.org/t/p/original{sample}'
+    except (KeyError, TypeError, IndexError):
         try:
             sp = requests_retry_session().get(
                 f'https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}/images?api_key={config.TMDB_APIKEY}&language=en',
                 timeout=60).json()
             poster = sp['posters'][0]['file_path']
-            sample = 'https://image.tmdb.org/t/p/original' + poster
-        except (KeyError, TypeError, IndexError, Exception):
+            sample = f'https://image.tmdb.org/t/p/original{poster}'
+        except (KeyError, TypeError, IndexError):
             sample = skyhook['images'][0]['url']
 
     return sample
@@ -568,7 +555,7 @@ def get_sonarr_episodeoverview(season, episode, tvdb_id, imdb_id):
             f'https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}/season/{season}/episode/{episode}?api_key={config.TMDB_APIKEY}&language=en',
             timeout=60).json()
         overview = episode_data['overview']
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         log.warning("Couldn't fetch episode overview. Falling back to series overview.")
         series = requests_retry_session().get(
             f'https://{config.TMDB_URL}/3/tv/{sonarr_tmdbapi(tvdb_id, imdb_id)}?api_key={config.TMDB_APIKEY}&language=en',
@@ -586,7 +573,7 @@ def get_sonarr_episodeoverview(season, episode, tvdb_id, imdb_id):
         html_overview += "..."
         ntfy_overview = f"\n\nOverview\n{overview}\n"
     else:
-        discord_overview = f""
+        discord_overview = ""
         slack_overview = ""
         html_overview = ""
         ntfy_overview = "\n"
