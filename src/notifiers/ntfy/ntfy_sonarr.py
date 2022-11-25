@@ -13,7 +13,7 @@ def sonarr_test():
         "topic": config.NTFY_SONARR_TOPIC,
         "tags": ["sonarr", "tv", "test"],
         "priority": config.NTFY_SONARR_PRIORITY,
-        "actions": [{"action": "view", "label": "Visit Sonarr", "url": f"{config.SONARR_URL}"}],
+        "actions": [{"action": "view", "label": "Visit Sonarr", "url": config.SONARR_URL}],
         "message": "Bettarr Notifications for Sonarr test message.\nThank you for using the script!"}
 
     if test["priority"] == "":
@@ -74,7 +74,7 @@ def sonarr_grab():
         "topic": config.NTFY_SONARR_TOPIC,
         "tags": ["sonarr", "tv", "grabbed"],
         "priority": config.NTFY_SONARR_PRIORITY,
-        "actions": [{"action": "view", "label": "Visit Sonarr", "url": f"{config.SONARR_URL}"},
+        "actions": [{"action": "view", "label": "Visit Sonarr", "url": config.SONARR_URL},
                     {"action": "view", "label": "View Trailer", "url": f"{funcs.get_sonarr_trailer()}"}],
         "attach": funcs.get_posterseries(sonarr_envs.tvdb_id, sonarr_envs.imdb_id),
         "filename": "poster.jpg",
@@ -160,7 +160,7 @@ def sonarr_import():
         "topic": config.NTFY_SONARR_TOPIC,
         "tags": ["sonarr", "tv", "downloaded"],
         "priority": config.NTFY_SONARR_PRIORITY,
-        "actions": [{"action": "view", "label": "Visit Sonarr", "url": f"{config.SONARR_URL}"}],
+        "actions": [{"action": "view", "label": "Visit Sonarr", "url": config.SONARR_URL}],
         "attach": funcs.get_sonarr_episodesample(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, season, episode, skyhook),
         "filename": "episode_sample.jpg",
         "message": f"{content}{funcs.get_sonarr_episodeoverview(season, episode, sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[3]}"
@@ -213,7 +213,7 @@ def sonarr_health():
         "topic": config.NTFY_SONARR_HEALTH_TOPIC,
         "tags": ["sonarr", "tv", "heartpulse"],
         "priority": config.NTFY_SONARR_PRIORITY,
-        "actions": [{"action": "view", "label": "Visit Sonarr", "url": f"{config.SONARR_URL}"},
+        "actions": [{"action": "view", "label": "Visit Sonarr", "url": config.SONARR_URL},
                     {"action": "view", "label": "Visit Wiki", "url": f"{sonarr_envs.wiki_link}"}],
         "message": "An issue has occured on Sonarr."
                    f"\n\nError Level: {sonarr_envs.issue_level}"
@@ -252,7 +252,7 @@ def sonarr_delete_episode():
         "topic": config.NTFY_SONARR_MISC_TOPIC,
         "tags": ["sonarr", "tv", "delete"],
         "priority": config.NTFY_SONARR_PRIORITY,
-        "actions": [{"action": "view", "label": "Visit Sonarr", "url": f"{config.SONARR_URL}"},
+        "actions": [{"action": "view", "label": "Visit Sonarr", "url": config.SONARR_URL},
                     {"action": "view", "label": "IMDb",
                      "url": f"{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[3]}"},
                     {"action": "view", "label": "TheTVDB",
@@ -313,7 +313,7 @@ def sonarr_delete_series():
         "topic": config.NTFY_SONARR_MISC_TOPIC,
         "tags": ["sonarr", "tv", "delete"],
         "priority": config.NTFY_SONARR_PRIORITY,
-        "actions": [{"action": "view", "label": "Visit Sonarr", "url": f"{config.SONARR_URL}"},
+        "actions": [{"action": "view", "label": "Visit Sonarr", "url": config.SONARR_URL},
                     {"action": "view", "label": "IMDb",
                      "url": f"{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[3]}"},
                     {"action": "view", "label": "TheTVDB",
@@ -350,7 +350,7 @@ def sonarr_update():
         "topic": config.NTFY_SONARR_MISC_TOPIC,
         "tags": ["sonarr", "tv", "update"],
         "priority": config.NTFY_SONARR_PRIORITY,
-        "actions": [{"action": "view", "label": "Visit Sonarr", "url": f"{config.SONARR_URL}"}],
+        "actions": [{"action": "view", "label": "Visit Sonarr", "url": config.SONARR_URL}],
         "message": f"Sonarr has been updated to {sonarr_envs.new_version}."
                    f"\n\nOld version: {sonarr_envs.old_version}"
     }

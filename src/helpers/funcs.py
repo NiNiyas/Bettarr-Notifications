@@ -72,29 +72,10 @@ def get_radarr_overview(radarr):
         log.warning("Error getting overview from Radarr.")
         overview = ""
 
-    """
-        if len(overview) >= 300:
-            overview = overview[:250]
-            overview += "..."
-        
-        if overview == "":
-        discord_overview = ""
-        slack_overview = ""
-        ntfy_overview = ""
-        html_overview = ""
-    else:
-        discord_overview = f"**Overview**\n{overview}"
-        slack_overview = overview
-        ntfy_overview = overview
-        html_overview = overview[:100]
-        html_overview += "..."
-    """
-
     discord_overview = f"**Overview**\n{overview}"
     slack_overview = overview
     ntfy_overview = overview
-    html_overview = overview[:100]
-    html_overview += "..."
+    html_overview = f"{overview[:100]}..."
 
     return discord_overview, slack_overview, html_overview, ntfy_overview
 
@@ -477,19 +458,17 @@ def get_sonarr_overview(tvdb_id, imdb_id):
         overview = ""
 
     if len(overview) >= 300:
-        overview = overview[:250]
-        overview += '...'
+        overview = f"{overview[:250]}..."
 
     if overview != "":
         discord_overview = f"**Overview**\n{overview}"
         slack_overview = overview
-        html_overview = f"\n\n<strong>Overview</strong>\n{overview[:100]}\n"
-        html_overview += "..."
+        html_overview = f"\n\n<strong>Overview</strong>\n{overview[:100]}...\n"
         ntfy_overview = f"\n\nOverview\n{overview}\n"
     else:
-        discord_overview = f""
+        discord_overview = ""
         slack_overview = ""
-        html_overview = ""
+        html_overview = "\n"
         ntfy_overview = "\n"
 
     return discord_overview, slack_overview, html_overview, ntfy_overview
@@ -533,11 +512,11 @@ def get_sonarr_episodesample(tvdb_id, imdb_id, season, episode, skyhook):
 
 def get_pushover_sonarrstill(tvdb_id, imdb_id, season, episode, skyhook):
     sample = get_sonarr_episodesample(tvdb_id, imdb_id, season, episode, skyhook)
-    if not os.path.exists('Images'):
-        os.mkdir('Images')
+    if not os.path.exists(f"{dir_path}/images"):
+        os.mkdir(f"{dir_path}/images")
     response = requests_retry_session().get(sample, stream=True)
     filename = sample.split("/")[-1]
-    file_path = os.path.join('Images', filename)
+    file_path = os.path.join(f"{dir_path}/images", filename)
     if response.status_code == 200:
         response.raw.decode_content = True
         with open(file_path, 'wb') as f:
@@ -563,19 +542,17 @@ def get_sonarr_episodeoverview(season, episode, tvdb_id, imdb_id):
         overview = series['overview']
 
     if len(overview) >= 300:
-        overview = overview[:250]
-        overview += '...'
+        overview = f"{overview[:250]}..."
 
     if overview != "":
         discord_overview = f"**Overview**\n{overview}"
         slack_overview = overview
-        html_overview = f"\n\n<strong>Overview</strong>\n{overview[:100]}\n"
-        html_overview += "..."
+        html_overview = f"\n\n<strong>Overview</strong>\n{overview[:100]}...\n"
         ntfy_overview = f"\n\nOverview\n{overview}\n"
     else:
         discord_overview = ""
         slack_overview = ""
-        html_overview = ""
+        html_overview = "\n"
         ntfy_overview = "\n"
 
     return discord_overview, slack_overview, html_overview, ntfy_overview
