@@ -7,7 +7,6 @@ from loguru import logger as log
 from requests import RequestException
 
 HEADERS = {"content-type": "application/json"}
-skyhook = requests.get(f'http://skyhook.sonarr.tv/v1/tvdb/shows/en/{sonarr_envs.tvdb_id}').json()
 
 
 def sonarr_test():
@@ -33,6 +32,7 @@ def sonarr_test():
 
 
 def sonarr_grab():
+    skyhook = requests.get(f'http://skyhook.sonarr.tv/v1/tvdb/shows/en/{sonarr_envs.tvdb_id}').json()
     slug = skyhook["slug"]
     season = funcs.format_season_episode(sonarr_envs.season, sonarr_envs.episode)[0]
     episode = funcs.format_season_episode(sonarr_envs.season, sonarr_envs.episode)[1]
@@ -219,6 +219,7 @@ def sonarr_grab():
 
 
 def sonarr_import():
+    skyhook = requests.get(f'http://skyhook.sonarr.tv/v1/tvdb/shows/en/{sonarr_envs.tvdb_id}').json()
     slug = skyhook["slug"]
     season = funcs.format_season_episode(sonarr_envs.import_season, sonarr_envs.import_episode)[0]
     episode = funcs.format_season_episode(sonarr_envs.import_season, sonarr_envs.import_episode)[1]
@@ -447,6 +448,7 @@ def sonarr_health():
 
 
 def sonarr_delete_episode():
+    skyhook = requests.get(f'http://skyhook.sonarr.tv/v1/tvdb/shows/en/{sonarr_envs.tvdb_id}').json()
     slug = skyhook['slug']
     season = funcs.format_season_episode(sonarr_envs.delete_season, sonarr_envs.delete_episode)[0]
     episode = funcs.format_season_episode(sonarr_envs.delete_season, sonarr_envs.delete_episode)[1]
@@ -573,6 +575,7 @@ def sonarr_delete_episode():
 
 
 def sonarr_delete_series():
+    skyhook = requests.get(f'http://skyhook.sonarr.tv/v1/tvdb/shows/en/{sonarr_envs.tvdb_id}').json()
     slug = skyhook['slug']
 
     message = {
