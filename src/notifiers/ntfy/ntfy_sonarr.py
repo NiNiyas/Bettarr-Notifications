@@ -6,6 +6,8 @@ from helpers import funcs, ratings, sonarr_envs, omdb
 from loguru import logger as log
 from requests import RequestException
 
+skyhook = requests.get(f'http://skyhook.sonarr.tv/v1/tvdb/shows/en/{sonarr_envs.tvdb_id}').json()
+
 
 def sonarr_test():
     test = {
@@ -37,7 +39,6 @@ def sonarr_test():
 
 
 def sonarr_grab():
-    skyhook = requests.get(f"http://skyhook.sonarr.tv/v1/tvdb/shows/en/{sonarr_envs.tvdb_id}").json()
     season = funcs.format_season_episode(sonarr_envs.season, sonarr_envs.episode)[0]
     episode = funcs.format_season_episode(sonarr_envs.season, sonarr_envs.episode)[1]
 
@@ -103,34 +104,25 @@ def sonarr_grab():
     if funcs.get_tv_watch_providers(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0] == "None":
         import re
         pattern = r'Available On \([^()]*\): None'
-        log.warning("Available On field is unknown, removing it..")
+        log.debug("Available On field is unknown, removing it..")
         mod_string = re.sub(pattern, '', message["message"])
         message["message"] = mod_string
 
     if funcs.get_sonarr_contentrating(skyhook) == "Unknown":
         import re
         pattern = r'Content Rating: '
-        log.warning("Content Rating field is unknown, removing it..")
+        log.debug("Content Rating field is unknown, removing it..")
         mod_string = re.sub(pattern, '', message["message"])
         message["message"] = mod_string
 
     if funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1] == "Unknown":
         import re
         pattern = r'Director: Unknown'
-        log.warning("Director field is unknown, removing it..")
+        log.debug("Director field is unknown, removing it..")
         mod_string = re.sub(pattern, '', message["message"])
         message["message"] = mod_string
 
     message['message'].rstrip()
-
-    """
-    if sonarr_envs.release_group == "":
-        import re
-        pattern = r'Release Group: '
-        log.warning("Release Group field is unknown, removing it..")
-        mod_string = re.sub(pattern, '', message["message"])
-        message["message"] = mod_string
-    """
 
     try:
         sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message, timeout=60)
@@ -150,7 +142,6 @@ def sonarr_grab():
 
 
 def sonarr_import():
-    skyhook = requests.get(f'http://skyhook.sonarr.tv/v1/tvdb/shows/en/{sonarr_envs.tvdb_id}').json()
     season = funcs.format_season_episode(sonarr_envs.import_season, sonarr_envs.import_episode)[0]
     episode = funcs.format_season_episode(sonarr_envs.import_season, sonarr_envs.import_episode)[1]
 
@@ -185,26 +176,17 @@ def sonarr_import():
     if message["priority"] == "":
         del message["priority"]
 
-    """
-    if funcs.get_sonarr_episodeoverview(season, episode, sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1] == "":
-        import re
-        pattern = r'Overview ...'
-        log.warning("Overview field is unknown, removing it..")
-        mod_string = re.sub(pattern, '', message["message"])
-        message["message"] = mod_string
-    """
-
     if sonarr_envs.delete_air_date == "":
         import re
         pattern = r'Air Date: UTC'
-        log.warning("Air Date field is unknown, removing it..")
+        log.debug("Air Date field is unknown, removing it..")
         mod_string = re.sub(pattern, '', message["message"])
         message["message"] = mod_string
 
     if funcs.get_sonarr_contentrating(skyhook) == "Unknown":
         import re
         pattern = r'Content Rating: '
-        log.warning("Content Rating field is unknown, removing it..")
+        log.debug("Content Rating field is unknown, removing it..")
         mod_string = re.sub(pattern, '', message["message"])
         message["message"] = mod_string
 
@@ -260,7 +242,6 @@ def sonarr_health():
 
 
 def sonarr_delete_episode():
-    skyhook = requests.get(f'http://skyhook.sonarr.tv/v1/tvdb/shows/en/{sonarr_envs.tvdb_id}').json()
     slug = skyhook['slug']
     season = funcs.format_season_episode(sonarr_envs.delete_season, sonarr_envs.delete_episode)[0]
     episode = funcs.format_season_episode(sonarr_envs.delete_season, sonarr_envs.delete_episode)[1]
@@ -294,14 +275,14 @@ def sonarr_delete_episode():
     if sonarr_envs.delete_release_group == "":
         import re
         pattern = r'Release Group: '
-        log.warning("Release Group field is unknown, removing it..")
+        log.debug("Release Group field is unknown, removing it..")
         mod_string = re.sub(pattern, '', message["message"])
         message["message"] = mod_string
 
     if sonarr_envs.scene_name == "":
         import re
         pattern = r'Release Name: Unknown'
-        log.warning("Release Name field is unknown, removing it..")
+        log.debug("Release Name field is unknown, removing it..")
         mod_string = re.sub(pattern, '', message["message"])
         message["message"] = mod_string
 
@@ -323,7 +304,6 @@ def sonarr_delete_episode():
 
 
 def sonarr_delete_series():
-    skyhook = requests.get(f'http://skyhook.sonarr.tv/v1/tvdb/shows/en/{sonarr_envs.tvdb_id}').json()
     slug = skyhook['slug']
 
     message = {

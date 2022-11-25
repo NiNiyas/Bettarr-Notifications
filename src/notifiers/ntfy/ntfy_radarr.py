@@ -13,7 +13,7 @@ def radarr_test():
         "topic": config.NTFY_RADARR_TOPIC,
         "tags": ["radarr", "movie_camera", "test"],
         "priority": config.NTFY_RADARR_PRIORITY,
-        "actions": [{"action": "view", "label": "Visit Radarr", "url": f"{config.RADARR_URL}"}],
+        "actions": [{"action": "view", "label": "Visit Radarr", "url": config.RADARR_URL}],
         "message": "Bettarr Notifications for Radarr test message.\nThank you for using the script!"}
 
     if test["priority"] == "":
@@ -70,7 +70,7 @@ def radarr_grab():
         "priority": config.NTFY_RADARR_PRIORITY,
         "attach": funcs.get_radarrposter(radarr_envs.tmdb_id),
         "filename": "poster.jpg",
-        "actions": [{"action": "view", "label": "Visit Radarr", "url": f"{config.RADARR_URL}"},
+        "actions": [{"action": "view", "label": "Visit Radarr", "url": config.RADARR_URL},
                     {"action": "view", "label": "View Trailer", "url": f"{funcs.get_radarr_trailer(radarr)}"}],
         "message": f"Grabbed {radarr_envs.media_title} ({radarr_envs.year}) from {radarr_envs.release_indexer}."
                    f"\n\nOverview\n{funcs.get_radarr_overview(radarr)[3]}\n{ratings.mdblist_movie()[4]}"
@@ -93,19 +93,9 @@ def radarr_grab():
     if funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0] == "None":
         import re
         pattern = r'Available On \([^()]*\): None'
-        log.warning("Available On field is unknown, removing it..")
+        log.debug("Available On field is unknown, removing it..")
         mod_string = re.sub(pattern, '', message["message"])
         message["message"] = mod_string
-
-    """
-        if radarr_envs.release_group == "":
-            import re
-            string = message["message"]
-            pattern = r'Release Group: '
-            log.warning("Release group field is unknown, removing it..")
-            mod_string = re.sub(pattern, '', string)
-            message["message"] = mod_string
-    """
 
     message['message'].rstrip()
 
@@ -152,7 +142,7 @@ def radarr_import():
         "priority": config.NTFY_RADARR_PRIORITY,
         "attach": funcs.get_radarr_backdrop(radarr_envs.tmdb_id),
         "filename": "backdrop.jpg",
-        "actions": [{"action": "view", "label": "Visit Radarr", "url": f"{config.RADARR_URL}"},
+        "actions": [{"action": "view", "label": "Visit Radarr", "url": config.RADARR_URL},
                     {"action": "view", "label": "View Trailer", "url": f"{funcs.get_radarr_trailer(radarr)}"}],
         "message": f"{content}"
                    f"Overview\n{funcs.get_radarr_overview(radarr)[3]}"
@@ -171,7 +161,7 @@ def radarr_import():
         import re
         string = message["message"]
         pattern = r'Release Name: '
-        log.warning("Scene name field is unknown, removing it..")
+        log.debug("Scene name field is unknown, removing it..")
         mod_string = re.sub(pattern, '', string)
         message["message"] = mod_string
 
@@ -198,7 +188,7 @@ def radarr_health():
         "topic": config.NTFY_RADARR_HEALTH_TOPIC,
         "tags": ["radarr", "movie_camera", "heartpulse"],
         "priority": config.NTFY_RADARR_PRIORITY,
-        "actions": [{"action": "view", "label": "Visit Radarr", "url": f"{config.RADARR_URL}"},
+        "actions": [{"action": "view", "label": "Visit Radarr", "url": config.RADARR_URL},
                     {"action": "view", "label": "Visit Wiki", "url": f"{radarr_envs.wiki_link}"}],
         "message": "An issue has occured on Radarr."
                    f"\n\nError Level: {radarr_envs.issue_level}"
@@ -232,7 +222,7 @@ def radarr_update():
         "topic": config.NTFY_RADARR_MISC_TOPIC,
         "tags": ["radarr", "movie_camera", "update"],
         "priority": config.NTFY_RADARR_PRIORITY,
-        "actions": [{"action": "view", "label": "Visit Radarr", "url": f"{config.RADARR_URL}"}],
+        "actions": [{"action": "view", "label": "Visit Radarr", "url": config.RADARR_URL}],
         "message": f"Radarr has been updated to {radarr_envs.new_version}."
                    f"\n\nOld version: {radarr_envs.old_version}"
     }
@@ -263,7 +253,7 @@ def radarr_movie_delete():
         "topic": config.NTFY_RADARR_MISC_TOPIC,
         "tags": ["radarr", "movie_camera", "delete"],
         "priority": config.NTFY_RADARR_PRIORITY,
-        "actions": [{"action": "view", "label": "Visit Radarr", "url": f"{config.RADARR_URL}"},
+        "actions": [{"action": "view", "label": "Visit Radarr", "url": config.RADARR_URL},
                     {"action": "view", "label": "IMDb",
                      "url": f"{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[0]}"},
                     {"action": "view", "label": "TheMovieDb",
@@ -281,7 +271,7 @@ def radarr_movie_delete():
         import re
         string = message["message"]
         pattern = r'Size: 0B'
-        log.warning("Size field is 0B, removing it..")
+        log.debug("Size field is 0B, removing it..")
         mod_string = re.sub(pattern, '', string)
         message["message"] = mod_string
 
@@ -308,7 +298,7 @@ def radarr_moviefile_delete():
         "topic": config.NTFY_RADARR_MISC_TOPIC,
         "tags": ["radarr", "movie_camera", "delete"],
         "priority": config.NTFY_RADARR_PRIORITY,
-        "actions": [{"action": "view", "label": "Visit Radarr", "url": f"{config.RADARR_URL}"},
+        "actions": [{"action": "view", "label": "Visit Radarr", "url": config.RADARR_URL},
                     {"action": "view", "label": "IMDb",
                      "url": f"{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[0]}"},
                     {"action": "view", "label": "TheMovieDb",
@@ -329,7 +319,7 @@ def radarr_moviefile_delete():
         import re
         string = message["message"]
         pattern = r'Size: 0B'
-        log.warning("Size field is 0B, removing it..")
+        log.debug("Size field is 0B, removing it..")
         mod_string = re.sub(pattern, '', string)
         message["message"] = mod_string
 
@@ -337,7 +327,7 @@ def radarr_moviefile_delete():
         import re
         string = message["message"]
         pattern = r'Release Name: '
-        log.warning("Release Name field is Unknown, removing it..")
+        log.debug("Release Name field is Unknown, removing it..")
         mod_string = re.sub(pattern, '', string)
         message["message"] = mod_string
 
@@ -345,7 +335,7 @@ def radarr_moviefile_delete():
         import re
         string = message["message"]
         pattern = r'Release Group: '
-        log.warning("Release Group field is Unknown, removing it..")
+        log.debug("Release Group field is Unknown, removing it..")
         mod_string = re.sub(pattern, '', string)
         message["message"] = mod_string
 

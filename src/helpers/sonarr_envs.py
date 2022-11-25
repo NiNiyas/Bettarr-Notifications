@@ -13,12 +13,6 @@ size = os.environ.get('sonarr_release_size')
 release_group = os.environ.get('sonarr_release_releasegroup')
 
 media_title = os.environ.get('sonarr_series_title')
-try:
-    if len(media_title) >= 250:
-        media_title = media_title[:200]
-        media_title += '...'
-except TypeError:
-    pass
 
 episode_title = os.environ.get('sonarr_release_episodetitles')
 
@@ -65,15 +59,6 @@ delete_quality = os.environ.get('sonarr_episodefile_quality')
 delete_air_date = os.environ.get('sonarr_episodefile_episodeairdatesutc')
 
 series_path = os.environ.get('sonarr_series_path')
-
-update_message = os.environ.get('sonarr_update_message')
-
-try:
-    if len(update_message) >= 250:
-        update_message = update_message[:200]
-        update_message += '...'
-except TypeError:
-    pass
 
 new_version = os.environ.get('sonarr_update_newversion')
 

@@ -92,14 +92,14 @@ def radarr_grab():
     if funcs.get_movie_watch_providers(radarr_envs.tmdb_id, radarr_envs.imdb_id)[0] == "None":
         import re
         pattern = r'<b>Available On<\/b> \([^()]*\): None'
-        log.warning("Available On field is unknown, removing it..")
+        log.debug("Available On field is unknown, removing it..")
         mod_string = re.sub(pattern, '', message["message"])
         message["message"] = mod_string
 
     if cast == "Unknown":
         import re
         pattern = r'<b>Cast<\/b>: Unknown'
-        log.warning("Cast field is unknown, removing it..")
+        log.debug("Cast field is unknown, removing it..")
         mod_string = re.sub(pattern, '', message["message"])
         message["message"] = mod_string
 
@@ -107,19 +107,9 @@ def radarr_grab():
         import re
         string = message["message"]
         pattern = r'<b>Director<\/b>: <a href=\[\]>Unknown<\/a>'
-        log.warning("Director field is unknown, removing it..")
+        log.debug("Director field is unknown, removing it..")
         mod_string = re.sub(pattern, '', string)
         message["message"] = mod_string
-
-    """
-    if radarr_envs.release_group == "":
-        import re
-        string = message["message"]
-        pattern = r'<b>Release Group<\/b>: '
-        log.warning("Release group field is unknown, removing it..")
-        mod_string = re.sub(pattern, '', string)
-        message["message"] = mod_string
-    """
 
     if len(message["message"]) > 1024:
         log.warning(
@@ -193,7 +183,7 @@ def radarr_import():
         import re
         string = message["message"]
         pattern = r'<b>Release Name<\/b>: '
-        log.warning("Scene name field is unknown, removing it..")
+        log.debug("Scene name field is unknown, removing it..")
         mod_string = re.sub(pattern, '', string)
         message["message"] = mod_string
 
@@ -309,7 +299,7 @@ def radarr_movie_delete():
         import re
         string = message["message"]
         pattern = r'<b>Size<\/b>: 0B'
-        log.warning("Size field is 0B, removing it..")
+        log.debug("Size field is 0B, removing it..")
         mod_string = re.sub(pattern, '', string)
         message["message"] = mod_string
 
@@ -356,7 +346,7 @@ def radarr_moviefile_delete():
         import re
         string = message["message"]
         pattern = r'<b>Size<\/b>: 0B'
-        log.warning("Size field is 0B, removing it..")
+        log.debug("Size field is 0B, removing it..")
         mod_string = re.sub(pattern, '', string)
         message["message"] = mod_string
 
@@ -364,7 +354,7 @@ def radarr_moviefile_delete():
         import re
         string = message["message"]
         pattern = r'<b>Release Name<\/b>: '
-        log.warning("Release Name field is Unknown, removing it..")
+        log.debug("Release Name field is Unknown, removing it..")
         mod_string = re.sub(pattern, '', string)
         message["message"] = mod_string
 
@@ -372,7 +362,7 @@ def radarr_moviefile_delete():
         import re
         string = message["message"]
         pattern = r'<b>Release Group<\/b>: '
-        log.warning("Release Group field is Unknown, removing it..")
+        log.debug("Release Group field is Unknown, removing it..")
         mod_string = re.sub(pattern, '', string)
         message["message"] = mod_string
 

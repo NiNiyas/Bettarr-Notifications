@@ -34,8 +34,6 @@ issue_message = os.environ.get("radarr_health_issue_message")
 
 wiki_link = os.environ.get("radarr_health_issue_wiki")
 
-update_message = os.environ.get('radarr_update_message')
-
 new_version = os.environ.get('radarr_update_newversion')
 
 old_version = os.environ.get('radarr_update_previousversion')
