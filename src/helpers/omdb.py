@@ -2,6 +2,8 @@ import config
 import requests
 from loguru import logger as log
 
+log = log.patch(lambda record: record.update(name="BettarrNotifications OMDB"))
+
 
 def omdb_radarr(radarr_imdb):
     if config.OMDB_APIKEY != "":

@@ -58,6 +58,8 @@ delete_quality = os.environ.get('sonarr_episodefile_quality')
 
 delete_air_date = os.environ.get('sonarr_episodefile_episodeairdatesutc')
 
+delete_reason = os.environ.get('sonarr_episodefile_deletereason')
+
 series_path = os.environ.get('sonarr_series_path')
 
 new_version = os.environ.get('sonarr_update_newversion')

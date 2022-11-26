@@ -10,7 +10,7 @@ Tested with v3.0.9.1549 of Sonarr, v4.2.4.6635 of Radarr and v0.4.7.2016 of Prow
 - Install requirements `pip install --no-cache --upgrade -r requirements.txt`.
 - On *arrs, add a custom script in `Settings -> Connect`.
     - `Sonarr`: select everything except `On Rename`.
-    - `Radarr`: select everything except `On Rename` and `On Movie Added`.
+    - `Radarr`: select everything except `On Rename`.
     - `Prowlarr`: select everything.
 
 ## Docker Installation

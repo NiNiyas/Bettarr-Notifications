@@ -8,6 +8,8 @@ from requests import RequestException
 
 HEADERS = {"content-type": "application/json"}
 
+log = log.patch(lambda record: record.update(name="Telegram Radarr"))
+
 
 def radarr_test():
     test = {
@@ -39,10 +41,10 @@ def radarr_grab():
 
     try:
         cast = f"<a href='{funcs.get_movie_cast(radarr_envs.tmdb_id)[0][0]}'>{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][0]}</a>, <a href='{funcs.get_movie_cast(radarr_envs.tmdb_id)[0][1]}'>{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][1]}</a>, <a href='{funcs.get_movie_cast(radarr_envs.tmdb_id)[0][2]}'>{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][2]}</a>"
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         try:
             cast = f"<a href='{funcs.get_movie_cast(radarr_envs.tmdb_id)[0][0]}'>{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][0]}</a>"
-        except (KeyError, TypeError, IndexError, Exception):
+        except (KeyError, TypeError, IndexError):
             cast = "Unknown"
 
     if radarr_envs.release_group == "":
@@ -240,10 +242,11 @@ def radarr_movie_delete():
         "text": f"Deleted <b>{radarr_envs.media_title} ({radarr_envs.year})</b> from Radarr."
                 f"\n<b>Size</b>: {funcs.convert_size(int(radarr_envs.deleted_size))}"
                 f"\n<b>Path</b>: {radarr_envs.delete_path}"
+                f"<a href='{funcs.get_radarrposter(radarr_envs.tmdb_id)}'>&#8204;</a>"
                 f"\n\n<b>View Details</b>: <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[0]}'>IMDb</a> | <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[1]}'>TheMovieDb</a> | <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[2]}'>Trakt</a> | <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[3]}'>MovieChat</a>"
     }
 
-    if funcs.convert_size(int(radarr_envs.deleted_size)) == "0B":
+    if radarr_envs.deleted_size == "0":
         import re
         string = message["text"]
         pattern = r'<b>Size<\/b>: 0B'
@@ -277,8 +280,10 @@ def radarr_moviefile_delete():
                 f"\n<b>Quality</b>: {radarr_envs.import_quality}"
                 f"\n<b>Size</b>: {funcs.convert_size(int(radarr_envs.deleted_moviefilesize))}"
                 f"\n<b>Release Group</b>: {radarr_envs.deleted_moviereleasegroup}"
+                f"\n<b>Delete Reason</b>: {radarr_envs.deleted_moviefilereason}"
                 f"\n\n<b>File name</b>:\n{radarr_envs.scene_name}"
                 f"\n\n<b>File location</b>:\n{radarr_envs.deleted_moviefilepath}"
+                f"<a href='{funcs.get_radarrposter(radarr_envs.tmdb_id)}'>&#8204;</a>"
                 f"\n\n<b>View Details</b>: <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[0]}'>IMDb</a> | <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[1]}'>TheMovieDb</a> | <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[2]}'>Trakt</a> | <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[3]}'>MovieChat</a>"
     }
 
@@ -321,3 +326,30 @@ def radarr_moviefile_delete():
     except RequestException as e:
         log.error(e)
         log.error("Error occured when trying to send movie file delete notification to Telegram.")
+
+
+def radarr_movie_added():
+    message = {
+        "chat_id": config.TELEGRAM_MISC_CHAT_ID,
+        "parse_mode": "HTML",
+        "disable_notification": config.TELEGRAM_SILENT,
+        "text": f"Added <b>{radarr_envs.media_title} ({radarr_envs.year})</b> to Radarr."
+                f"<a href='{funcs.get_radarrposter(radarr_envs.tmdb_id)}'>&#8204;</a>"
+                f"\n\n<b>View Details</b>: <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[0]}'>IMDb</a> | <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[1]}'>TheMovieDb</a> | <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[2]}'>Trakt</a> | <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[3]}'>MovieChat</a>"
+    }
+
+    try:
+        sender = requests.post(config.TELEGRAM_RADARR_MISC_URL, headers=HEADERS, json=message, timeout=60)
+        if sender.status_code == 200:
+            log.success("Successfully sent movie added notification to Telegram.")
+        else:
+            log.error(
+                "Error occured when trying to send movie added notification to Telegram. Please open an issue with the below contents.")
+            log.error("-------------------------------------------------------")
+            log.error(f"Status code: {sender.status_code}")
+            log.error(f"Status body: {sender.content}")
+            log.error(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+            log.error("-------------------------------------------------------")
+    except RequestException as e:
+        log.error(e)
+        log.error("Error occured when trying to send movie added notification to Telegram.")

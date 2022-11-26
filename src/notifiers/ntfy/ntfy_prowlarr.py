@@ -13,6 +13,8 @@ issue_message = os.environ.get("prowlarr_health_issue_message")
 new_version = os.environ.get("prowlarr_update_newversion")
 old_version = os.environ.get("prowlarr_update_previousversion")
 
+log = log.patch(lambda record: record.update(name="ntfy Prowlarr"))
+
 
 def prowlarr_test():
     test = {

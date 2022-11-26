@@ -4,6 +4,8 @@ import config
 import requests
 from loguru import logger as log
 
+log = log.patch(lambda record: record.update(name="BettarrNotifications ratings"))
+
 
 def mdblist_movie():
     imdb_id = os.environ.get("radarr_movie_imdbid")
@@ -64,14 +66,14 @@ def mdblist_movie():
             html_ratings = ""
             certification = "Unknown"
             ntfy_ratings = ""
-            log.warning("Failed to fetch ratings and trailer. API limit reached.")
+            log.warning("Failed to fetch ratings and certification. API limit reached.")
     else:
         discord_ratings = ""
         slack_ratings = ""
         html_ratings = ""
         certification = "Unknown"
         ntfy_ratings = ""
-        log.warning("Didn't fetch ratings, trailer and certification because MDBLIST_APIKEY is not set in config.")
+        log.warning("Didn't fetch ratings and certification because MDBLIST_APIKEY is not set in config.")
 
     return discord_ratings, certification, slack_ratings, html_ratings, ntfy_ratings
 

@@ -8,6 +8,8 @@ from requests import RequestException
 
 HEADERS = {"content-type": "application/json"}
 
+log = log.patch(lambda record: record.update(name="Slack Sonarr"))
+
 
 def sonarr_test():
     test = {
@@ -44,10 +46,10 @@ def sonarr_grab():
 
     try:
         cast = f"<{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}|{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}>, <{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][1]}|{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][1]}>, <{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][2]}|{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][2]}>"
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         try:
             cast = f"<{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}|{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}>"
-        except (KeyError, TypeError, IndexError, Exception):
+        except (KeyError, TypeError, IndexError):
             cast = "Unknown"
 
     message = {
@@ -479,6 +481,25 @@ def sonarr_delete_episode():
                 }
             },
             {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": "Delete Reason"
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"```{sonarr_envs.delete_reason}```"
+                }
+            },
+            {
+                "type": "image",
+                "image_url": funcs.get_posterseries(sonarr_envs.tvdb_id, sonarr_envs.imdb_id),
+                "alt_text": "poster"
+            },
+            {
                 "type": "divider"
             },
             {
@@ -552,10 +573,10 @@ def sonarr_delete_episode():
     }
 
     if sonarr_envs.scene_name == "":
-        del message['blocks'][4]['fields'][6]
+        del message['blocks'][7]['fields'][6]
 
     if sonarr_envs.delete_release_group == "":
-        del message['blocks'][4]['fields'][5]
+        del message['blocks'][7]['fields'][5]
 
     try:
         sender = requests.post(config.SONARR_MISC_SLACK_WEBHOOK, headers=HEADERS, json=message, timeout=60)
@@ -590,12 +611,13 @@ def sonarr_delete_series():
                 }
             },
             {
+                "type": "image",
+                "image_url": funcs.get_posterseries(sonarr_envs.tvdb_id, sonarr_envs.imdb_id),
+                "alt_text": "poster"
+            },
+            {
                 "type": "section",
                 "fields": [
-                    {
-                        "type": "mrkdwn",
-                        "text": f"*Series name*\n{sonarr_envs.media_title}"
-                    },
                     {
                         "type": "mrkdwn",
                         "text": f"*Path*\n`{sonarr_envs.series_path}`"

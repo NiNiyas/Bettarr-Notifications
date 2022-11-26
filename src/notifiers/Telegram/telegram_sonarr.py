@@ -8,6 +8,8 @@ from requests import RequestException
 
 HEADERS = {"content-type": "application/json"}
 
+log = log.patch(lambda record: record.update(name="Telegram Sonarr"))
+
 
 def sonarr_test():
     test = {
@@ -46,10 +48,10 @@ def sonarr_grab():
 
     try:
         cast = f"\nCast: <a href='{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}'>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}</a>, <a href='{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][2]}'>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][1]}</a>, <a href='{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][1]}'>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][2]}</a>"
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         try:
             cast = f"\nCast: <a href='{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}'>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}</a>"
-        except (KeyError, TypeError, IndexError, Exception):
+        except (KeyError, TypeError, IndexError):
             cast = ""
 
     if funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1] == "Unknown":
@@ -240,8 +242,10 @@ def sonarr_delete_episode():
                 f"\n<b>Quality</b>: {sonarr_envs.delete_quality}"
                 f"\n<b>Release Group</b>: {sonarr_envs.delete_release_group}"
                 f"\n<b>Aired on</b>: {sonarr_envs.delete_air_date} UTC"
+                f"\n<b>Delete Reason</b>: {sonarr_envs.delete_reason}"
                 f"\n\n<b>File name</b>:\n{sonarr_envs.scene_name}"
                 f"\n\n<b>File location</b>:\n{sonarr_envs.episode_path}"
+                f"<a href='{funcs.get_posterseries(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)}'>&#8204;</a>"
                 f"\n\n<b>View Details</b>: <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[3]}'>IMDb</a> | <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[0]}'>TheTVDB</a> | <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[4]}'>TheMovieDb</a> | <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[2]}'>Trakt</a> | <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[1]}'>TVmaze</a>"
     }
 
@@ -285,8 +289,8 @@ def sonarr_delete_series():
         "parse_mode": "HTML",
         "disable_notification": config.TELEGRAM_SILENT,
         "text": f"Deleted <b>{sonarr_envs.media_title}</b> from Sonarr."
-                f"\n\n<b>Series name</b>: {sonarr_envs.media_title}"
-                f"\n<b>Path</b>: {sonarr_envs.series_path}"
+                f"\n\n<b>Path</b>: {sonarr_envs.series_path}"
+                f"<a href='{funcs.get_posterseries(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)}'>&#8204;</a>"
                 f"\n<b>View Details</b>: <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[3]}'>IMDb</a> | <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[0]}'>TheTVDB</a> | <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[4]}'>TheMovieDb</a> | <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[2]}'>Trakt</a> | <a href='{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[1]}'>TVmaze</a>"
 
     }

@@ -8,6 +8,8 @@ from requests import RequestException
 
 HEADERS = {"content-type": "application/json"}
 
+log = log.patch(lambda record: record.update(name="Slack Radarr"))
+
 
 def radarr_test():
     test = {
@@ -37,10 +39,10 @@ def radarr_grab():
 
     try:
         cast = f"<{funcs.get_movie_cast(radarr_envs.tmdb_id)[0][0]}|{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][0]}>, <{funcs.get_movie_cast(radarr_envs.tmdb_id)[0][1]}|{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][1]}>, <{funcs.get_movie_cast(radarr_envs.tmdb_id)[0][2]}|{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][2]}>"
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         try:
             cast = f"<{funcs.get_movie_cast(radarr_envs.tmdb_id)[0][0]}|{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][0]}>"
-        except (KeyError, TypeError, IndexError, Exception):
+        except (KeyError, TypeError, IndexError):
             cast = "Unknown"
 
     message = {
@@ -476,6 +478,11 @@ def radarr_movie_delete():
                 }
             },
             {
+                "type": "image",
+                "image_url": funcs.get_radarrposter(radarr_envs.tmdb_id),
+                "alt_text": "Poster"
+            },
+            {
                 "type": "divider"
             },
             {
@@ -517,7 +524,7 @@ def radarr_movie_delete():
     }
 
     if radarr_envs.deleted_size == 0:
-        del message['blocks'][2]['fields'][0]
+        del message['blocks'][3]['fields'][0]
 
     try:
         sender = requests.post(config.RADARR_MISC_SLACK_WEBHOOK, headers=HEADERS, json=message, timeout=60)
@@ -552,6 +559,20 @@ def radarr_moviefile_delete():
                 "type": "header",
                 "text": {
                     "type": "plain_text",
+                    "text": "File Path"
+                }
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"```{radarr_envs.deleted_moviefilepath}```"
+                },
+            },
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
                     "text": "Deleted Reason"
                 }
             },
@@ -561,6 +582,11 @@ def radarr_moviefile_delete():
                     "type": "mrkdwn",
                     "text": f"```{radarr_envs.deleted_moviefilereason}```"
                 },
+            },
+            {
+                "type": "image",
+                "image_url": funcs.get_radarrposter(radarr_envs.tmdb_id),
+                "alt_text": "Poster"
             },
             {
                 "type": "divider"
@@ -575,10 +601,6 @@ def radarr_moviefile_delete():
                     {
                         "type": "mrkdwn",
                         "text": f"*Size*\n{funcs.convert_size(int(radarr_envs.deleted_moviefilesize))}",
-                    },
-                    {
-                        "type": "mrkdwn",
-                        "text": f"*Path*\n`{radarr_envs.deleted_moviefilepath}`",
                     },
                     {
                         "type": "mrkdwn",
@@ -616,17 +638,17 @@ def radarr_moviefile_delete():
     }
 
     if radarr_envs.scene_name == "":
-        del message['blocks'][4]['fields'][4]
+        del message['blocks'][7]['fields'][3]
 
     if radarr_envs.deleted_moviefilereason == "":
-        del message['blocks'][1]
-        del message['blocks'][2]
+        del message['blocks'][3]
+        del message['blocks'][4]
 
     if radarr_envs.deleted_moviefilesize == 0:
-        del message['blocks'][4]['fields'][1]
+        del message['blocks'][7]['fields'][1]
 
     if radarr_envs.deleted_moviereleasegroup == "":
-        del message['blocks'][4]['fields'][3]
+        del message['blocks'][7]['fields'][2]
 
     try:
         sender = requests.post(config.RADARR_MISC_SLACK_WEBHOOK, headers=HEADERS, json=message, timeout=60)
@@ -643,3 +665,70 @@ def radarr_moviefile_delete():
     except RequestException as e:
         log.error(e)
         log.error("Error occured when trying to send movie file delete notification to Slack.")
+
+
+def radarr_movie_added():
+    message = {
+        "channel": config.SLACK_CHANNEL,
+        "text": f"Added *{radarr_envs.media_title} ({radarr_envs.year})* to Radarr.",
+        "blocks": [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"Added *{radarr_envs.media_title} ({radarr_envs.year})* to Radarr.",
+                }
+            },
+            {
+                "type": "image",
+                "image_url": funcs.get_radarrposter(radarr_envs.tmdb_id),
+                "alt_text": "Poster"
+            },
+            {
+                "type": "divider"
+            },
+            {
+                "type": "section",
+                "fields": [
+                    {
+                        "type": "mrkdwn",
+                        "text": f"*View Details*\n<{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[0]}|IMDb> | <{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[1]}|TheMovieDb> | <{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[2]}|Trakt> | <{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[3]}|MovieChat>"
+                    }
+                ]
+            },
+            {
+                "type": "divider"
+            },
+            {
+                "type": "actions",
+                "elements": [
+                    {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": "Visit Radarr"
+
+                        },
+                        "style": "primary",
+                        "url": config.RADARR_URL
+                    }
+                ]
+            }
+        ]
+    }
+
+    try:
+        sender = requests.post(config.RADARR_MISC_SLACK_WEBHOOK, headers=HEADERS, json=message, timeout=60)
+        if sender.status_code == 200:
+            log.success("Successfully sent movie added notification to Slack.")
+        else:
+            log.error(
+                "Error occured when trying to send movie added notification to Slack. Please open an issue with the below contents.")
+            log.error("-------------------------------------------------------")
+            log.error(f"Status code: {sender.status_code}")
+            log.error(f"Status body: {sender.content}")
+            log.error(json.dumps(message, sort_keys=True, indent=4, separators=(",", ": ")))
+            log.error("-------------------------------------------------------")
+    except RequestException as e:
+        log.error(e)
+        log.error("Error occured when trying to send movie added notification to Slack.")

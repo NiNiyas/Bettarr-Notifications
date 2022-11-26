@@ -9,6 +9,9 @@ from requests import RequestException
 
 HEADERS = {"content-type": "application/json"}
 
+log = log.patch(lambda record: record.update(name="Discord Sonarr"))
+
+
 def sonarr_test():
     test = {
         "username": config.SONARR_DISCORD_USERNAME,
@@ -44,10 +47,10 @@ def sonarr_grab():
 
     try:
         cast = f"[{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}]({funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}), [{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][1]}]({funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][1]}), [{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][2]}]({funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][2]})"
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         try:
             cast = f"[{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}]({funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]})"
-        except (KeyError, TypeError, IndexError, Exception):
+        except (KeyError, TypeError, IndexError):
             cast = "Unknown"
 
     message = {
@@ -381,8 +384,11 @@ def sonarr_delete_episode():
                 },
                 'timestamp': funcs.utc_now_iso(),
                 'title': f"**{sonarr_envs.media_title}** - **S{season}E{episode}** - **{sonarr_envs.delete_episode_name}**",
-                'description': f"**File location**\n```{sonarr_envs.episode_path}```",
+                'description': f"**File location**\n```{sonarr_envs.episode_path}```\n**Deleted Reason**\n```{sonarr_envs.delete_reason}```",
                 'color': random.choice(funcs.colors),
+                "image": {
+                    "url": funcs.get_posterseries(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)
+                },
                 'fields': [
                     {
                         "name": "Series Name",
@@ -483,12 +489,10 @@ def sonarr_delete_series():
                 'timestamp': funcs.utc_now_iso(),
                 'title': f"Deleted `{sonarr_envs.media_title}` from Sonarr",
                 'color': random.choice(funcs.colors),
+                "image": {
+                    "url": funcs.get_posterseries(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)
+                },
                 'fields': [
-                    {
-                        "name": "Series name",
-                        "value": sonarr_envs.media_title,
-                        "inline": False
-                    },
                     {
                         "name": "Path",
                         "value": sonarr_envs.series_path,

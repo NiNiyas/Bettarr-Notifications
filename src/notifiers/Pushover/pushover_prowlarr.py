@@ -15,6 +15,8 @@ old_version = os.environ.get("prowlarr_update_previousversion")
 
 HEADERS = {"content-type": "application/json"}
 
+log = log.patch(lambda record: record.update(name="Pushover Prowlarr"))
+
 
 def prowlarr_test():
     test = {
@@ -81,6 +83,7 @@ def prowlarr_health():
     except RequestException as e:
         log.error(e)
         log.error("Error occured when trying to health notification to Pushover.")
+
 
 def prowlarr_update():
     message = {

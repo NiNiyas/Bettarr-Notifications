@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
 import os
 import sys
@@ -21,54 +22,53 @@ log.remove()
 dir_path = os.path.dirname(os.path.realpath(__file__))
 log.add(f"{dir_path}/logs/better-notifications.log", level=LOG_LEVEL, format=fmt, backtrace=True, rotation="1 week")
 
-if not config.SONARR:
-    if not config.RADARR:
-        log.error("None of the *arrs are enabled. Exiting...")
-        exit(1)
+if not any((config.SONARR, config.RADARR, config.PROWLARR)):
+    log.error("None of the *arrs are enabled. Exiting...")
+    exit(1)
 
 RADARR_EVENT_TYPE = os.environ.get("radarr_eventtype")
 SONARR_EVENT_TYPE = os.environ.get("sonarr_eventtype")
 PROWLARR_EVENT_TYPE = os.environ.get("prowlarr_eventtype")
+
+log = log.patch(lambda record: record.update(name="BettarrNotifications"))
 
 
 def initialize_sonarr():
     """
     Checking if required variables are set for sonarr
     """
-    if config.SONARR:
-        required_variables = [config.SONARR_URL, config.SONARR_APIKEY]
-        for x in required_variables:
-            if x == "":
-                log.error(
-                    "Required variables for Sonarr are not set. Please check your config and make sure you set everything correct.")
-                log.error("Exiting...")
-                exit(1)
+    required_variables = [config.SONARR_URL, config.SONARR_APIKEY]
+    for x in required_variables:
+        if x == "":
+            log.error(
+                "Required variables for Sonarr are not set. Please check your config and make sure you set everything correct.")
+            log.error("Exiting...")
+            exit(1)
 
 
 def initialize_radarr():
     """
     Checking if required variables are set for radarr
     """
-    if config.RADARR:
-        required_variables = [config.RADARR_URL, config.RADARR_APIKEY]
-        for x in required_variables:
-            if x == "":
-                log.error(
-                    "Required variables for Radarr are not set. Please check your config and make sure you set everything correct.")
-                log.error("Exiting...")
-                exit(1)
+    required_variables = [config.RADARR_URL, config.RADARR_APIKEY]
+    for x in required_variables:
+        if x == "":
+            log.error(
+                "Required variables for Radarr are not set. Please check your config and make sure you set everything correct.")
+            log.error("Exiting...")
+            exit(1)
 
 
 def initialize_prowlarr():
     """
     Checking if required variables are set for prowlarr
     """
-    if config.PROWLARR:
-        if config.PROWLARR_URL == "":
-            log.error(
-                "Required variables for Radarr are not set. Please check your config and make sure you set everything correct.")
-            log.error("Exiting...")
-            exit(1)
+
+    if config.PROWLARR_URL == "":
+        log.error(
+            "Required variables for Radarr are not set. Please check your config and make sure you set everything correct.")
+        log.error("Exiting...")
+        exit(1)
 
 
 def check_sonarr_connection():
@@ -76,19 +76,18 @@ def check_sonarr_connection():
     Checking sonarr connection.
     """
     initialize_sonarr()
-    if config.SONARR:
-        try:
-            cmd = requests.get(f"{config.SONARR_URL}/api/v3/health?apikey={config.SONARR_APIKEY}")
-            if cmd.status_code == 200:
-                log.debug("Successfully connected to Sonarr.")
-            else:
-                log.error(
-                    "Error occurred when trying to connect to Sonarr. Please check your config and make sure you set everything correct.")
-                log.error("Exiting...")
-                exit(1)
-        except RequestException as e:
-            log.error("Error occured when trying to connect to Sonarr.")
-            log.exception(e)
+    try:
+        cmd = requests.get(f"{config.SONARR_URL}/api/v3/health?apikey={config.SONARR_APIKEY}")
+        if cmd.status_code == 200:
+            log.debug("Successfully connected to Sonarr.")
+        else:
+            log.error(
+                "Error occurred when trying to connect to Sonarr. Please check your config and make sure you set everything correct.")
+            log.error("Exiting...")
+            exit(1)
+    except RequestException as e:
+        log.error("Error occured when trying to connect to Sonarr.")
+        log.exception(e)
 
 
 def check_radarr_connection():
@@ -96,19 +95,18 @@ def check_radarr_connection():
     Checking radarr connection.
     """
     initialize_radarr()
-    if config.RADARR:
-        try:
-            cmd = requests.get(f"{config.RADARR_URL}/api/v3/health?apikey={config.RADARR_APIKEY}")
-            if cmd.status_code == 200:
-                log.debug("Successfully connected to Radarr.")
-            else:
-                log.error(
-                    "Error occurred when trying to connect to Radarr. Please check your config and make sure you set everything correct.")
-                log.error("Exiting...")
-                exit(1)
-        except RequestException as e:
-            log.error("Error occured when trying to connect to Radarr.")
-            log.exception(e)
+    try:
+        cmd = requests.get(f"{config.RADARR_URL}/api/v3/health?apikey={config.RADARR_APIKEY}")
+        if cmd.status_code == 200:
+            log.debug("Successfully connected to Radarr.")
+        else:
+            log.error(
+                "Error occurred when trying to connect to Radarr. Please check your config and make sure you set everything correct.")
+            log.error("Exiting...")
+            exit(1)
+    except RequestException as e:
+        log.error("Error occured when trying to connect to Radarr.")
+        log.exception(e)
 
 
 def check_prowlarr_connection():
@@ -116,19 +114,18 @@ def check_prowlarr_connection():
     Checking prowlarr connection.
     """
     initialize_prowlarr()
-    if config.PROWLARR:
-        try:
-            cmd = requests.get(config.PROWLARR_URL)
-            if cmd.status_code == 200:
-                log.debug("Successfully connected to Prowlarr.")
-            else:
-                log.error(
-                    "Error occurred when trying to connect to Prowlarr. Please check your config and make sure you set everything correct.")
-                log.error("Exiting...")
-                exit(1)
-        except RequestException as e:
-            log.error("Error occured when trying to connect to Prowlarr.")
-            log.exception(e)
+    try:
+        cmd = requests.get(config.PROWLARR_URL)
+        if cmd.status_code == 200:
+            log.debug("Successfully connected to Prowlarr.")
+        else:
+            log.error(
+                "Error occurred when trying to connect to Prowlarr. Please check your config and make sure you set everything correct.")
+            log.error("Exiting...")
+            exit(1)
+    except RequestException as e:
+        log.error("Error occured when trying to connect to Prowlarr.")
+        log.exception(e)
 
 
 def radarr_send():
@@ -152,6 +149,8 @@ def radarr_send():
             discord_radarr.radarr_moviefile_delete()
         elif RADARR_EVENT_TYPE == "ApplicationUpdate":
             discord_radarr.radarr_update()
+        elif RADARR_EVENT_TYPE == "MovieAdded":
+            discord_radarr.radarr_movie_added()
 
     if config.SLACK:
         if RADARR_EVENT_TYPE == "Test":
@@ -168,6 +167,8 @@ def radarr_send():
             slack_radarr.radarr_health()
         elif RADARR_EVENT_TYPE == "ApplicationUpdate":
             slack_radarr.radarr_update()
+        elif RADARR_EVENT_TYPE == "MovieAdded":
+            slack_radarr.radarr_movie_added()
 
     if config.PUSHOVER:
         if RADARR_EVENT_TYPE == "Test":
@@ -184,6 +185,8 @@ def radarr_send():
             pushover_radarr.radarr_health()
         elif RADARR_EVENT_TYPE == "ApplicationUpdate":
             pushover_radarr.radarr_update()
+        elif RADARR_EVENT_TYPE == "MovieAdded":
+            pushover_radarr.radarr_movie_added()
 
     if config.TELEGRAM:
         if RADARR_EVENT_TYPE == "Test":
@@ -200,6 +203,8 @@ def radarr_send():
             telegram_radarr.radarr_health()
         elif RADARR_EVENT_TYPE == "ApplicationUpdate":
             telegram_radarr.radarr_update()
+        elif RADARR_EVENT_TYPE == "MovieAdded":
+            telegram_radarr.radarr_movie_added()
 
     if config.ntfy:
         if RADARR_EVENT_TYPE == "Test":
@@ -216,6 +221,8 @@ def radarr_send():
             ntfy_radarr.radarr_health()
         elif RADARR_EVENT_TYPE == "ApplicationUpdate":
             ntfy_radarr.radarr_update()
+        elif RADARR_EVENT_TYPE == "MovieAdded":
+            ntfy_radarr.radarr_movie_added()
 
 
 def sonarr_send():
@@ -352,11 +359,14 @@ def prowlarr_send():
             ntfy_prowlarr.prowlarr_update()
 
 
-if SONARR_EVENT_TYPE:
-    sonarr_send()
+if config.SONARR:
+    if SONARR_EVENT_TYPE:
+        sonarr_send()
 
-if RADARR_EVENT_TYPE:
-    radarr_send()
+if config.RADARR:
+    if RADARR_EVENT_TYPE:
+        radarr_send()
 
-if PROWLARR_EVENT_TYPE:
-    prowlarr_send()
+if config.PROWLARR:
+    if PROWLARR_EVENT_TYPE:
+        prowlarr_send()

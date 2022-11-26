@@ -8,6 +8,8 @@ from requests import RequestException
 
 HEADERS = {"content-type": "application/json"}
 
+log = log.patch(lambda record: record.update(name="Pushover Sonarr"))
+
 
 def sonarr_test():
     test = {
@@ -41,7 +43,6 @@ def sonarr_test():
 
 
 def sonarr_grab():
-    skyhook = requests.get(f'http://skyhook.sonarr.tv/v1/tvdb/shows/en/{sonarr_envs.tvdb_id}').json()
     skyhook = requests.get(f"http://skyhook.sonarr.tv/v1/tvdb/shows/en/{sonarr_envs.tvdb_id}").json()
     season = funcs.format_season_episode(sonarr_envs.season, sonarr_envs.episode)[0]
     episode = funcs.format_season_episode(sonarr_envs.season, sonarr_envs.episode)[1]
@@ -53,10 +54,10 @@ def sonarr_grab():
 
     try:
         cast = f"\nCast: <a href={funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}</a>, <a href={funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][2]}>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][1]}</a>, <a href={funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][1]}>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][2]}</a>"
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         try:
             cast = f"\nCast: <a href={funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[0][0]}>{funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}</a>"
-        except (KeyError, TypeError, IndexError, Exception):
+        except (KeyError, TypeError, IndexError):
             cast = ""
 
     if funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1] == "Unknown":
@@ -279,6 +280,7 @@ def sonarr_delete_episode():
                    f"\n<b>Quality</b>: {sonarr_envs.delete_quality}"
                    f"\n<b>Release Group</b>: {sonarr_envs.delete_release_group}"
                    f"\n<b>Aired on</b>: {sonarr_envs.delete_air_date} UTC"
+                   f"\n<b>Delete Reason</b>: {sonarr_envs.delete_reason}"
                    f"\n\n<b>File name</b>:\n{sonarr_envs.scene_name}"
                    f"\n\n<b>File location</b>:\n{sonarr_envs.episode_path}"
                    f"\n\n<b>View Details</b>: <a href={funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[3]}>IMDb</a> | <a href={funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[0]}>TheTVDB</a> | <a href={funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[4]}>TheMovieDb</a> | <a href={funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[2]}>Trakt</a> | <a href={funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[1]}>TVmaze</a>"
@@ -299,7 +301,10 @@ def sonarr_delete_episode():
         message["message"] = mod_string
 
     try:
-        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=message, timeout=60)
+        sender = requests.post(config.PUSHOVER_API_URL, data=message,
+                               files={"attachment": ("poster.jpg", open(
+                                   funcs.get_pushover_sonarrposter(sonarr_envs.tvdb_id, sonarr_envs.imdb_id), "rb"),
+                                                     "image/jpeg")}, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent delete episode notification to Pushover.")
         else:
@@ -331,13 +336,15 @@ def sonarr_delete_series():
         "url": config.SONARR_URL,
         "url_title": "Visit Sonarr",
         "message": f"Deleted <b>{sonarr_envs.media_title}</b> from Sonarr."
-                   f"\n\n<b>Series name</b>: {sonarr_envs.media_title}"
-                   f"\n<b>Path</b>: {sonarr_envs.series_path}"
+                   f"\n\n<b>Path</b>: {sonarr_envs.series_path}"
                    f"\n\n<b>View Details</b>: <a href={funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[3]}>IMDb</a> | <a href={funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[0]}>TheTVDB</a> | <a href={funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[4]}>TheMovieDb</a> | <a href={funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[2]}>Trakt</a> | <a href={funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[1]}>TVmaze</a>"
     }
 
     try:
-        sender = requests.post(config.PUSHOVER_API_URL, headers=HEADERS, json=message, timeout=60)
+        sender = requests.post(config.PUSHOVER_API_URL, data=message,
+                               files={"attachment": ("poster.jpg", open(
+                                   funcs.get_pushover_sonarrposter(sonarr_envs.tvdb_id, sonarr_envs.imdb_id), "rb"),
+                                                     "image/jpeg")}, timeout=60)
         if sender.status_code == 200:
             log.success("Successfully sent series delete notification to Pushover.")
         else:

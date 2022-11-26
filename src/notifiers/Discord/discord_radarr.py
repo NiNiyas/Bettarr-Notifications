@@ -9,6 +9,8 @@ from requests import RequestException
 
 HEADERS = {"content-type": "application/json"}
 
+log = log.patch(lambda record: record.update(name="Discord Radarr"))
+
 
 def radarr_test():
     test = {
@@ -38,10 +40,10 @@ def radarr_grab():
 
     try:
         cast = f"[{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][0]}]({funcs.get_movie_cast(radarr_envs.tmdb_id)[0][0]}), [{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][1]}]({funcs.get_movie_cast(radarr_envs.tmdb_id)[0][1]}), [{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][2]}]({funcs.get_movie_cast(radarr_envs.tmdb_id)[0][2]})"
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         try:
             cast = f"[{funcs.get_movie_cast(radarr_envs.tmdb_id)[1][0]}]({funcs.get_movie_cast(radarr_envs.tmdb_id)[0][0]})"
-        except (KeyError, TypeError, IndexError, Exception):
+        except (KeyError, TypeError, IndexError):
             cast = "Unknown"
 
     message = {
@@ -396,6 +398,9 @@ def radarr_movie_delete():
                 'timestamp': funcs.utc_now_iso(),
                 'title': f"{radarr_envs.media_title}",
                 'color': random.choice(funcs.colors),
+                "image": {
+                    "url": funcs.get_radarrposter(radarr_envs.tmdb_id)
+                },
                 'fields': [
                     {
                         "name": "Size",
@@ -459,8 +464,11 @@ def radarr_moviefile_delete():
                 },
                 'timestamp': funcs.utc_now_iso(),
                 'title': f"{radarr_envs.media_title}",
-                'description': f"**Deleted Reason**\n```{radarr_envs.deleted_moviefilereason}```",
+                'description': f"**File location**\n```{radarr_envs.deleted_moviefilepath}```\n**Deleted Reason**\n```{radarr_envs.deleted_moviefilereason}```",
                 'color': random.choice(funcs.colors),
+                "image": {
+                    "url": funcs.get_radarrposter(radarr_envs.tmdb_id)
+                },
                 'fields': [
                     {
                         "name": "Quality",
@@ -470,11 +478,6 @@ def radarr_moviefile_delete():
                     {
                         "name": "Size",
                         "value": funcs.convert_size(int(radarr_envs.deleted_moviefilesize)),
-                        "inline": False
-                    },
-                    {
-                        "name": "Path",
-                        "value": f"`{radarr_envs.deleted_moviefilepath}`",
                         "inline": False
                     },
                     {
@@ -529,3 +532,57 @@ def radarr_moviefile_delete():
     except RequestException as e:
         log.error(e)
         log.error("Error occured when trying to send movie file delete notification to Discord.")
+
+
+def radarr_movie_added():
+    message = {
+        'username': config.RADARR_DISCORD_USERNAME,
+        'content': f"Added **{radarr_envs.media_title} ({radarr_envs.year})** to Radarr.",
+        'embeds': [
+            {
+                'author': {
+                    'name': config.RADARR_DISCORD_USERNAME,
+                    'url': config.RADARR_URL,
+                    'icon_url': config.RADARR_DISCORD_USERICON
+                },
+                "footer": {
+                    "icon_url": config.RADARR_DISCORD_USERICON,
+                    "text": "Radarr"
+                },
+                'timestamp': funcs.utc_now_iso(),
+                'title': f"{radarr_envs.media_title}",
+                'color': random.choice(funcs.colors),
+                "image": {
+                    "url": funcs.get_radarrposter(radarr_envs.tmdb_id)
+                },
+                'fields': [
+                    {
+                        "name": "View Details",
+                        "value": f"[IMDb]({funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[0]}) | [TheMovieDb]({funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[1]}) | [Trakt]({funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[2]}) | [MovieChat]({funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[3]})",
+                        "inline": False
+                    },
+                    {
+                        "name": "Visit Radarr",
+                        "value": f'[Radarr]({config.RADARR_URL})',
+                        "inline": False
+                    }
+                ]
+            }
+        ]
+    }
+
+    try:
+        sender = requests.post(config.RADARR_MISC_DISCORD_WEBHOOK, headers=HEADERS, json=message, timeout=60)
+        if sender.status_code == 204:
+            log.success("Successfully sent movie added notification to Discord.")
+        else:
+            log.error(
+                "Error occured when trying to send movie added notification to Discord. Please open an issue with the below contents.")
+            log.error("-------------------------------------------------------")
+            log.error(f"Status code: {sender.status_code}")
+            log.error(f"Status body: {sender.content}")
+            log.error(json.dumps(message, sort_keys=True, indent=4, separators=(",", ": ")))
+            log.error("-------------------------------------------------------")
+    except RequestException as e:
+        log.error(e)
+        log.error("Error occured when trying to send movie added notification to Discord.")

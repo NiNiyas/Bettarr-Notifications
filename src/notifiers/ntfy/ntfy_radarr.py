@@ -6,6 +6,8 @@ from helpers import funcs, ratings, radarr_envs, omdb
 from loguru import logger as log
 from requests import RequestException
 
+log = log.patch(lambda record: record.update(name="ntfy Radarr"))
+
 
 def radarr_test():
     test = {
@@ -42,10 +44,10 @@ def radarr_grab():
 
     try:
         cast = f"\nCast: {funcs.get_movie_cast(radarr_envs.tmdb_id)[1][0]}, {funcs.get_movie_cast(radarr_envs.tmdb_id)[1][1]}, {funcs.get_movie_cast(radarr_envs.tmdb_id)[1][2]}"
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         try:
             cast = f"\nCast: {funcs.get_movie_cast(radarr_envs.tmdb_id)[1][0]}"
-        except (KeyError, TypeError, IndexError, Exception):
+        except (KeyError, TypeError, IndexError):
             cast = ""
 
     if funcs.get_movie_crew(radarr_envs.tmdb_id)[1][0] == "Unknown":
@@ -253,6 +255,8 @@ def radarr_movie_delete():
         "topic": config.NTFY_RADARR_MISC_TOPIC,
         "tags": ["radarr", "movie_camera", "delete"],
         "priority": config.NTFY_RADARR_PRIORITY,
+        "attach": funcs.get_radarrposter(radarr_envs.tmdb_id),
+        "filename": "poster.jpg",
         "actions": [{"action": "view", "label": "Visit Radarr", "url": config.RADARR_URL},
                     {"action": "view", "label": "IMDb",
                      "url": f"{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[0]}"},
@@ -267,7 +271,7 @@ def radarr_movie_delete():
     if message["priority"] == "":
         del message["priority"]
 
-    if funcs.convert_size(int(radarr_envs.deleted_size)) == "0B":
+    if radarr_envs.deleted_size == "0":
         import re
         string = message["message"]
         pattern = r'Size: 0B'
@@ -298,6 +302,8 @@ def radarr_moviefile_delete():
         "topic": config.NTFY_RADARR_MISC_TOPIC,
         "tags": ["radarr", "movie_camera", "delete"],
         "priority": config.NTFY_RADARR_PRIORITY,
+        "attach": funcs.get_radarrposter(radarr_envs.tmdb_id),
+        "filename": "poster.jpg",
         "actions": [{"action": "view", "label": "Visit Radarr", "url": config.RADARR_URL},
                     {"action": "view", "label": "IMDb",
                      "url": f"{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[0]}"},
@@ -307,6 +313,7 @@ def radarr_moviefile_delete():
                    f"\nQuality: {radarr_envs.import_quality}"
                    f"\nSize: {funcs.convert_size(int(radarr_envs.deleted_moviefilesize))}"
                    f"\nRelease Group: {radarr_envs.deleted_moviereleasegroup}"
+                   f"\nDelete Reason: {radarr_envs.deleted_moviefilereason}"
                    f"\n\nFile name\n{radarr_envs.scene_name}"
                    f"\n\nFile location\n{radarr_envs.deleted_moviefilepath}"
         # f"\n\nView Details: Trakt: {funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[2]}\nMovieChat: {funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[3]}"
@@ -354,3 +361,39 @@ def radarr_moviefile_delete():
     except RequestException as e:
         log.error(e)
         log.error("Error occured when trying to movie file delete notification to ntfy.")
+
+
+def radarr_movie_added():
+    message = {
+        "title": "Radarr",
+        "topic": config.NTFY_RADARR_MISC_TOPIC,
+        "tags": ["radarr", "movie_camera", "added"],
+        "priority": config.NTFY_RADARR_PRIORITY,
+        "attach": funcs.get_radarrposter(radarr_envs.tmdb_id),
+        "filename": "poster.jpg",
+        "actions": [{"action": "view", "label": "Visit Radarr", "url": config.RADARR_URL},
+                    {"action": "view", "label": "IMDb",
+                     "url": f"{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[0]}"},
+                    {"action": "view", "label": "TheMovieDb",
+                     "url": f"{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[1]}"}],
+        "message": f"Added {radarr_envs.media_title} ({radarr_envs.year}) to Radarr."
+    }
+
+    if message["priority"] == "":
+        del message["priority"]
+
+    try:
+        sender = requests.post(config.NTFY_URL, headers=config.NTFY_HEADER, json=message, timeout=60)
+        if sender.status_code == 200:
+            log.success("Successfully sent movie added notification to ntfy.")
+        else:
+            log.error(
+                "Error occured when trying to send movie added notification to ntfy. Please open an issue with the below contents.")
+            log.error("-------------------------------------------------------")
+            log.error(f"Status code: {sender.status_code}")
+            log.error(f"Status body: {sender.content}")
+            log.error(json.dumps(message, sort_keys=True, indent=4, separators=(',', ': ')))
+            log.error("-------------------------------------------------------")
+    except RequestException as e:
+        log.error(e)
+        log.error("Error occured when trying to movie added notification to ntfy.")

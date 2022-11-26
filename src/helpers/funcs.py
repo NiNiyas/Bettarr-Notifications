@@ -14,6 +14,8 @@ from requests.packages.urllib3.util.retry import Retry
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
+log = log.patch(lambda record: record.update(name="BettarrNotifications funcs"))
+
 colors = ['65405', '15484425', '16270516', '1529855', '14399755', '10947666', '7376755', '1752220', '1146986',
           '3066993', '2067276', '3447003', '2123412', '10181046', '7419530', '15277667',
           '11342935', '15844367', '12745742', '15105570', '11027200', '15158332', '10038562', '9807270', '9936031',

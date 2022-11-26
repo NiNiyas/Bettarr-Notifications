@@ -6,6 +6,8 @@ from helpers import funcs, ratings, sonarr_envs, omdb
 from loguru import logger as log
 from requests import RequestException
 
+log = log.patch(lambda record: record.update(name="ntfy Sonarr"))
+
 
 def sonarr_test():
     test = {
@@ -48,10 +50,10 @@ def sonarr_grab():
 
     try:
         cast = f"\nCast: {funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}, {funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][1]}, {funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][2]}"
-    except (KeyError, TypeError, IndexError, Exception):
+    except (KeyError, TypeError, IndexError):
         try:
             cast = f"\nCast: {funcs.get_seriescast(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1][0]}"
-        except (KeyError, TypeError, IndexError, Exception):
+        except (KeyError, TypeError, IndexError):
             cast = ""
 
     if funcs.get_seriescrew(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)[1] == "Unknown":
@@ -252,6 +254,8 @@ def sonarr_delete_episode():
         "topic": config.NTFY_SONARR_MISC_TOPIC,
         "tags": ["sonarr", "tv", "delete"],
         "priority": config.NTFY_SONARR_PRIORITY,
+        "attach": funcs.get_posterseries(sonarr_envs.tvdb_id, sonarr_envs.imdb_id),
+        "filename": "poster.jpg",
         "actions": [{"action": "view", "label": "Visit Sonarr", "url": config.SONARR_URL},
                     {"action": "view", "label": "IMDb",
                      "url": f"{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[3]}"},
@@ -265,6 +269,7 @@ def sonarr_delete_episode():
                    f"\nQuality: {sonarr_envs.delete_quality}"
                    f"\nRelease Group: {sonarr_envs.delete_release_group}"
                    f"\nAired on: {sonarr_envs.delete_air_date} UTC"
+                   f"\nDelete Reason: {sonarr_envs.delete_reason}"
                    f"\n\nFile name\n{sonarr_envs.scene_name}"
                    f"\n\nFile location\n{sonarr_envs.episode_path}"
         # f"\n\nView Details: TheMovieDb: {funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[4]}, Trakt: {funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[2]}, TVMaze: {funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[1]}"
@@ -313,14 +318,15 @@ def sonarr_delete_series():
         "topic": config.NTFY_SONARR_MISC_TOPIC,
         "tags": ["sonarr", "tv", "delete"],
         "priority": config.NTFY_SONARR_PRIORITY,
+        "attach": funcs.get_posterseries(sonarr_envs.tvdb_id, sonarr_envs.imdb_id),
+        "filename": "poster.jpg",
         "actions": [{"action": "view", "label": "Visit Sonarr", "url": config.SONARR_URL},
                     {"action": "view", "label": "IMDb",
                      "url": f"{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[3]}"},
                     {"action": "view", "label": "TheTVDB",
                      "url": f"{funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[0]}"}],
         "message": f"Deleted {sonarr_envs.media_title} from Sonarr."
-                   f"\n\nSeries name: {sonarr_envs.media_title}"
-                   f"\nPath: {sonarr_envs.series_path}"
+                   f"\n\nPath: {sonarr_envs.series_path}"
         # f"\n\nView Details: TheMovieDb: {funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[4]}, Trakt: {funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[2]}, TVMaze: {funcs.get_sonarr_links(sonarr_envs.tvdb_id, sonarr_envs.imdb_id, skyhook, slug)[1]}"
     }
 

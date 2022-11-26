@@ -17,6 +17,8 @@ old_version = os.environ.get("prowlarr_update_previousversion")
 
 HEADERS = {"content-type": "application/json"}
 
+log = log.patch(lambda record: record.update(name="Discord Prowlarr"))
+
 
 def prowlarr_test():
     test = {
