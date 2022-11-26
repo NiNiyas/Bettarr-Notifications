@@ -464,7 +464,7 @@ def radarr_moviefile_delete():
                 },
                 'timestamp': funcs.utc_now_iso(),
                 'title': f"{radarr_envs.media_title}",
-                'description': f"**File location**\n```{radarr_envs.deleted_moviefilepath}```\n**Deleted Reason**\n```{radarr_envs.deleted_moviefilereason}```",
+                'description': f"**File location**\n```{radarr_envs.deleted_moviefilepath}```\n**Delete Reason**\n```{radarr_envs.deleted_moviefilereason}```",
                 'color': random.choice(funcs.colors),
                 "image": {
                     "url": funcs.get_radarrposter(radarr_envs.tmdb_id)

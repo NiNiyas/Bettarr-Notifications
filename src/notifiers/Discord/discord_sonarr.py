@@ -384,7 +384,7 @@ def sonarr_delete_episode():
                 },
                 'timestamp': funcs.utc_now_iso(),
                 'title': f"**{sonarr_envs.media_title}** - **S{season}E{episode}** - **{sonarr_envs.delete_episode_name}**",
-                'description': f"**File location**\n```{sonarr_envs.episode_path}```\n**Deleted Reason**\n```{sonarr_envs.delete_reason}```",
+                'description': f"**File location**\n```{sonarr_envs.episode_path}```\n**Delete Reason**\n```{sonarr_envs.delete_reason}```",
                 'color': random.choice(funcs.colors),
                 "image": {
                     "url": funcs.get_posterseries(sonarr_envs.tvdb_id, sonarr_envs.imdb_id)
