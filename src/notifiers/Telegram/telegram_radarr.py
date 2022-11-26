@@ -246,7 +246,7 @@ def radarr_movie_delete():
                 f"\n\n<b>View Details</b>: <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[0]}'>IMDb</a> | <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[1]}'>TheMovieDb</a> | <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[2]}'>Trakt</a> | <a href='{funcs.get_radarr_links(radarr_envs.imdb_id, radarr_envs.tmdb_id)[3]}'>MovieChat</a>"
     }
 
-    if radarr_envs.deleted_size == "0":
+    if radarr_envs.deleted_size == 0:
         import re
         string = message["text"]
         pattern = r'<b>Size<\/b>: 0B'

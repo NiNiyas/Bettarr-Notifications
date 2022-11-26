@@ -271,7 +271,7 @@ def radarr_movie_delete():
     if message["priority"] == "":
         del message["priority"]
 
-    if radarr_envs.deleted_size == "0":
+    if radarr_envs.deleted_size == 0:
         import re
         string = message["message"]
         pattern = r'Size: 0B'
